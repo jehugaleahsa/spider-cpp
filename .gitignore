@@ -10,3 +10,6 @@
 *.lai
 *.la
 *.a
+
+# Spider Executable
+spider-cpp
