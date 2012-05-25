@@ -30,12 +30,13 @@ int main(int argc, char ** argv) {
     boost::asio::write(socket, request);
     
     boost::asio::streambuf response;
-    boost::asio::read_until(socket, response, newline);
-
-    std::istream response_stream(&response);
-    std::istreambuf_iterator<char> start(response_stream);
-    std::istreambuf_iterator<char> end;
-    std::string response_data(start, end);
-    std::cout << response_data << std::endl;
+    boost::system::error_code error;
+    while (boost::asio::read(socket, response, boost::asio::transfer_at_least(1), error)) {
+        std::cout << &response;
+    }
+    if (error != boost::asio::error::eof) {
+        std::cout << boost::system::system_error(error).what() << std::endl;
+    }
+    
     return 0;
 }
