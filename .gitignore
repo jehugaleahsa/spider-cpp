@@ -11,5 +11,8 @@
 *.la
 *.a
 
+# Test Executables
+*.test
+
 # Spider Executable
 spider-cpp
