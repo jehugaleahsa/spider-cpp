@@ -3,6 +3,8 @@
 
 #include <string>
 
+namespace spider {
+
 class Url {
     std::string m_scheme;
     std::string m_host;
@@ -11,6 +13,10 @@ class Url {
     std::string m_queryString;
 public:
     Url(std::string const& host);
+
+    static Url parse(std::string const& urlString);
 };
+
+}
 
 #endif // spider_url
