@@ -3,15 +3,33 @@
 
 #include <string>
 #include <boost/unordered_map.hpp>
+#include "url.hpp"
 
 namespace spider {
 
+enum RequestMethod { 
+    GET, 
+    POST, 
+    PUT, 
+    DELETE 
+};
+
+std::string str(RequestMethod method);
+
 class HttpRequest
 {
+    RequestMethod m_method;
+    Url m_url;
     boost::unordered_map<std::string, std::string> m_headers;
 
+    static std::string getNewline();
+
 public:
-    HttpRequest();
+    HttpRequest(RequestMethod method, Url const& url);
+
+    void setHeader(std::string const& name, std::string const& value);
+
+    void getResponse() const;
 };
 
 }

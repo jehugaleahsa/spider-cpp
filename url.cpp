@@ -23,11 +23,11 @@ Url::Url(
     m_query(query) {
 }
 
-char const* Url::getHttpScheme() {
+string Url::getHttpScheme() {
     return "http";
 }
 
-char const* Url::getHttpsScheme() {
+string Url::getHttpsScheme() {
     return "https";
 }
 

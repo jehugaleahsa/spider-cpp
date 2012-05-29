@@ -10,8 +10,8 @@ test: http_request.test url.test
 main.o: main.cpp
 	g++ -c main.cpp
 
-http_request.test: http_request_test.o http_request.o
-	g++ http_request_test.o http_request.o -o http_request.test
+http_request.test: http_request_test.o http_request.o url.o bad_url_exception.o
+	g++ http_request_test.o http_request.o url.o bad_url_exception.o -lboost_system -lpthread -lboost_regex -lboost_unit_test_framework -o http_request.test
 
 http_request_test.o: http_request_test.cpp http_request.hpp
 	g++ -c http_request_test.cpp
