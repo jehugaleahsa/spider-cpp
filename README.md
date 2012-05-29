@@ -32,6 +32,6 @@ I came into this project completely inexperienced writing realistic applications
 * Boost's asio library is a very low-level abstraction of the underlyiung socket libraries.
 * argument checking in C++ is annoying and creating custom exceptions is annoying.
 * it is hard to tell when to return std::string vs. const char *.
-* I find myself reaching for Boost more often than I thought I would
+* I find myself reaching for Boost more often than I thought I would.
 * having implementation (.cpp) in a separate file than the declaration (.hpp) takes longer and requires memorization.
 * only say "using namespace xyz;" in .cpp files; list the fully-qualified type names in .hpp files.
