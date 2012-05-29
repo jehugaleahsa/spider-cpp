@@ -2,6 +2,7 @@
 #include <sstream>
 #include <boost/regex.hpp>
 #include "url.hpp"
+#include "bad_url_exception.hpp"
 
 using namespace std;
 using namespace boost;
@@ -55,12 +56,12 @@ string const& Url::getQuery() const {
 }
 
 Url Url::parse(string const& urlString) {
-    const string urlFormat = "((?<scheme>http(s)?)://)?(?<host>[^:/]+)(:(?<port>[\\d]+))?(?<path>(/[^/?]+)*)(\\?(?<query>.*))?";
+    const string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?]*)?(\\?(?<query>.*))?";
     regex expression(urlFormat);
     smatch matches;
     bool found = regex_match(urlString, matches, expression);
     if (!found) {
-        // throw bad url exception
+        throw BadUrlException(urlString);
     }
     string scheme = matches["scheme"];
     if (scheme == "") {
@@ -77,6 +78,10 @@ Url Url::parse(string const& urlString) {
     }
     string path = matches["path"];
     string query = matches["query"];
+    // use '/' as default if there is a query but no path
+    if (path == "" && query != "") {
+        path = "/";
+    }
     return Url(scheme, host, port, path, query);
 }
 

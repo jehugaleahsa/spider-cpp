@@ -19,14 +19,17 @@ http_request_test.o: http_request_test.cpp http_request.hpp
 http_request.o: http_request.cpp http_request.hpp
 	g++ -c http_request.cpp
 
-url.test: url_test.o url.o
-	g++ url_test.o url.o -lboost_unit_test_framework -lboost_regex -o url.test
+url.test: url_test.o url.o bad_url_exception.o
+	g++ url_test.o url.o bad_url_exception.o -lboost_unit_test_framework -lboost_regex -o url.test
 
-url_test.o: url_test.cpp url.hpp
+url_test.o: url_test.cpp url.hpp bad_url_exception.hpp
 	g++ -c url_test.cpp
 
-url.o: url.cpp url.hpp
+url.o: url.cpp url.hpp bad_url_exception.hpp
 	g++ -c url.cpp
+
+bad_url_exception.o : bad_url_exception.cpp bad_url_exception.hpp
+	g++ -c bad_url_exception.cpp
 
 .PHONY : clean
 clean:

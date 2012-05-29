@@ -1,5 +1,5 @@
-#ifndef SPIDER_URL
-#define SPIDER_URL
+#ifndef SPIDER_URL_HPP
+#define SPIDER_URL_HPP
 
 #include <string>
 
