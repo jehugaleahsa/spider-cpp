@@ -33,7 +33,7 @@ void checkParsedValues(
 
 BOOST_AUTO_TEST_CASE(parseShouldParseHost) {
     Url url = Url::parse("www.google.com");
-    checkParsedValues(url, Url::getHttpScheme(), "www.google.com", Url::getDefaultPort(), "", "");
+    checkParsedValues(url, Url::getDefaultScheme(), "www.google.com", Url::getDefaultPort(), "", "");
 }
 
 BOOST_AUTO_TEST_CASE(parseShouldParseScheme) {
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(parseShouldParsePortAndPath) {
 
 BOOST_AUTO_TEST_CASE(parseShouldParseQuery) {
     Url url = Url::parse("www.google.com?param=123");
-    checkParsedValues(url, Url::getHttpScheme(), "www.google.com", Url::getDefaultPort(), "/", "param=123");
+    checkParsedValues(url, Url::getDefaultScheme(), "www.google.com", Url::getDefaultPort(), "/", "param=123");
 }
 
 BOOST_AUTO_TEST_CASE(parseShouldThrowIfBadUrl) {

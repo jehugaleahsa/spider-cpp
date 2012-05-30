@@ -4,18 +4,14 @@
 #include "url.hpp"
 #include "bad_url_exception.hpp"
 
-using namespace std;
-using namespace boost;
-using namespace spider;
-
 namespace spider {
 
 Url::Url(
-    string const& scheme, 
-    string const& host,
+    std::string const& scheme, 
+    std::string const& host,
     int port,
-    string const& path,
-    string const& query)
+    std::string const& path,
+    std::string const& query)
     : m_scheme(scheme), 
     m_host(host), 
     m_port(port), 
@@ -23,23 +19,20 @@ Url::Url(
     m_query(query) {
 }
 
-string Url::getHttpScheme() {
-    return "http";
-}
-
-string Url::getHttpsScheme() {
-    return "https";
+std::string const& Url::getDefaultScheme() {
+    static const std::string scheme = "http";
+    return scheme;
 }
 
 int Url::getDefaultPort() {
     return 80;
 }
 
-string const& Url::getScheme() const {
+std::string const& Url::getScheme() const {
     return m_scheme;
 }
 
-string const& Url::getHost() const {
+std::string const& Url::getHost() const {
     return m_host;
 }
 
@@ -47,15 +40,21 @@ int Url::getPort() const {
     return m_port;
 }
 
-string const& Url::getPath() const {
+std::string const& Url::getPath() const {
     return m_path;
 }
 
-string const& Url::getQuery() const {
+std::string const& Url::getQuery() const {
     return m_query;
 }
 
-Url Url::parse(string const& urlString) {
+Url Url::parse(std::string const& urlString) {
+    using std::string;
+    using std::stringstream;
+    using boost::regex;
+    using boost::regex_match;
+    using boost::smatch;
+
     const string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?]*)?(\\?(?<query>.*))?";
     regex expression(urlFormat);
     smatch matches;
@@ -65,7 +64,7 @@ Url Url::parse(string const& urlString) {
     }
     string scheme = matches["scheme"];
     if (scheme == "") {
-        scheme = Url::getHttpScheme();
+        scheme = Url::getDefaultScheme();
     }
     string host = matches["host"];
     string portString = matches["port"];

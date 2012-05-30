@@ -14,7 +14,7 @@ enum RequestMethod {
     DELETE 
 };
 
-std::string str(RequestMethod method);
+std::string const& str(RequestMethod method);
 
 class HttpRequest
 {
@@ -22,7 +22,7 @@ class HttpRequest
     Url m_url;
     boost::unordered_map<std::string, std::string> m_headers;
 
-    static std::string getNewline();
+    static std::string const& getNewline();
 
 public:
     HttpRequest(RequestMethod method, Url const& url);

@@ -19,9 +19,7 @@ public:
         std::string const& path,
         std::string const& query);
 
-    static std::string getHttpScheme();
-
-    static std::string getHttpsScheme();
+    static std::string const& getDefaultScheme();
 
     static int getDefaultPort();
 

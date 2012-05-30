@@ -8,35 +8,40 @@
 
 namespace spider {
 
-using namespace std;
-using namespace boost;
-using namespace boost::algorithm;
-using namespace boost::asio;
-using namespace boost::asio::ip;
+std::string const& str(RequestMethod method) {
+    using std::string;
 
-string str(RequestMethod method) {
+    static const string getString = "GET";
+    static const string postString = "POST";
+    static const string putString = "PUT";
+    static const string deleteString = "DELETE";
+
     switch (method) {
         case GET:
         default:
-            return "GET";
+            return getString;
         case POST:
-            return "POST";
+            return postString;
         case PUT:
-            return "PUT";
+            return putString;
         case DELETE:
-            return "DELETE";
+            return deleteString;
     }
 }
 
-string HttpRequest::getNewline() {
-    return "\x0D\x0A";
+std::string const& HttpRequest::getNewline() {
+     static const std::string newline = "\x0D\x0A";
+     return newline;
 }
 
 HttpRequest::HttpRequest(RequestMethod method, Url const& url) 
     : m_method(method), m_url(url) {
 }
 
-void HttpRequest::setHeader(string const& name, string const& value) {
+void HttpRequest::setHeader(std::string const& name, std::string const& value) {
+    using std::invalid_argument;
+    using boost::algorithm::trim_copy;
+
     if (trim_copy(name) == "") {
         throw invalid_argument("A header name cannot be blank.");
     }
@@ -44,6 +49,12 @@ void HttpRequest::setHeader(string const& name, string const& value) {
 }
 
 void HttpRequest::getResponse() const {
+    using std::string;
+    using std::ostream;
+    using boost::unordered_map;
+    using boost::asio::ip::tcp;
+    using boost::asio::io_service;
+
     string const& host = m_url.getHost();
     string const& scheme = m_url.getScheme();
     tcp::resolver::query nameQuery(host, scheme);
