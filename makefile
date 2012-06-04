@@ -1,23 +1,26 @@
 all: spider-cpp http_request.test url.test
 
-spider-cpp: main.o
-	g++ main.o -lboost_system -lboost_thread -lpthread -o spider-cpp
+spider-cpp: main.o http_request.o http_response.o url.o bad_url_exception.o
+	g++ main.o http_request.o http_response.o url.o bad_url_exception.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp
 
 test: http_request.test url.test
 	./http_request.test
 	./url.test
 
 main.o: main.cpp
-	g++ -c main.cpp
+	g++ -g -c main.cpp
 
-http_request.test: http_request_test.o http_request.o url.o bad_url_exception.o
-	g++ http_request_test.o http_request.o url.o bad_url_exception.o -lboost_system -lpthread -lboost_regex -lboost_unit_test_framework -o http_request.test
+http_request.test: http_request_test.o http_request.o http_response.o url.o bad_url_exception.o
+	g++ http_request_test.o http_request.o http_response.o url.o bad_url_exception.o -lboost_system -lpthread -lboost_regex -lboost_unit_test_framework -o http_request.test
 
 http_request_test.o: http_request_test.cpp http_request.hpp
 	g++ -c http_request_test.cpp
 
-http_request.o: http_request.cpp http_request.hpp
+http_request.o: http_request.cpp http_request.hpp http_response.hpp
 	g++ -c http_request.cpp
+
+http_response.o: http_response.cpp http_response.hpp
+	g++ -c http_response.cpp
 
 url.test: url_test.o url.o bad_url_exception.o
 	g++ url_test.o url.o bad_url_exception.o -lboost_unit_test_framework -lboost_regex -o url.test

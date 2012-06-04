@@ -1,9 +1,12 @@
+#include <functional>
 #include <iostream>
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/asio.hpp>
 #include "http_request.hpp"
+#include "http_response.hpp"
 #include "url.hpp"
 
 namespace spider {
@@ -30,7 +33,7 @@ std::string const& str(RequestMethod method) {
 }
 
 std::string const& HttpRequest::getNewline() {
-     static const std::string newline = "\x0D\x0A";
+     static const std::string newline = "\r\n";
      return newline;
 }
 
@@ -48,9 +51,17 @@ void HttpRequest::setHeader(std::string const& name, std::string const& value) {
     m_headers[name] = value;
 }
 
-void HttpRequest::getResponse() const {
+void closeSocket(boost::asio::ip::tcp::socket * socket) {
+    socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    boost::system::error_code error;
+    socket->close(error);
+    delete socket;
+}
+
+HttpResponse HttpRequest::getResponse() const {
     using std::string;
     using std::ostream;
+    using boost::shared_ptr;
     using boost::unordered_map;
     using boost::asio::ip::tcp;
     using boost::asio::io_service;
@@ -63,8 +74,8 @@ void HttpRequest::getResponse() const {
     tcp::resolver resolver(service);
     tcp::resolver::iterator iterator = resolver.resolve(nameQuery);
 
-    tcp::socket socket(service);
-    connect(socket, iterator);
+    shared_ptr<tcp::socket> socket(new tcp::socket(service), closeSocket);
+    connect(*socket, iterator);
 
     boost::asio::streambuf request;
     ostream requestStream(&request);
@@ -80,7 +91,10 @@ void HttpRequest::getResponse() const {
     }
     requestStream << HttpRequest::getNewline();
 
-    write(socket, request);
+    write(*socket, request);
+
+    HttpResponse response(socket);
+    return response;
 }
 
 }

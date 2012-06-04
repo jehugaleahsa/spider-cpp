@@ -3,6 +3,7 @@
 
 #include <string>
 #include <boost/unordered_map.hpp>
+#include "http_response.hpp"
 #include "url.hpp"
 
 namespace spider {
@@ -29,7 +30,7 @@ public:
 
     void setHeader(std::string const& name, std::string const& value);
 
-    void getResponse() const;
+    HttpResponse getResponse() const;
 };
 
 }

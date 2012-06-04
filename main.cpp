@@ -1,42 +1,41 @@
-#include <string>
+#include <algorithm>
 #include <iostream>
-#include <boost/asio.hpp>
+#include <sstream>
+#include <string>
+#include <vector>
+#include "url.hpp"
+#include "http_request.hpp"
+#include "http_response.hpp"
 
-int main(int argc, char ** argv) {
-    if (argc != 2) {
-        std::cerr << "Usage: spider-cpp <URL>" << std::endl;
-        return 1;
+using namespace std;
+using namespace spider;
+
+class HeaderPrinter {
+    HttpResponse const& m_response;
+
+    public:
+    HeaderPrinter(HttpResponse const& response)
+        : m_response(response) {
     }
 
-    using boost::asio::ip::tcp;
-
-    boost::asio::io_service io_service;
-    tcp::resolver resolver(io_service);
-
-    std::string url = argv[1];
-    tcp::resolver::query query(url, "http");
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-    tcp::socket socket(io_service);
-    boost::asio::connect(socket, endpoint_iterator);
-
-    boost::asio::streambuf request;
-    std::ostream request_stream(&request);
-    const std::string newline = "\r\n";
-    request_stream << "GET / HTTP/1.0" << newline;
-    request_stream << "Host: " << url << newline;
-    request_stream << newline;
-
-    boost::asio::write(socket, request);
-    
-    boost::asio::streambuf response;
-    boost::system::error_code error;
-    while (boost::asio::read(socket, response, boost::asio::transfer_at_least(1), error)) {
-        std::cout << &response;
+    string operator ()(string const& headerName) {
+        vector<string> values;
+        m_response.getHeaderValues(headerName, values);
+        ostringstream builder;
+        builder << headerName << ": ";
+        copy(values.begin(), values.end(), ostream_iterator<string>(builder, ", "));
+        return builder.str();
     }
-    if (error != boost::asio::error::eof) {
-        std::cout << boost::system::system_error(error).what() << std::endl;
-    }
-    
-    return 0;
+};
+
+int main() {
+    Url url = Url::parse("http://www.google.com/");
+    HttpRequest request(GET, url);
+    HttpResponse response = request.getResponse();
+    int statusCode = response.getStatus();
+    cerr << "Status Code: " << statusCode << endl;
+    vector<string> headerNames;
+    response.getHeaderNames(headerNames);
+    transform(headerNames.begin(), headerNames.end(), ostream_iterator<string>(cerr, "\n"), HeaderPrinter(response));
+    cerr << "Done" << endl;
 }
