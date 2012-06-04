@@ -43,10 +43,9 @@ BOOST_AUTO_TEST_CASE(shouldCreateDefaultRequest) {
     Url url = Url::parse("http://www.google.com/");
     HttpRequest request(GET, url);
     HttpResponse response = request.getResponse();
-    //int statusCode = response.getStatus();
-    //BOOST_REQUIRE_MESSAGE(statusCode == 200, "Google did not return an OK status code.");
+    int statusCode = response.getStatus();
+    BOOST_REQUIRE_MESSAGE(statusCode == 200, "Google did not return an OK status code.");
     vector<string> headerNames;
     response.getHeaderNames(headerNames);
-    //transform(headerNames.begin(), headerNames.end(), ostream_iterator<string>(cerr, "\n"), HeaderPrinter(response));
-    //cerr << "Done" << endl;
+    transform(headerNames.begin(), headerNames.end(), ostream_iterator<string>(cerr, "\n"), HeaderPrinter(response));
 }

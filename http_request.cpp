@@ -51,13 +51,6 @@ void HttpRequest::setHeader(std::string const& name, std::string const& value) {
     m_headers[name] = value;
 }
 
-void closeSocket(boost::asio::ip::tcp::socket * socket) {
-    socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    boost::system::error_code error;
-    socket->close(error);
-    delete socket;
-}
-
 HttpResponse HttpRequest::getResponse() const {
     using std::string;
     using std::ostream;
@@ -70,11 +63,11 @@ HttpResponse HttpRequest::getResponse() const {
     string const& scheme = m_url.getScheme();
     tcp::resolver::query nameQuery(host, scheme);
 
-    io_service service;
-    tcp::resolver resolver(service);
+    shared_ptr<io_service> service(new io_service);
+    tcp::resolver resolver(*service);
     tcp::resolver::iterator iterator = resolver.resolve(nameQuery);
 
-    shared_ptr<tcp::socket> socket(new tcp::socket(service), closeSocket);
+    shared_ptr<tcp::socket> socket(new tcp::socket(*service));
     connect(*socket, iterator);
 
     boost::asio::streambuf request;
@@ -93,7 +86,7 @@ HttpResponse HttpRequest::getResponse() const {
 
     write(*socket, request);
 
-    HttpResponse response(socket);
+    HttpResponse response(service, socket);
     return response;
 }
 

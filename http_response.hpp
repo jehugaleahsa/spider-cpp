@@ -15,6 +15,7 @@ namespace spider {
     private:
         friend class HttpRequest;
 
+        boost::shared_ptr<boost::asio::io_service> m_service;
         boost::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
         boost::shared_ptr<boost::asio::streambuf> m_buffer;
 
@@ -28,7 +29,9 @@ namespace spider {
         void getHeadersCached();
         header_collection_type m_headers;
 
-        HttpResponse(boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
+        HttpResponse(
+            boost::shared_ptr<boost::asio::io_service> service,
+            boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
 
         bool readLine(std::string & line);
 

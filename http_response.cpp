@@ -10,8 +10,10 @@
 #include "http_response.hpp"
 
 namespace spider {
-    HttpResponse::HttpResponse(boost::shared_ptr<boost::asio::ip::tcp::socket> socket)
-        : m_socket(socket), m_buffer(new boost::asio::streambuf) {
+    HttpResponse::HttpResponse(
+        boost::shared_ptr<boost::asio::io_service> service,
+        boost::shared_ptr<boost::asio::ip::tcp::socket> socket)
+        : m_service(service), m_socket(socket), m_buffer(new boost::asio::streambuf) {
         }
 
     bool HttpResponse::readLine(std::string & line) {
