@@ -96,40 +96,4 @@ namespace spider {
             m_hasHeaders = true;
         }
     }
-
-    std::string getHeaderValue(HttpResponse::header_collection_type::value_type const& pair) {
-        return pair.second;
-    }
-
-    void HttpResponse::getHeaderValues(std::string const& name, std::vector<std::string> & values) const {
-        using std::pair;
-        using std::transform;
-        using boost::unordered_multimap;
-
-        const_cast<HttpResponse&>(*this).getHeadersCached();
-        values.clear();
-        typedef header_collection_type::const_iterator iterator;
-        pair<iterator, iterator> range = m_headers.equal_range(name);
-        transform(range.first, range.second, back_inserter(values), getHeaderValue);
-    }
-
-    std::string getHeaderName(HttpResponse::header_collection_type::value_type const& pair) {
-        return pair.first;
-    }
-
-    void HttpResponse::getHeaderNames(std::vector<std::string> & names) const {
-        using std::back_inserter;
-        using std::sort;
-        using std::string;
-        using std::transform;
-        using std::unique;
-        using std::vector;
-
-        const_cast<HttpResponse&>(*this).getHeadersCached();
-        names.clear();
-        transform(m_headers.begin(), m_headers.end(), back_inserter(names), getHeaderName);
-        sort(names.begin(), names.end());
-        vector<string>::iterator position = unique(names.begin(), names.end());
-        names.erase(position, names.end());
-    }
 }

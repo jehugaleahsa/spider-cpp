@@ -38,10 +38,88 @@ namespace spider {
     public:
         int getStatus() const;
 
-        void getHeaderNames(std::vector<std::string> & names) const;
+        template <typename TOutIterator>
+        void getHeaderNames(TOutIterator destination) const;
 
-        void getHeaderValues(std::string const& name, std::vector<std::string> & values) const;
+        template <typename TOutIterator>
+        void getHeaderValues(std::string const& name, TOutIterator destination) const;
+        
+        template <typename TOutIterator>
+        bool getNextContentChunk(TOutIterator destination);
     };
+    
+    namespace {
+        std::string getHeaderValue(HttpResponse::header_collection_type::value_type const& pair) {
+            return pair.second;
+        }
+        
+        std::string getHeaderName(HttpResponse::header_collection_type::value_type const& pair) {
+            return pair.first;
+        }
+    }
+
+    template <typename TOutIterator>
+    void HttpResponse::getHeaderValues(std::string const& name, TOutIterator destination) const {
+        using std::pair;
+        using std::transform;
+        using boost::unordered_multimap;
+
+        const_cast<HttpResponse&>(*this).getHeadersCached();
+        typedef header_collection_type::const_iterator iterator;
+        pair<iterator, iterator> range = m_headers.equal_range(name);
+        transform(range.first, range.second, destination, getHeaderValue);
+    }
+
+    template <typename TOutIterator>
+    void HttpResponse::getHeaderNames(TOutIterator destination) const {
+        using std::back_inserter;
+        using std::copy;
+        using std::sort;
+        using std::string;
+        using std::transform;
+        using std::unique;
+        using std::vector;
+
+        const_cast<HttpResponse&>(*this).getHeadersCached();
+        vector<string> names;
+        transform(m_headers.begin(), m_headers.end(), back_inserter(names), getHeaderName);
+        sort(names.begin(), names.end());
+        vector<string>::iterator position = unique(names.begin(), names.end());
+        names.erase(position, names.end());
+        copy(names.begin(), names.end(), destination);
+    }
+    
+    template <typename TOutIterator>
+    bool HttpResponse::getNextContentChunk(TOutIterator destination) {
+        using std::copy;
+        using std::istream;
+        using std::istream_iterator;
+        using std::noskipws;
+        using boost::asio::error::eof;
+        using boost::asio::read;
+        using boost::asio::transfer_at_least;
+        using boost::system::error_code;
+        using boost::system::system_error;
+    
+        getHeadersCached();
+        
+        error_code error;
+        read(*m_socket, *m_buffer, transfer_at_least(1), error);
+        bool hasMore = true;
+        if (error) {
+            if (error == eof) {
+                hasMore = false;
+            } else {
+                throw system_error(error);
+            }
+        }
+        
+        istream reader(m_buffer.get());
+        istream_iterator<char> position(reader >> noskipws);
+        istream_iterator<char> end;
+        copy(position, end, destination);
+        return hasMore;
+    }
 }
 
 #endif // SPIDER_HTTP_RESPONSE_HPP
