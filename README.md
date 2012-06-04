@@ -2,11 +2,13 @@
 
 ##Dependencies
 spider-cpp is dependent on **Boost 1.49**. It requires access to the libraries:
+* boost asio
+* boost regex
 * boost system
 * boost thread
 * boost unit test framework
-* boost regex
-* posix threads
+
+spider-cpp was compiled on Ubuntu 12 with g++-4.6.3 installed. It was written using VIM and gedit. I used GNU make to automate my builds.
 
 ##Purpose
 The hope is that given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while).
