@@ -44,7 +44,7 @@ namespace spider {
         template <typename TOutIterator>
         void getHeaderValues(std::string const& name, TOutIterator destination) const;
         
-        template <typename TOutIterator>
+        template <typename TOutIterator, typename TChar>
         bool getNextContentChunk(TOutIterator destination);
     };
     
@@ -89,7 +89,7 @@ namespace spider {
         copy(names.begin(), names.end(), destination);
     }
     
-    template <typename TOutIterator>
+    template <typename TOutIterator, typename TChar>
     bool HttpResponse::getNextContentChunk(TOutIterator destination) {
         using std::copy;
         using std::istream;
@@ -115,8 +115,8 @@ namespace spider {
         }
         
         istream reader(m_buffer.get());
-        istream_iterator<char> position(reader >> noskipws);
-        istream_iterator<char> end;
+        istream_iterator<TChar> position(reader >> noskipws);
+        istream_iterator<TChar> end;
         copy(position, end, destination);
         return hasMore;
     }

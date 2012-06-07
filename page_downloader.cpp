@@ -19,8 +19,8 @@ namespace spider {
             // TODO: throw an exception
         }
         ostringstream htmlBuilder;
-        ostream_iterator<char> destination(htmlBuilder, "");
-        while (response.getNextContentChunk(destination)) {
+        ostream_iterator<char> destination(htmlBuilder);
+        while (response.getNextContentChunk<ostream_iterator<char>, char>(destination)) {
         }
         return htmlBuilder.str();
     }
