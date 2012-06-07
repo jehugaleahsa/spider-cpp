@@ -42,3 +42,7 @@ I came into this project completely inexperienced writing realistic applications
 * always check whether a constructor takes a value or a reference type.
 * when you can't figure out the cause of a segmentation fault, use gdb.
 * the iostream library is extremely powerful and flexible at the same time.
+* fstream only accepts char * for file names.
+* fstream doesn't recognize ~ and other special path indicators.
+* prior to C++11, default function template arguments weren't allowed.
+* template member functions lead to ugly syntax, in many cases.
