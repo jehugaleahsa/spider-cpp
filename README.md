@@ -47,4 +47,4 @@ I came into this project completely inexperienced writing realistic applications
 * fstream doesn't recognize ~ and other special path indicators. No exceptions thrown.
 * prior to C++11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
-* inheriting from types in the <functional> header is painful.
+* inheriting from types in the &lt;functional&gt; header is painful.
