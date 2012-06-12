@@ -32,17 +32,19 @@ I came into this project completely inexperienced writing realistic applications
 * Boost's unit testing framework is pretty awesome, but relies on macros.
 * working with Git on the command-line isn't that bad.
 * Boost's asio library is a very low-level abstraction of the underlyiung socket libraries.
-* argument checking in C++ is annoying and creating custom exceptions is annoying.
+* argument checking in C++ is annoying and creating custom exceptions is even more annoying.
 * it is hard to tell when to return std::string vs. const char *.
 * I find myself reaching for Boost more often than I thought I would.
 * having implementation (.cpp) in a separate file than the declaration (.hpp) takes longer and requires more memorization.
 * almost never use "using namespace xyz;" (using directive); limit yourself to using declarations within functions.
 * template members must be implemented in the header files (since export doesn't work).
+* inline functions must be implemented in the header files, too.
 * prefer taking a templated destination iterator over a collection to populate.
 * always check whether a constructor takes a value or a reference type.
 * when you can't figure out the cause of a segmentation fault, use gdb.
 * the iostream library is extremely powerful and flexible at the same time.
 * fstream only accepts char * for file names.
-* fstream doesn't recognize ~ and other special path indicators.
+* fstream doesn't recognize ~ and other special path indicators. No exceptions thrown.
 * prior to C++11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
+* inheriting from types in the <functional> header is painful.

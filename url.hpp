@@ -74,11 +74,7 @@ public:
 namespace std {
 
 template <>
-struct equal_to<spider::Url> {
-    typedef bool result_type;
-    typedef spider::Url first_argument_type;
-    typedef spider::Url second_argument_type;
-
+struct equal_to<spider::Url> : public binary_function<spider::Url, spider::Url, bool> {
     result_type operator ()(first_argument_type const& first, second_argument_type const& second) const {
         return std::equal_to<std::string>()(first.getScheme(), second.getScheme())
             && std::equal_to<std::string>()(first.getHost(), second.getHost())
@@ -93,10 +89,7 @@ struct equal_to<spider::Url> {
 namespace boost {
 
 template <>
-struct hash<spider::Url> {
-    typedef std::size_t result_type;
-    typedef spider::Url argument_type;
-
+struct hash<spider::Url> : public std::unary_function<spider::Url, std::size_t> {
     result_type operator ()(argument_type const& url) const {
         return hash<std::string>()(url.getScheme())
             ^ hash<std::string>()(url.getHost())
