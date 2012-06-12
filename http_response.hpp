@@ -1,6 +1,8 @@
 #ifndef SPIDER_HTTP_RESPONSE_HPP
 #define SPIDER_HTTP_RESPONSE_HPP
 
+#include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 #include <boost/asio.hpp>
@@ -15,9 +17,7 @@ namespace spider {
     private:
         friend class HttpRequest;
 
-        boost::shared_ptr<boost::asio::io_service> m_service;
-        boost::shared_ptr<boost::asio::ip::tcp::socket> m_socket;
-        boost::shared_ptr<boost::asio::streambuf> m_buffer;
+        boost::shared_ptr<boost::asio::ip::tcp::iostream> m_stream;
 
         bool m_isInitialized;
 
@@ -29,9 +29,7 @@ namespace spider {
         void getHeadersCached();
         header_collection_type m_headers;
 
-        HttpResponse(
-            boost::shared_ptr<boost::asio::io_service> service,
-            boost::shared_ptr<boost::asio::ip::tcp::socket> socket);
+        HttpResponse(boost::shared_ptr<boost::asio::ip::tcp::iostream> stream);
 
         bool readLine(std::string & line);
 
@@ -39,13 +37,12 @@ namespace spider {
         int getStatus() const;
 
         template <typename TOutIterator>
-        void getHeaderNames(TOutIterator destination) const;
+        void getHeaderNames(TOutIterator destination);
 
         template <typename TOutIterator>
-        void getHeaderValues(std::string const& name, TOutIterator destination) const;
+        void getHeaderValues(std::string const& name, TOutIterator destination);
         
-        template <typename TOutIterator, typename TChar>
-        bool getNextContentChunk(TOutIterator destination);
+        std::istream & getContent();
     };
     
     namespace {
@@ -59,7 +56,7 @@ namespace spider {
     }
 
     template <typename TOutIterator>
-    void HttpResponse::getHeaderValues(std::string const& name, TOutIterator destination) const {
+    void HttpResponse::getHeaderValues(std::string const& name, TOutIterator destination) {
         using std::pair;
         using std::transform;
         using boost::unordered_multimap;
@@ -71,54 +68,17 @@ namespace spider {
     }
 
     template <typename TOutIterator>
-    void HttpResponse::getHeaderNames(TOutIterator destination) const {
-        using std::back_inserter;
+    void HttpResponse::getHeaderNames(TOutIterator destination) {
+        using std::inserter;
         using std::copy;
-        using std::sort;
+        using std::set;
         using std::string;
         using std::transform;
-        using std::unique;
-        using std::vector;
 
         const_cast<HttpResponse&>(*this).getHeadersCached();
-        vector<string> names;
-        transform(m_headers.begin(), m_headers.end(), back_inserter(names), getHeaderName);
-        sort(names.begin(), names.end());
-        vector<string>::iterator position = unique(names.begin(), names.end());
-        names.erase(position, names.end());
+        set<string> names;
+        transform(m_headers.begin(), m_headers.end(), inserter(names, names.end()), getHeaderName);
         copy(names.begin(), names.end(), destination);
-    }
-    
-    template <typename TOutIterator, typename TChar>
-    bool HttpResponse::getNextContentChunk(TOutIterator destination) {
-        using std::copy;
-        using std::istream;
-        using std::istream_iterator;
-        using std::noskipws;
-        using boost::asio::error::eof;
-        using boost::asio::read;
-        using boost::asio::transfer_at_least;
-        using boost::system::error_code;
-        using boost::system::system_error;
-    
-        getHeadersCached();
-        
-        error_code error;
-        read(*m_socket, *m_buffer, transfer_at_least(1), error);
-        bool hasMore = true;
-        if (error) {
-            if (error == eof) {
-                hasMore = false;
-            } else {
-                throw system_error(error);
-            }
-        }
-        
-        istream reader(m_buffer.get());
-        istream_iterator<TChar> position(reader >> noskipws);
-        istream_iterator<TChar> end;
-        copy(position, end, destination);
-        return hasMore;
     }
 }
 

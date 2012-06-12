@@ -1,25 +1,20 @@
+#include <algorithm>
 #include <iostream>
-#include <cassert>
-#include "download_queue.hpp"
-#include "url.hpp"
+#include <iterator>
+#include <vector>
+#include "http_request.hpp"
+#include "http_response.hpp"
 
+using namespace std;
 using namespace spider;
 
 int main() {
-    DownloadQueue queue;
-    queue.addUrl(Url::parse("http://www.google.com"));
-    queue.addUrl(Url::parse("http://www.google.com"));
-    queue.addUrl(Url::parse("http://www.aweber.com"));
-    
-    assert(queue.hasMore());
-    Url firstUrl = queue.getNextUrl();
-    assert(firstUrl.getHost() == "www.google.com");
-    
-    assert(queue.hasMore());
-    Url secondUrl = queue.getNextUrl();
-    assert(secondUrl.getHost() == "www.aweber.com");
-    
-    assert(!queue.hasMore());
-    
-    std::cout << "All tests ran" << std::endl;
+    Url url = Url::parse("http://www.google.com/");
+    HttpRequest request(GET, url);
+    HttpResponse response = request.getResponse();
+    istream_iterator<char> begin(response.getContent());
+    istream_iterator<char> end;
+    ostream_iterator<char> destination(cerr);
+    copy(begin, end, destination);
+    std::cerr << std::endl;
 }

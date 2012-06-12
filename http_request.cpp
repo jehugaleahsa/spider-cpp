@@ -58,35 +58,28 @@ HttpResponse HttpRequest::getResponse() const {
     using boost::unordered_map;
     using boost::asio::ip::tcp;
     using boost::asio::io_service;
-
+    
     string const& host = m_url.getHost();
     string const& scheme = m_url.getScheme();
-    tcp::resolver::query nameQuery(host, scheme);
-
-    shared_ptr<io_service> service(new io_service);
-    tcp::resolver resolver(*service);
-    tcp::resolver::iterator iterator = resolver.resolve(nameQuery);
-
-    shared_ptr<tcp::socket> socket(new tcp::socket(*service));
-    connect(*socket, iterator);
-
-    boost::asio::streambuf request;
-    ostream requestStream(&request);
-    requestStream << str(m_method) << " " << m_url.getPath();
+    
+    shared_ptr<tcp::iostream> stream(new tcp::iostream());
+    stream->connect(host, scheme);
+    
+    // TODO - check if we couldn't connect
+    
+    *stream << str(m_method) << " " << m_url.getPath();
     string const& query = m_url.getQuery();
     if (query != "") {
-        requestStream << "?" << query;
+        *stream << "?" << query;
     }
-    requestStream << " HTTP/1.0" << HttpRequest::getNewline();
+    *stream << " HTTP/1.0" << HttpRequest::getNewline();
     typedef unordered_map<string, string>::const_iterator map_iter;
     for (map_iter iterator = m_headers.begin(); iterator != m_headers.end(); ++iterator) {
-        requestStream << iterator->first << ": " << iterator->second << HttpRequest::getNewline();
+        *stream << iterator->first << ": " << iterator->second << HttpRequest::getNewline();
     }
-    requestStream << HttpRequest::getNewline();
+    *stream << HttpRequest::getNewline();
 
-    write(*socket, request);
-
-    HttpResponse response(service, socket);
+    HttpResponse response(stream);
     return response;
 }
 

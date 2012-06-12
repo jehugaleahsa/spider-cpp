@@ -99,20 +99,25 @@ namespace spider {
     }
     
     void FileDownloader::download(Url const& url) const {
+        using std::copy;
         using std::ios;
+        using std::istream_iterator;
         using std::ofstream;
         using std::ostream_iterator;
         using std::string;
+        
+        HttpRequest request(GET, url);
+        HttpResponse response = request.getResponse();
+        
+        istream_iterator<unsigned char> begin(response.getContent());
+        istream_iterator<unsigned char> end;
         
         string fileName = createFileName(url);
         string path = m_directoryPath + '/' + fileName;
         ofstream file(path.c_str(), ios::out | ios::binary);
         ostream_iterator<unsigned char> destination(file);
         
-        HttpRequest request(GET, url);
-        HttpResponse response = request.getResponse();
-        while (response.getNextContentChunk<ostream_iterator<unsigned char>, unsigned char>(destination)) {
-        }
+        copy(begin, end, destination);
     }
     
 }

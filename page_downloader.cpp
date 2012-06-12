@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iterator>
 #include <sstream>
 #include <string>
@@ -9,6 +10,8 @@
 namespace spider {
 
     std::string PageDownloader::download(Url const& url) const {
+        using std::copy;
+        using std::istream_iterator;
         using std::ostringstream;
         using std::ostream_iterator;
         
@@ -18,10 +21,11 @@ namespace spider {
         if (status != 200) {
             // TODO: throw an exception
         }
+        istream_iterator<char> begin(response.getContent());
+        istream_iterator<char> end;
         ostringstream htmlBuilder;
         ostream_iterator<char> destination(htmlBuilder);
-        while (response.getNextContentChunk<ostream_iterator<char>, char>(destination)) {
-        }
+        copy(begin, end, destination);
         return htmlBuilder.str();
     }
 
