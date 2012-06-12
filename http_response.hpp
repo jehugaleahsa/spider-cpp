@@ -1,7 +1,7 @@
 #ifndef SPIDER_HTTP_RESPONSE_HPP
 #define SPIDER_HTTP_RESPONSE_HPP
 
-#include <iostream>
+#include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
