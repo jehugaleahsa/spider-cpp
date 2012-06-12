@@ -51,13 +51,19 @@ void HttpRequest::setHeader(std::string const& name, std::string const& value) {
     m_headers[name] = value;
 }
 
+std::string createHeader(std::pair<std::string const, std::string> const& pair) {
+    return pair.first + ": " + pair.second;
+}
+
 HttpResponse HttpRequest::getResponse() const {
-    using std::string;
     using std::ostream;
+    using std::ostream_iterator;
+    using std::string;
+    using std::transform;
+    using boost::asio::io_service;
+    using boost::asio::ip::tcp;
     using boost::shared_ptr;
     using boost::unordered_map;
-    using boost::asio::ip::tcp;
-    using boost::asio::io_service;
     
     string const& host = m_url.getHost();
     string const& scheme = m_url.getScheme();
@@ -73,10 +79,8 @@ HttpResponse HttpRequest::getResponse() const {
         *stream << "?" << query;
     }
     *stream << " HTTP/1.0" << HttpRequest::getNewline();
-    typedef unordered_map<string, string>::const_iterator map_iter;
-    for (map_iter iterator = m_headers.begin(); iterator != m_headers.end(); ++iterator) {
-        *stream << iterator->first << ": " << iterator->second << HttpRequest::getNewline();
-    }
+    ostream_iterator<string> destination(*stream, HttpRequest::getNewline().c_str());
+    transform(m_headers.begin(), m_headers.end(), destination, createHeader);
     *stream << HttpRequest::getNewline();
 
     HttpResponse response(stream);

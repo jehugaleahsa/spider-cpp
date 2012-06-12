@@ -4,8 +4,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <vector>
-#include <boost/array.hpp>
+#include <boost/regex.hpp>
 #include "http_request.hpp"
 #include "http_response.hpp"
 #include "url.hpp"
@@ -24,63 +23,27 @@ namespace spider {
         }
     
         void splitPath(std::string const& path, std::string & directory, std::string & fileName) {
-            using std::copy;
-            using std::distance;
             using std::find;
-            using std::ostream_iterator;
-            using std::ostringstream;
-            using std::remove_if;
             using std::string;
-            using std::vector;
             
-            // divide the sub-directories and the file by looking for the slashes
-            vector<string> directories;
-            string::const_iterator position = path.begin();
-            while (position != path.end()) {
-                string::const_iterator nextPosition = find(position, path.end(), '/');
-                if (nextPosition != path.end()) {
-                    ++nextPosition;
-                    string subDirectory(position, nextPosition);
-                    directories.push_back(subDirectory);
-                } else {
-                    // store everything after the last slash as the file name
-                    fileName = string(position, path.end());
-                }
-                position = nextPosition;
+            string::const_reverse_iterator rposition = find(path.rbegin(), path.rend(), '/');
+            if (rposition == path.rend()) {
+                directory = path;
+                fileName = "";
+            } else {
+                string::const_iterator position = rposition.base();
+                directory = string(path.begin(), position + 1);
+                fileName = string(position + 1, path.end());
             }
-            
-            // remove duplicate slashes
-            if (distance(directories.begin(), directories.end()) > 1) {
-                vector<string>::iterator position = remove_if(++directories.begin(), directories.end(), isDuplicateDirectory);
-                directories.erase(position, directories.end());
-            }
-            
-            // combine the relative paths into the absolute directory path
-            ostringstream pathBuilder;
-            ostream_iterator<string> destination(pathBuilder);
-            copy(directories.begin(), directories.end(), destination);
-            directory = pathBuilder.str();
         }
     
         std::string encode(std::string const& value) {
-            using std::back_inserter;
-            using std::copy;
-            using std::find_first_of;
             using std::string;
-            using boost::array;
+            using boost::regex;
+            using boost::regex_replace;
             
-            array<int, 12> badValues = { '\\', '/', ':', '*', '?', '"', '\'', '<', '>', '|', '.', ',' };
-            string result;
-            string::const_iterator position = value.begin();
-            while (position != value.end()) {
-                string::const_iterator nextPosition = find_first_of(position, value.end(), badValues.begin(), badValues.end());
-                copy(position, nextPosition, back_inserter(result));
-                if (nextPosition != value.end()) {
-                    result += '_';
-                    ++nextPosition;
-                }
-                position = nextPosition;
-            }
+            static regex search("[\\/:*?\"'<>|.,]");
+            string result = regex_replace(value, search, "_");
             return result;
         }
     
@@ -102,6 +65,7 @@ namespace spider {
         using std::copy;
         using std::ios;
         using std::istream_iterator;
+        using std::noskipws;
         using std::ofstream;
         using std::ostream_iterator;
         using std::string;
@@ -109,7 +73,7 @@ namespace spider {
         HttpRequest request(GET, url);
         HttpResponse response = request.getResponse();
         
-        istream_iterator<unsigned char> begin(response.getContent());
+        istream_iterator<unsigned char> begin(response.getContent() >> noskipws);
         istream_iterator<unsigned char> end;
         
         string fileName = createFileName(url);
