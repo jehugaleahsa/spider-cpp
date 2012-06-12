@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include "url.hpp"
-#include "bad_url_exception.hpp"
 
 #define BOOST_TEST_MODULE TestUrl
 #define BOOST_TEST_DYN_LINK

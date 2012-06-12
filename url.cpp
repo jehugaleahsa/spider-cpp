@@ -1,8 +1,8 @@
-#include <string>
+#include <exception>
 #include <sstream>
+#include <string>
 #include <boost/regex.hpp>
 #include "url.hpp"
-#include "bad_url_exception.hpp"
 
 namespace spider {
 
@@ -26,26 +26,6 @@ std::string const& Url::getDefaultScheme() {
 
 int Url::getDefaultPort() {
     return 80;
-}
-
-std::string const& Url::getScheme() const {
-    return m_scheme;
-}
-
-std::string const& Url::getHost() const {
-    return m_host;
-}
-
-int Url::getPort() const {
-    return m_port;
-}
-
-std::string const& Url::getPath() const {
-    return m_path;
-}
-
-std::string const& Url::getQuery() const {
-    return m_query;
 }
 
 Url Url::parse(std::string const& urlString) {
@@ -82,6 +62,27 @@ Url Url::parse(std::string const& urlString) {
         path = "/";
     }
     return Url(scheme, host, port, path, query);
+}
+
+BadUrlException::BadUrlException() throw() {
+}
+
+BadUrlException::BadUrlException(std::string const& url) throw()
+    : m_url(url) {
+}
+
+BadUrlException::~BadUrlException() throw() {
+}
+
+char const* BadUrlException::what() const throw() {
+    using std::string;
+    using std::ostringstream;
+    using std::endl;
+
+    ostringstream builder;
+    builder << "The given string was not a valid URL: " << m_url << endl;
+    string result = builder.str();
+    return result.c_str();
 }
 
 }

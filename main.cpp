@@ -1,22 +1,25 @@
 #include <iostream>
-#include <string>
-#include "page_downloader.hpp"
-#include "file_downloader.hpp"
+#include <cassert>
+#include "download_queue.hpp"
+#include "url.hpp"
 
-using namespace std;
 using namespace spider;
 
 int main() {
-    try {
-        Url url = Url::parse("http://www.google.com/");
-        PageDownloader downloader;
-        string content = downloader.download(url);
-        cout << content << endl;
-        
-        Url fileUrl = Url::parse("http://www.google.com/images/logos/google_logo_41.png");
-        FileDownloader fileDownloader("/home/travis/spider-test");
-        fileDownloader.download(fileUrl);
-    } catch (...) {
-        std::cerr << "An Error Occurred." << std::endl;
-    }
+    DownloadQueue queue;
+    queue.addUrl(Url::parse("http://www.google.com"));
+    queue.addUrl(Url::parse("http://www.google.com"));
+    queue.addUrl(Url::parse("http://www.aweber.com"));
+    
+    assert(queue.hasMore());
+    Url firstUrl = queue.getNextUrl();
+    assert(firstUrl.getHost() == "www.google.com");
+    
+    assert(queue.hasMore());
+    Url secondUrl = queue.getNextUrl();
+    assert(secondUrl.getHost() == "www.aweber.com");
+    
+    assert(!queue.hasMore());
+    
+    std::cout << "All tests ran" << std::endl;
 }
