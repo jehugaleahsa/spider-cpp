@@ -46,8 +46,3 @@ I came into this project completely inexperienced writing realistic applications
 * fstream doesn't recognize ~ and other special path indicators.
 * prior to C++11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
-
-## TODO
-* Create a class that can extract URLs from an HTML string.
-* Create a class that can track which URLs have been visited.
-* Create a class that can act as a URL queue.
