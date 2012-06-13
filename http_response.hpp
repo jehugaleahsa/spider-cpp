@@ -23,7 +23,9 @@ namespace spider {
 
         bool m_hasStatus;
         void getStatusCached();
-        int m_status;
+        std::string m_version;
+        int m_statusCode;
+        std::string m_statusMessage;
 
         bool m_hasHeaders;
         void getHeadersCached();
@@ -34,7 +36,11 @@ namespace spider {
         bool readLine(std::string & line);
 
     public:
-        int getStatus() const;
+        std::string getVersion();
+        
+        int getStatusCode();
+        
+        std::string getStatusMessage();
 
         template <typename TOutIterator>
         void getHeaderNames(TOutIterator destination);
@@ -61,7 +67,7 @@ namespace spider {
         using std::transform;
         using boost::unordered_multimap;
 
-        const_cast<HttpResponse&>(*this).getHeadersCached();
+        getHeadersCached();
         typedef header_collection_type::const_iterator iterator;
         pair<iterator, iterator> range = m_headers.equal_range(name);
         transform(range.first, range.second, destination, getHeaderValue);
@@ -75,7 +81,7 @@ namespace spider {
         using std::string;
         using std::transform;
 
-        const_cast<HttpResponse&>(*this).getHeadersCached();
+        getHeadersCached();
         set<string> names;
         transform(m_headers.begin(), m_headers.end(), inserter(names, names.end()), getHeaderName);
         copy(names.begin(), names.end(), destination);

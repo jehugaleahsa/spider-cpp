@@ -18,7 +18,7 @@ namespace spider {
         
         HttpRequest request(GET, url);
         HttpResponse response = request.getResponse();
-        int status = response.getStatus();
+        int status = response.getStatusCode();
         if (status != 200) {
             // TODO: throw an exception
         }
