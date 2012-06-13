@@ -7,6 +7,7 @@
 #include <boost/regex.hpp>
 #include "http_request.hpp"
 #include "http_response.hpp"
+#include "path_utilities.hpp"
 #include "url.hpp"
 #include "file_downloader.hpp"
 
@@ -17,25 +18,6 @@ namespace spider {
     }
     
     namespace {
-    
-        bool isDuplicateDirectory(std::string const& directory) {
-            return directory == "/";
-        }
-    
-        void splitPath(std::string const& path, std::string & directory, std::string & fileName) {
-            using std::find;
-            using std::string;
-            
-            string::const_reverse_iterator rposition = find(path.rbegin(), path.rend(), '/');
-            if (rposition == path.rend()) {
-                directory = path;
-                fileName = "";
-            } else {
-                string::const_iterator position = rposition.base();
-                directory = string(path.begin(), position + 1);
-                fileName = string(position + 1, path.end());
-            }
-        }
     
         std::string encode(std::string const& value) {
             using std::string;
@@ -51,9 +33,8 @@ namespace spider {
             using std::ostringstream;
             using std::string;
 
-            string directory;
-            string fileName;
-            splitPath(url.getPath(), directory, fileName);
+            string directory = getDirectory(url.getPath());
+            string fileName = getFileName(url.getPath());
             
             ostringstream builder;
             builder << encode(url.getHost()) << encode(directory) << fileName;

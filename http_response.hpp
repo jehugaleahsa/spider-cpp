@@ -4,8 +4,6 @@
 #include <iosfwd>
 #include <set>
 #include <string>
-#include <vector>
-#include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
@@ -17,7 +15,7 @@ namespace spider {
     private:
         friend class HttpRequest;
 
-        boost::shared_ptr<boost::asio::ip::tcp::iostream> m_stream;
+        boost::shared_ptr<std::istream> m_stream;
 
         bool m_isInitialized;
 
@@ -31,7 +29,7 @@ namespace spider {
         void getHeadersCached();
         header_collection_type m_headers;
 
-        HttpResponse(boost::shared_ptr<boost::asio::ip::tcp::iostream> stream);
+        HttpResponse(boost::shared_ptr<std::istream> stream);
 
         bool readLine(std::string & line);
 

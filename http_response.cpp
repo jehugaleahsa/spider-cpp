@@ -4,9 +4,8 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <vector>
+#include <utility>
 #include <boost/algorithm/string.hpp>
-#include <boost/asio.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
@@ -14,7 +13,7 @@
 #include "http_response.hpp"
 
 namespace spider {
-    HttpResponse::HttpResponse(boost::shared_ptr<boost::asio::ip::tcp::iostream> stream)
+    HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
         : m_stream(stream) {
     }
     
