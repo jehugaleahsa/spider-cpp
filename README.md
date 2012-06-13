@@ -26,7 +26,7 @@ Next, I will write code that can determine whether a URL refers to an HTML page 
 Initially, I won't worry about making this process asynchronous. I will get a synchronous version working first, to encapsulate the work being done. Only after I have that working will I wrap the code. I may even implement a command-line interface (plain text or curses) before moving on to threading.
 
 ## What I've Learned So Far
-I came into this project completely inexperienced writing realistic applications with C++. Previously, I only wrote simple command-line applications that worked within the STL. That means no database access, no network excess and almost no file system access. Already, I have learned a lot about writing realistic C++ applications. It has made me more appreciative of how hard it can be to write large scale software in such a low-level language. Amongst the things I have learned, here is a short list:
+I came into this project completely inexperienced writing realistic applications with C++. Previously, I only wrote simple command-line applications that worked within the STL. That means no database access, no network access and almost no file system access. Already, I have learned a lot about writing realistic C++ applications. It has made me more appreciative of how hard it can be to write large scale software in such a low-level language. Amongst the things I have learned, here is a short list:
 * make files are a lot of work.
 * separate compilation allows pushing off linking until the last second.
 * Boost's unit testing framework is pretty awesome, but relies on macros.
@@ -47,4 +47,4 @@ I came into this project completely inexperienced writing realistic applications
 * fstream doesn't recognize ~ and other special path indicators. No exceptions thrown.
 * prior to C++11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
-* inheriting from types in the &lt;functional&gt; header is painful.
+* inheriting from types in the &lt;functional&gt; header is painful. Use ptr_fun, etc. when possible.
