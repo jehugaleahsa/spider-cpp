@@ -3,8 +3,9 @@ all: test spider-cpp
 spider-cpp: main.o http_request.o http_response.o url.o page_downloader.o file_downloader.o download_queue.o
 	g++ main.o http_request.o http_response.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp
 
-test: algorithm.test path_utilities.test url.test
+test: algorithm.test download_queue.test path_utilities.test url.test
 	./algorithm.test;\
+	./download_queue.test;\
 	./path_utilities.test;\
 	./url.test
 
@@ -35,6 +36,12 @@ algorithm.test: algorithm_test.o
 
 algorithm_test.o: algorithm_test.cpp algorithm.hpp
 	g++ -c algorithm_test.cpp
+
+download_queue.test: download_queue_test.o download_queue.o url.o
+	g++ download_queue_test.o download_queue.o url.o -lboost_regex -lboost_unit_test_framework -o download_queue.test
+
+download_queue_test.o: download_queue_test.cpp download_queue.hpp
+	g++ -c download_queue_test.cpp
 
 path_utilities.test: path_utilities_test.o
 	g++ path_utilities_test.o -lboost_unit_test_framework -o path_utilities.test
