@@ -10,6 +10,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include "algorithm.hpp"
+#include "header.hpp"
 #include "http_response.hpp"
 
 namespace spider {
@@ -63,25 +64,46 @@ namespace spider {
         return m_statusMessage;
     }
     
-    std::pair<std::string, std::string> makeHeaderPair(Line const& line) {
+    bool makeHeaderPair(Line const& line, std::string & name, std::string & value) {
         using std::find;
         using std::string;
         using boost::algorithm::trim;
         
         string::const_iterator position = find(line.value.begin(), line.value.end(), ':');
-
-        string name = string(line.value.begin(), position);
+        if (position == line.value.end()) {
+            name = "";
+            value = "";
+            return false;
+        }
+        name = string(line.value.begin(), position);
         trim(name);
-        string value = string(position + 1, line.value.end());
-        trim(value);
-        
-        // TODO: Check for bad format
-        return make_pair(name, value);
+        value = string(position + 1, line.value.end());
+        trim(value);        
+        return true;
     }
     
     inline bool isEmpty(Line const& line) {
         return line.value.empty();
     }
+    
+    class HeaderAdded : public std::unary_function<void, std::string> {
+        HeaderCollection & m_headers;
+        
+    public:
+        HeaderAdded(HeaderCollection & headers) : m_headers(headers) {
+        }
+        
+        void operator ()(Line const& line) {
+            using std::pair;
+            using std::string;
+            
+            string name;
+            string value;
+            if (makeHeaderPair(line, name, value)) {
+                m_headers.addHeader(name, value);
+            }
+        }
+    };
 
     void HttpResponse::getHeadersCached() {
         if (!m_hasHeaders) {
@@ -95,13 +117,16 @@ namespace spider {
             string line;
             istream_iterator<Line> begin(*m_stream);
             istream_iterator<Line> end;
-            transform_while(
+            for_each_while(
                 begin, end, 
-                inserter(m_headers, m_headers.end()), 
                 not1(ptr_fun(isEmpty)), 
-                ptr_fun(makeHeaderPair));
+                HeaderAdded(m_headers));
             m_hasHeaders = true;
         }
+    }
+    
+    HeaderCollection const& HttpResponse::getHeaders() const {
+        return m_headers;
     }
     
     std::istream & HttpResponse::getContent() {

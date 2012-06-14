@@ -6,12 +6,12 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include "header.hpp"
+#include "http_response_interface.hpp"
 
 namespace spider {
-    class HttpResponse {
-    public:
-        typedef boost::unordered_multimap<std::string, std::string> header_collection_type;
 
+    class HttpResponse : public virtual HttpResponseInterface<HeaderCollection> {
     private:
         friend class HttpRequest;
 
@@ -27,7 +27,7 @@ namespace spider {
 
         bool m_hasHeaders;
         void getHeadersCached();
-        header_collection_type m_headers;
+        HeaderCollection m_headers;
 
         HttpResponse(boost::shared_ptr<std::istream> stream);
 
@@ -39,51 +39,11 @@ namespace spider {
         int getStatusCode();
         
         std::string getStatusMessage();
-
-        template <typename TOutIterator>
-        void getHeaderNames(TOutIterator destination);
-
-        template <typename TOutIterator>
-        void getHeaderValues(std::string const& name, TOutIterator destination);
+        
+        HeaderCollection const& getHeaders() const;
         
         std::istream & getContent();
     };
-    
-    namespace {
-        std::string getHeaderValue(HttpResponse::header_collection_type::value_type const& pair) {
-            return pair.second;
-        }
-        
-        std::string getHeaderName(HttpResponse::header_collection_type::value_type const& pair) {
-            return pair.first;
-        }
-    }
-
-    template <typename TOutIterator>
-    void HttpResponse::getHeaderValues(std::string const& name, TOutIterator destination) {
-        using std::pair;
-        using std::transform;
-        using boost::unordered_multimap;
-
-        getHeadersCached();
-        typedef header_collection_type::const_iterator iterator;
-        pair<iterator, iterator> range = m_headers.equal_range(name);
-        transform(range.first, range.second, destination, getHeaderValue);
-    }
-
-    template <typename TOutIterator>
-    void HttpResponse::getHeaderNames(TOutIterator destination) {
-        using std::inserter;
-        using std::copy;
-        using std::set;
-        using std::string;
-        using std::transform;
-
-        getHeadersCached();
-        set<string> names;
-        transform(m_headers.begin(), m_headers.end(), inserter(names, names.end()), getHeaderName);
-        copy(names.begin(), names.end(), destination);
-    }
 }
 
 #endif // SPIDER_HTTP_RESPONSE_HPP

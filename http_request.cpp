@@ -7,30 +7,40 @@
 #include <boost/asio.hpp>
 #include "http_request.hpp"
 #include "http_response.hpp"
+#include "header.hpp"
 #include "url.hpp"
 
-namespace spider {
-
-std::string const& str(RequestMethod method) {
+std::string const& str(spider::RequestMethod method) {
     using std::string;
 
     static const string getString = "GET";
     static const string postString = "POST";
     static const string putString = "PUT";
     static const string deleteString = "DELETE";
+    static const string headString = "HEAD";
+    static const string traceString = "TRACE";
+    static const string connectString = "CONNECT";
 
     switch (method) {
-        case GET:
+        case spider::GET:
         default:
             return getString;
-        case POST:
+        case spider::POST:
             return postString;
-        case PUT:
+        case spider::PUT:
             return putString;
-        case DELETE:
+        case spider::DELETE:
             return deleteString;
+        case spider::HEAD:
+            return headString;
+        case spider::TRACE:
+            return traceString;
+        case spider::CONNECT:
+            return connectString;
     }
 }
+
+namespace spider {
 
 std::string const& HttpRequest::getNewline() {
      static const std::string newline = "\r\n";
@@ -41,21 +51,21 @@ HttpRequest::HttpRequest(RequestMethod method, Url const& url)
     : m_method(method), m_url(url) {
 }
 
-void HttpRequest::setHeader(std::string const& name, std::string const& value) {
-    using std::invalid_argument;
-    using boost::algorithm::trim_copy;
+//void HttpRequest::setHeader(std::string const& name, std::string const& value) {
+//    using std::invalid_argument;
+//    using boost::algorithm::trim_copy;
+//
+//    if (trim_copy(name) == "") {
+//        throw invalid_argument("A header name cannot be blank.");
+//    }
+//    m_headers[name] = value;
+//}
 
-    if (trim_copy(name) == "") {
-        throw invalid_argument("A header name cannot be blank.");
-    }
-    m_headers[name] = value;
+HeaderCollection & HttpRequest::getHeaders() {
+    return m_headers;
 }
 
-std::string createHeader(std::pair<std::string const, std::string> const& pair) {
-    return pair.first + ": " + pair.second;
-}
-
-HttpResponse HttpRequest::getResponse() const {
+boost::shared_ptr<HttpResponseInterface<HeaderCollection> > HttpRequest::getResponse() const {
     using std::ostream;
     using std::ostream_iterator;
     using std::string;
@@ -79,11 +89,12 @@ HttpResponse HttpRequest::getResponse() const {
         *stream << "?" << query;
     }
     *stream << " HTTP/1.0" << HttpRequest::getNewline();
-    ostream_iterator<string> destination(*stream, HttpRequest::getNewline().c_str());
-    transform(m_headers.begin(), m_headers.end(), destination, createHeader);
+    // TODO - convert the header collection into a string
+    //ostream_iterator<string> destination(*stream, HttpRequest::getNewline().c_str());
+    //transform(m_headers.begin(), m_headers.end(), destination, createHeader);
     *stream << HttpRequest::getNewline();
 
-    HttpResponse response(stream);
+    shared_ptr<HttpResponse> response(new HttpResponse(stream));
     return response;
 }
 

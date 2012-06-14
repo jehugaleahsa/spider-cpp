@@ -2,42 +2,38 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <boost/shared_ptr.hpp>
 #include "file_downloader.hpp"
+#include "header.hpp"
 #include "http_request.hpp"
 #include "http_response.hpp"
 #include "url.hpp"
 
 using namespace std;
+using namespace boost;
 using namespace spider;
 
-class HeaderPrinter : unary_function<void, string> {
-    HttpResponse & m_response;
-    
-public:
-    HeaderPrinter(HttpResponse & response)
-        : m_response(response) {
-    }
-    
-    void operator ()(string const& name) {
-        vector<string> values;
-        m_response.getHeaderValues(name, back_inserter(values));
-        cerr << name << ": ";
-        ostream_iterator<string> destination(cerr, ", ");
-        copy(values.begin(), values.end(), destination);
-        cerr << endl;
-    }
-};
+void printHeader(Header const& header) {
+    cerr << header.getName() << ": ";
+    ostream_iterator<string> output(cerr, ", ");
+    copy(header.begin(), header.end(), output);
+    cerr << endl;
+}
 
 int main() {
     Url url = Url::parse("http://www.google.com/");
-    HttpRequest request(GET, url);
-    HttpResponse response = request.getResponse();
-    cerr << response.getStatusCode() << endl;
-    vector<string> names;
-    response.getHeaderNames(back_inserter(names));
-    for_each(names.begin(), names.end(), HeaderPrinter(response));
-    istream_iterator<char> begin(response.getContent() >> noskipws);
+    HttpRequest request(HEAD, url);
+    request.getHeaders().addHeader("referer", "me like tacos");
+    
+    HttpRequest::response_ptr response = request.getResponse();
+    cerr << response->getStatusCode() << endl;
+    
+    istream_iterator<char> begin(response->getContent() >> noskipws);
     istream_iterator<char> end;
     ostream_iterator<char> destination(cerr);
     copy(begin, end, destination);
+    cerr << endl;
+    
+    HeaderCollection const& headers = response->getHeaders();
+    for_each(headers.begin(), headers.end(), printHeader);
 }

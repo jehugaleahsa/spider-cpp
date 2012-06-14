@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <boost/regex.hpp>
+#include <boost/shared_ptr.hpp>
 #include "http_request.hpp"
 #include "http_response.hpp"
 #include "path_utilities.hpp"
@@ -50,11 +51,16 @@ namespace spider {
         using std::ofstream;
         using std::ostream_iterator;
         using std::string;
+        using boost::shared_ptr;
         
         HttpRequest request(GET, url);
-        HttpResponse response = request.getResponse();
+        HttpRequest::response_ptr response = request.getResponse();
         
-        istream_iterator<unsigned char> begin(response.getContent() >> noskipws);
+        if (response->getStatusCode() != 200) {
+            // TODO: throw an exception
+        }
+        
+        istream_iterator<unsigned char> begin(response->getContent() >> noskipws);
         istream_iterator<unsigned char> end;
         
         string fileName = createFileName(url);

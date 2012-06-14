@@ -2,35 +2,33 @@
 #define SPIDER_CPP_HTTP_REQUEST
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
+#include "header.hpp"
+#include "http_request_interface.hpp"
 #include "http_response.hpp"
 #include "url.hpp"
 
 namespace spider {
 
-enum RequestMethod { 
-    GET, 
-    POST, 
-    PUT, 
-    DELETE 
-};
-
-std::string const& str(RequestMethod method);
-
-class HttpRequest
+class HttpRequest : public virtual HttpRequestInterface<HeaderCollection>
 {
     RequestMethod m_method;
     Url m_url;
-    boost::unordered_map<std::string, std::string> m_headers;
+    HeaderCollection m_headers;
 
     static std::string const& getNewline();
 
 public:
+    typedef boost::shared_ptr<HttpResponseInterface<HeaderCollection> > response_ptr;
+
     HttpRequest(RequestMethod method, Url const& url);
 
-    void setHeader(std::string const& name, std::string const& value);
+    //void setHeader(std::string const& name, std::string const& value);
+    
+    HeaderCollection & getHeaders();
 
-    HttpResponse getResponse() const;
+    response_ptr getResponse() const;
 };
 
 }

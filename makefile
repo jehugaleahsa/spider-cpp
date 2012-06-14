@@ -1,7 +1,7 @@
 all: test spider-cpp
 
-spider-cpp: main.o http_request.o http_response.o url.o page_downloader.o file_downloader.o download_queue.o
-	g++ main.o http_request.o http_response.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp
+spider-cpp: main.o http_request.o http_response.o header.o url.o page_downloader.o file_downloader.o download_queue.o
+	g++ main.o http_request.o http_response.o header.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp
 
 test: algorithm.test download_queue.test path_utilities.test url.test
 	./algorithm.test;\
@@ -12,11 +12,14 @@ test: algorithm.test download_queue.test path_utilities.test url.test
 main.o: main.cpp
 	g++ -g -c main.cpp
 
-http_request.o: http_request.cpp http_request.hpp http_response.hpp
+http_request.o: http_request.cpp http_request.hpp http_response.hpp header.hpp
 	g++ -c http_request.cpp
 
-http_response.o: http_response.cpp http_response.hpp algorithm.hpp
+http_response.o: http_response.cpp http_response.hpp algorithm.hpp header.hpp
 	g++ -c http_response.cpp
+
+header.o: header.cpp header.hpp
+	g++ -c header.cpp
 
 url.o: url.cpp url.hpp
 	g++ -c url.cpp

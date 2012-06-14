@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <iterator>
-#include <sstream>
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include "http_request.hpp"
 #include "http_response.hpp"
 #include "page_downloader.hpp"
@@ -10,24 +10,27 @@
 namespace spider {
 
     std::string PageDownloader::download(Url const& url) const {
+        using std::back_inserter;
         using std::copy;
         using std::istream_iterator;
         using std::noskipws;
-        using std::ostringstream;
         using std::ostream_iterator;
+        using std::string;
+        using boost::shared_ptr;
         
         HttpRequest request(GET, url);
-        HttpResponse response = request.getResponse();
-        int status = response.getStatusCode();
+        HttpRequest::response_ptr response = request.getResponse();
+        
+        int status = response->getStatusCode();
         if (status != 200) {
             // TODO: throw an exception
         }
-        istream_iterator<char> begin(response.getContent() >> noskipws);
+        
+        istream_iterator<char> begin(response->getContent() >> noskipws);
         istream_iterator<char> end;
-        ostringstream htmlBuilder;
-        ostream_iterator<char> destination(htmlBuilder);
-        copy(begin, end, destination);
-        return htmlBuilder.str();
+        string content;
+        copy(begin, end, back_inserter(content));
+        return content;
     }
 
 }
