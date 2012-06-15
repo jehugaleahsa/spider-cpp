@@ -7,11 +7,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include "header.hpp"
-#include "http_response_interface.hpp"
 
 namespace spider {
 
-    class HttpResponse : public virtual HttpResponseInterface<HeaderCollection> {
+    class HttpResponse {
     private:
         friend class HttpRequest;
 

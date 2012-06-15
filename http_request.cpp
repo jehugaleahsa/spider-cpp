@@ -51,21 +51,11 @@ HttpRequest::HttpRequest(RequestMethod method, Url const& url)
     : m_method(method), m_url(url) {
 }
 
-//void HttpRequest::setHeader(std::string const& name, std::string const& value) {
-//    using std::invalid_argument;
-//    using boost::algorithm::trim_copy;
-//
-//    if (trim_copy(name) == "") {
-//        throw invalid_argument("A header name cannot be blank.");
-//    }
-//    m_headers[name] = value;
-//}
-
 HeaderCollection & HttpRequest::getHeaders() {
     return m_headers;
 }
 
-boost::shared_ptr<HttpResponseInterface<HeaderCollection> > HttpRequest::getResponse() const {
+HttpRequest::response_ptr HttpRequest::getResponse() const {
     using std::ostream;
     using std::ostream_iterator;
     using std::string;
@@ -94,7 +84,7 @@ boost::shared_ptr<HttpResponseInterface<HeaderCollection> > HttpRequest::getResp
     //transform(m_headers.begin(), m_headers.end(), destination, createHeader);
     *stream << HttpRequest::getNewline();
 
-    shared_ptr<HttpResponse> response(new HttpResponse(stream));
+    response_ptr response(new HttpResponse(stream));
     return response;
 }
 

@@ -22,7 +22,7 @@ void printHeader(Header const& header) {
 
 int main() {
     Url url = Url::parse("http://www.google.com/");
-    HttpRequest request(HEAD, url);
+    HttpRequest request(GET, url);
     request.getHeaders().addHeader("referer", "me like tacos");
     
     HttpRequest::response_ptr response = request.getResponse();

@@ -1,4 +1,4 @@
-#include <map>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include "header.hpp"
@@ -16,55 +16,49 @@ std::string Header::getName() const {
     return m_name;
 }
 
-std::vector<std::string>::const_iterator Header::begin() const {
+Header::iterator Header::begin() const {
     return m_values.begin();
 }
 
-std::vector<std::string>::const_iterator Header::end() const {
+Header::iterator Header::end() const {
     return m_values.end();
 }
 
-HeaderIterator::HeaderIterator(std::map<std::string, Header>::const_iterator iterator)
-    : m_iterator(iterator) {
-}
-
-HeaderIterator::HeaderIterator(HeaderIterator const& other)
-    : m_iterator(other.m_iterator) {
+inline bool isHeaderLessThanName(Header const& header, std::string const& name) {
+    return std::less<std::string>()(header.getName(), name);
 }
 
 void HeaderCollection::addHeader(std::string const& name, std::string const& value) {
-    using std::map;
+    using std::less;
+    using std::lower_bound;
     using std::string;
+    using std::vector;
     
-    map<string, Header>::iterator position = m_headers.find(name);
-    if (position == m_headers.end()) {
-        position = m_headers.insert(m_headers.end(), make_pair(name, Header(name)));
+    vector<Header>::iterator position = lower_bound(m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
+    if (position == m_headers.end() || position->getName() != name) {
+        position = m_headers.insert(position, Header(name));
     }
-    position->second.addValue(value);
+    position->addValue(value);
 }
 
-bool HeaderCollection::hasHeader(std::string const& name) const {
-    return m_headers.find(name) != m_headers.end();
-}
-
-Header const& HeaderCollection::getHeader(std::string const& name) const {
-    using std::map;
+HeaderCollection::header_ptr HeaderCollection::getHeader(std::string const& name) const {
+    using std::lower_bound;
     using std::string;
+    using std::vector;
     
-    map<string, Header>::const_iterator position = m_headers.find(name);
-    if (position == m_headers.end()) {
-        // TODO: create an exception for missing headers
-        throw "No such header!";
+    vector<Header>::const_iterator position = lower_bound(m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
+    if (position == m_headers.end() || position->getName() != name) {
+        return header_ptr();
     }
-    return position->second;
+    return &*position;
 }
 
-HeaderIterator const HeaderCollection::begin() const {
-    return HeaderIterator(m_headers.begin());
+HeaderCollection::iterator HeaderCollection::begin() const {
+    return m_headers.begin();
 }
 
-HeaderIterator const HeaderCollection::end() const {
-    return HeaderIterator(m_headers.end());
+HeaderCollection::iterator HeaderCollection::end() const {
+    return m_headers.end();
 }
 
 }

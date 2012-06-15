@@ -5,14 +5,22 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include "header.hpp"
-#include "http_request_interface.hpp"
 #include "http_response.hpp"
 #include "url.hpp"
 
 namespace spider {
 
-class HttpRequest : public virtual HttpRequestInterface<HeaderCollection>
-{
+enum RequestMethod { 
+    GET, 
+    POST, 
+    PUT, 
+    DELETE,
+    HEAD,
+    TRACE,
+    CONNECT,
+};
+
+class HttpRequest {
     RequestMethod m_method;
     Url m_url;
     HeaderCollection m_headers;
@@ -20,7 +28,7 @@ class HttpRequest : public virtual HttpRequestInterface<HeaderCollection>
     static std::string const& getNewline();
 
 public:
-    typedef boost::shared_ptr<HttpResponseInterface<HeaderCollection> > response_ptr;
+    typedef boost::shared_ptr<HttpResponse> response_ptr;
 
     HttpRequest(RequestMethod method, Url const& url);
 
