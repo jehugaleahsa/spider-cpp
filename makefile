@@ -4,8 +4,11 @@ export LD_LIBRARY_PATH=/home/travis/Projects/local/boost_1_50_0/stage/lib
 
 all: test spider-cpp
 
-spider-cpp: main.o http_request.o http_response.o header.o url.o page_downloader.o file_downloader.o download_queue.o
-	g++ main.o http_request.o http_response.o header.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp $(CFLAGS)
+extractor: spider-cpp
+	./spider-cpp "http://www.google.com/"
+
+spider-cpp: main.o http_request.o http_response.o header.o extractor.o url.o page_downloader.o file_downloader.o download_queue.o
+	g++ main.o http_request.o http_response.o header.o extractor.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp $(CFLAGS)
 
 test: algorithm.test download_queue.test path_utilities.test url.test
 	./algorithm.test;\
@@ -24,6 +27,9 @@ http_response.o: http_response.cpp http_response.hpp algorithm.hpp header.hpp
 
 header.o: header.cpp header.hpp
 	g++ -c header.cpp $(CFLAGS)
+
+extractor.o: extractor.cpp extractor.hpp
+	g++ -c extractor.cpp $(CFLAGS)
 
 url.o: url.cpp url.hpp
 	g++ -c url.cpp $(CFLAGS)

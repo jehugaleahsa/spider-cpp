@@ -7,15 +7,15 @@
 namespace spider {
 
 Url::Url(
-    std::string const& scheme, 
+    std::string const& scheme,
     std::string const& host,
     int port,
     std::string const& path,
     std::string const& query)
-    : m_scheme(scheme), 
-    m_host(host), 
-    m_port(port), 
-    m_path(path), 
+    : m_scheme(scheme),
+    m_host(host),
+    m_port(port),
+    m_path(path),
     m_query(query) {
 }
 
@@ -62,6 +62,21 @@ Url Url::parse(std::string const& urlString) {
         path = "/";
     }
     return Url(scheme, host, port, path, query);
+}
+
+std::ostream & operator<<(std::ostream & stream, Url const& url) {
+    stream << url.getScheme() << "://";
+    stream << url.getHost();
+    if (url.getPort() != Url::getDefaultPort()) {
+        stream << ":" << url.getPort();
+    }
+    if (url.getPath().size() > 0) {
+        stream << url.getPath();
+    }
+    if (url.getQuery().size() > 0) {
+        stream << "?" << url.getQuery();
+    }
+    return stream;
 }
 
 BadUrlException::BadUrlException() throw() {

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <exception>
 #include <functional>
+#include <iosfwd>
 #include <string>
 #include <boost/functional/hash.hpp>
 
@@ -59,6 +60,8 @@ inline std::string const& Url::getPath() const {
 inline std::string const& Url::getQuery() const {
     return m_query;
 }
+
+std::ostream & operator<<(std::ostream & stream, Url const& url);
 
 class BadUrlException : public virtual std::exception {
     std::string m_url;
