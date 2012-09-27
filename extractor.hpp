@@ -10,31 +10,28 @@
 namespace spider {
 
 class UrlExtractor {
-    std::string m_tagName;
+    boost::regex m_regex;
     Url m_baseAddress;
 
-    boost::regex const& getRegex();
-
-    Url buildUrl(boost::smatch const& match);
+    Url buildUrl(boost::smatch const& match) const;
 
 public:
     explicit UrlExtractor(std::string const& tagName, Url const& baseAddress);
 
     template <typename TOutputIterator>
-    TOutputIterator getUrls(std::string const& content, TOutputIterator dest);
+    TOutputIterator getUrls(std::string const& content, TOutputIterator dest) const;
 };
 
 template <typename TOutputIterator>
 TOutputIterator UrlExtractor::getUrls(
     std::string const& content,
-    TOutputIterator dest) {
+    TOutputIterator dest) const {
     using std::transform;
     using boost::bind;
     using boost::regex;
     using boost::sregex_iterator;
 
-    regex const& re = UrlExtractor::getRegex();
-    sregex_iterator regex_begin = make_regex_iterator(content, re);
+    sregex_iterator regex_begin = make_regex_iterator(content, m_regex);
     sregex_iterator regex_end;
     return transform(
         regex_begin, regex_end,

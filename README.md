@@ -10,20 +10,15 @@ spider-cpp is dependent on **Boost 1.50**. It requires access to the libraries:
 
 spider-cpp was compiled on Ubuntu 12 with g++-4.6.3 installed. It was written using VIM and gedit. I used GNU make to automate my builds.
 
-##Purpose
+## Purpose
 The hope is that given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while).
 
 ## TODO
 * Add the ability to specify the referrer in the page/file downloaders.
-* Write class to find the base URL for a page.
-* Write class to detect URLs in HTML pages.
-    * Override current URL with last base address, if it exists.
-    * Skip JavaScript URLs.
-    * Convert back slashes to forward slashes. \ -> /
+* Convert back slashes to forward slashes in URLs. \ -> /
 * Write class for classifying URLs.
     * Determine if URL refers to web page (.html, .htm, .asp, .php, .chm, etc.).
     * Determine whether the URL refers to a desired content type (.jpeg, .mpg, etc.)
-* Write code to store extracted URLs in download queue/download files.
 * Spit out progress to command line as streaming text.
 
 ## What I've Learned So Far

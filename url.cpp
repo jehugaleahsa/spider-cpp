@@ -1,6 +1,7 @@
 #include <exception>
 #include <sstream>
 #include <string>
+#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include "url.hpp"
 
@@ -31,12 +32,13 @@ int Url::getDefaultPort() {
 Url Url::parse(std::string const& urlString) {
     using std::string;
     using std::stringstream;
+    using boost::replace_all;
     using boost::regex;
     using boost::regex_match;
     using boost::smatch;
 
-    const string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?]*)?(\\?(?<query>.*))?";
-    regex expression(urlFormat);
+    const static string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?]*)?(\\?(?<query>.*))?";
+    regex expression(urlFormat, boost::regex::icase);
     smatch matches;
     bool found = regex_match(urlString, matches, expression);
     if (!found) {
@@ -60,6 +62,8 @@ Url Url::parse(std::string const& urlString) {
     // use '/' as default if there is a query but no path
     if (path == "" && query != "") {
         path = "/";
+    } else {
+        replace_all(path, "//", "/");
     }
     return Url(scheme, host, port, path, query);
 }
