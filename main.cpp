@@ -43,6 +43,9 @@ int main(int argc, char** argv) {
 
     DownloadQueue queue;
     Stripper stripper("script");
+    UrlExtractor baseExtractor("base", "href");
+    UrlExtractor anchorExtractor("a", "href");
+    UrlExtractor imageExtractor("img", "src");
 
     string topUrlString = (argc < 2) ? getStartingUrl() : argv[1];
     Url topUrl = Url::parse(topUrlString);
@@ -71,16 +74,14 @@ int main(int argc, char** argv) {
             url.getPort(),
             url.getPath(),
             "");
-        UrlExtractor baseExtractor("base", baseUrl);
-        baseExtractor.getUrls(stripped, back_inserter(baseAddresses));
+        baseExtractor.getUrls(baseUrl, stripped, back_inserter(baseAddresses));
         if (baseAddresses.size() > 0) {
             baseUrl = baseAddresses.back();
         }
 
         // Get links
         vector<Url> links;
-        UrlExtractor anchorExtractor("a", baseUrl);
-        anchorExtractor.getUrls(stripped, back_inserter(links));
+        anchorExtractor.getUrls(baseUrl, stripped, back_inserter(links));
         for_each(
             links.begin(), links.end(),
             bind(&DownloadQueue::addUrl, &queue, _1));

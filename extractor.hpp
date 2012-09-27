@@ -11,19 +11,24 @@ namespace spider {
 
 class UrlExtractor {
     boost::regex m_regex;
-    Url m_baseAddress;
 
-    Url buildUrl(boost::smatch const& match) const;
+    Url buildUrl(Url const& baseAddress, boost::smatch const& match) const;
 
 public:
-    explicit UrlExtractor(std::string const& tagName, Url const& baseAddress);
+    explicit UrlExtractor(
+        std::string const& tagName,
+        std::string const& attributeName);
 
     template <typename TOutputIterator>
-    TOutputIterator getUrls(std::string const& content, TOutputIterator dest) const;
+    TOutputIterator getUrls(
+        Url const& baseAddress,
+        std::string const& content,
+        TOutputIterator dest) const;
 };
 
 template <typename TOutputIterator>
 TOutputIterator UrlExtractor::getUrls(
+    Url const& baseAddress,
     std::string const& content,
     TOutputIterator dest) const {
     using std::transform;
@@ -36,7 +41,7 @@ TOutputIterator UrlExtractor::getUrls(
     return transform(
         regex_begin, regex_end,
         dest,
-        bind(&UrlExtractor::buildUrl, this, _1));
+        bind(&UrlExtractor::buildUrl, this, baseAddress, _1));
 }
 
 }
