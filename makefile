@@ -7,8 +7,8 @@ all: test spider-cpp
 extractor: spider-cpp
 	./spider-cpp "http://www.google.com/"
 
-spider-cpp: main.o http_request.o http_response.o header.o extractor.o stripper.o url.o page_downloader.o file_downloader.o download_queue.o
-	g++ main.o http_request.o http_response.o header.o extractor.o stripper.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp $(CFLAGS)
+spider-cpp: main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o url.o page_downloader.o file_downloader.o download_queue.o
+	g++ main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp $(CFLAGS)
 
 test: algorithm.test download_queue.test path_utilities.test url.test
 	./algorithm.test;\
@@ -17,7 +17,10 @@ test: algorithm.test download_queue.test path_utilities.test url.test
 	./url.test
 
 main.o: main.cpp
-	g++ -g -c main.cpp $(CFLAGS)
+	g++ -c main.cpp $(CFLAGS)
+
+spider.o: spider.cpp spider.hpp
+	g++ -c spider.cpp $(CFLAGS)
 
 http_request.o: http_request.cpp http_request.hpp http_response.hpp header.hpp
 	g++ -c http_request.cpp $(CFLAGS)
@@ -28,7 +31,7 @@ http_response.o: http_response.cpp http_response.hpp algorithm.hpp header.hpp
 header.o: header.cpp header.hpp
 	g++ -c header.cpp $(CFLAGS)
 
-extractor.o: extractor.cpp extractor.hpp
+extractor.o: extractor.cpp extractor.hpp url.hpp
 	g++ -c extractor.cpp $(CFLAGS)
 
 stripper.o: stripper.cpp stripper.hpp
