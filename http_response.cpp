@@ -17,18 +17,18 @@ namespace spider {
     HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
         : m_stream(stream) {
     }
-    
+
     struct Line {
         std::string value;
     };
-    
+
     std::istream & operator >>(std::istream & input, Line & line) {
         using std::getline;
         using boost::algorithm::is_any_of;
         using boost::algorithm::trim_right_if;
-            
+
         getline(input, line.value);
-        trim_right_if(line.value, is_any_of("\r"));        
+        trim_right_if(line.value, is_any_of("\r\n"));
         return input;
     }
 
@@ -36,7 +36,6 @@ namespace spider {
         if (!m_hasStatus) {
             using std::istringstream;
             using std::noskipws;
-            using std::string;
 
             Line line;
             *m_stream >> line;
@@ -48,7 +47,7 @@ namespace spider {
             m_hasStatus = true;
         }
     }
-    
+
     std::string HttpResponse::getVersion() {
         getStatusCached();
         return m_version;
@@ -58,17 +57,17 @@ namespace spider {
         getStatusCached();
         return m_statusCode;
     }
-    
+
     std::string HttpResponse::getStatusMessage() {
         getStatusCached();
         return m_statusMessage;
     }
-    
+
     bool makeHeaderPair(Line const& line, std::string & name, std::string & value) {
         using std::find;
         using std::string;
         using boost::algorithm::trim;
-        
+
         string::const_iterator position = find(line.value.begin(), line.value.end(), ':');
         if (position == line.value.end()) {
             name = "";
@@ -78,25 +77,25 @@ namespace spider {
         name = string(line.value.begin(), position);
         trim(name);
         value = string(position + 1, line.value.end());
-        trim(value);        
+        trim(value);
         return true;
     }
-    
+
     inline bool isEmpty(Line const& line) {
         return line.value.empty();
     }
-    
+
     class HeaderAdded : public std::unary_function<void, std::string> {
         HeaderCollection & m_headers;
-        
+
     public:
         HeaderAdded(HeaderCollection & headers) : m_headers(headers) {
         }
-        
+
         void operator ()(Line const& line) {
             using std::pair;
             using std::string;
-            
+
             string name;
             string value;
             if (makeHeaderPair(line, name, value)) {
@@ -107,7 +106,6 @@ namespace spider {
 
     void HttpResponse::getHeadersCached() {
         if (!m_hasHeaders) {
-            using std::inserter;
             using std::istream_iterator;
             using std::not1;
             using std::ptr_fun;
@@ -118,19 +116,19 @@ namespace spider {
             istream_iterator<Line> begin(*m_stream);
             istream_iterator<Line> end;
             for_each_while(
-                begin, end, 
-                not1(ptr_fun(isEmpty)), 
+                begin, end,
+                not1(ptr_fun(isEmpty)),
                 HeaderAdded(m_headers));
             m_hasHeaders = true;
         }
     }
-    
+
     HeaderCollection const& HttpResponse::getHeaders() const {
         return m_headers;
     }
-    
+
     std::istream & HttpResponse::getContent() {
-        getHeadersCached();            
+        getHeadersCached();
         return *m_stream;
     }
 }

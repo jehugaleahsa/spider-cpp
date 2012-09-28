@@ -30,17 +30,17 @@ namespace spider {
 Url UrlExtractor::buildUrl(
     Url const& baseAddress,
     boost::smatch const& match) const {
+    using std::ostringstream;
     using std::string;
-    using std::stringstream;
     using boost::istarts_with;
 
     string urlString = match.str("url");
-    if (istarts_with(urlString, "javascript:void(0)")) {
+    if (istarts_with(urlString, "javascript:")) {
         return baseAddress;
     }
     if (!istarts_with(urlString, "http://")
         && !istarts_with(urlString, "https://")) {
-        stringstream builder;
+        ostringstream builder;
         builder << baseAddress;
         builder << urlString;
         urlString = builder.str();

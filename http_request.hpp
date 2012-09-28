@@ -10,10 +10,10 @@
 
 namespace spider {
 
-enum RequestMethod { 
-    GET, 
-    POST, 
-    PUT, 
+enum RequestMethod {
+    GET,
+    POST,
+    PUT,
     DELETE,
     HEAD,
     TRACE,
@@ -32,8 +32,6 @@ public:
 
     HttpRequest(RequestMethod method, Url const& url);
 
-    //void setHeader(std::string const& name, std::string const& value);
-    
     HeaderCollection & getHeaders();
 
     response_ptr getResponse() const;

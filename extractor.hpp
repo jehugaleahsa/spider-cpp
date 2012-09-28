@@ -33,7 +33,6 @@ TOutputIterator UrlExtractor::getUrls(
     TOutputIterator dest) const {
     using std::transform;
     using boost::bind;
-    using boost::regex;
     using boost::sregex_iterator;
 
     sregex_iterator regex_begin = make_regex_iterator(content, m_regex);

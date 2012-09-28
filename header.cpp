@@ -25,15 +25,16 @@ Header::iterator Header::end() const {
 }
 
 inline bool isHeaderLessThanName(Header const& header, std::string const& name) {
-    return std::less<std::string>()(header.getName(), name);
+    using std::less;
+    using std::string;
+
+    return less<string>()(header.getName(), name);
 }
 
 void HeaderCollection::addHeader(std::string const& name, std::string const& value) {
-    using std::less;
     using std::lower_bound;
-    using std::string;
     using std::vector;
-    
+
     vector<Header>::iterator position = lower_bound(m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
     if (position == m_headers.end() || position->getName() != name) {
         position = m_headers.insert(position, Header(name));
@@ -43,9 +44,8 @@ void HeaderCollection::addHeader(std::string const& name, std::string const& val
 
 HeaderCollection::header_ptr HeaderCollection::getHeader(std::string const& name) const {
     using std::lower_bound;
-    using std::string;
     using std::vector;
-    
+
     vector<Header>::const_iterator position = lower_bound(m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
     if (position == m_headers.end() || position->getName() != name) {
         return header_ptr();

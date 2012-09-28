@@ -30,15 +30,15 @@ int Url::getDefaultPort() {
 }
 
 Url Url::parse(std::string const& urlString) {
+    using std::istringstream;
     using std::string;
-    using std::stringstream;
     using boost::replace_all;
     using boost::regex;
     using boost::regex_match;
     using boost::smatch;
 
     const static string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?]*)?(\\?(?<query>.*))?";
-    regex expression(urlFormat, boost::regex::icase);
+    regex expression(urlFormat, regex::icase);
     smatch matches;
     bool found = regex_match(urlString, matches, expression);
     if (!found) {
@@ -54,7 +54,7 @@ Url Url::parse(std::string const& urlString) {
     if (portString == "") {
         port = Url::getDefaultPort();
     } else {
-        stringstream portStream(portString);
+        istringstream portStream(portString);
         portStream >> port;
     }
     string path = matches["path"];

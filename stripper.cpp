@@ -6,10 +6,10 @@
 namespace {
 
 boost::regex getRegex(std::string const& tagName) {
-    using std::stringstream;
+    using std::ostringstream;
     using boost::regex;
 
-    stringstream builder;
+    ostringstream builder;
     builder << '<';
     builder << tagName;
     builder << ".*?>.*?</";

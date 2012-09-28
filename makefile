@@ -4,11 +4,8 @@ export LD_LIBRARY_PATH=/home/travis/Projects/local/boost_1_50_0/stage/lib
 
 all: test spider-cpp
 
-extractor: spider-cpp
-	./spider-cpp "http://www.google.com/"
-
-spider-cpp: main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o url.o page_downloader.o file_downloader.o download_queue.o
-	g++ main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o url.o page_downloader.o file_downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider-cpp $(CFLAGS)
+spider: main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o categorizer.o url.o page_downloader.o file_downloader.o downloader.o download_queue.o
+	g++ main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o categorizer.o url.o page_downloader.o file_downloader.o downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider $(CFLAGS)
 
 test: algorithm.test download_queue.test path_utilities.test url.test
 	./algorithm.test;\
@@ -16,16 +13,16 @@ test: algorithm.test download_queue.test path_utilities.test url.test
 	./path_utilities.test;\
 	./url.test
 
-main.o: main.cpp
+main.o: main.cpp spider.hpp url.hpp
 	g++ -c main.cpp $(CFLAGS)
 
-spider.o: spider.cpp spider.hpp
+spider.o: spider.cpp categorizer.hpp download_queue.hpp extractor.hpp file_downloader.hpp page_downloader.hpp spider.hpp stripper.hpp url.hpp
 	g++ -c spider.cpp $(CFLAGS)
 
-http_request.o: http_request.cpp http_request.hpp http_response.hpp header.hpp
+http_request.o: http_request.cpp header.hpp http_request.hpp http_response.hpp url.hpp
 	g++ -c http_request.cpp $(CFLAGS)
 
-http_response.o: http_response.cpp http_response.hpp algorithm.hpp header.hpp
+http_response.o: http_response.cpp algorithm.hpp header.hpp http_response.hpp
 	g++ -c http_response.cpp $(CFLAGS)
 
 header.o: header.cpp header.hpp
@@ -37,13 +34,19 @@ extractor.o: extractor.cpp extractor.hpp url.hpp
 stripper.o: stripper.cpp stripper.hpp
 	g++ -c stripper.cpp $(CFLAGS)
 
+categorizer.o: categorizer.cpp categorizer.hpp url.hpp
+	g++ -c categorizer.cpp $(CFLAGS)
+
 url.o: url.cpp url.hpp
 	g++ -c url.cpp $(CFLAGS)
 
-page_downloader.o: page_downloader.cpp page_downloader.hpp url.hpp http_request.hpp http_response.hpp
+downloader.o: downloader.cpp downloader.hpp http_request.hpp url.hpp
+	g++ -c downloader.cpp $(CFLAGS)
+
+page_downloader.o: page_downloader.cpp downloader.hpp http_request.hpp page_downloader.hpp url.hpp
 	g++ -c page_downloader.cpp $(CFLAGS)
 
-file_downloader.o: file_downloader.cpp file_downloader.hpp url.hpp http_request.hpp http_response.hpp path_utilities.hpp
+file_downloader.o: file_downloader.cpp downloader.hpp file_downloader.hpp http_request.hpp http_response.hpp path_utilities.hpp url.hpp
 	g++ -c file_downloader.cpp $(CFLAGS)
 
 download_queue.o: download_queue.cpp download_queue.hpp url.hpp
@@ -62,6 +65,9 @@ download_queue.test: download_queue_test.o download_queue.o url.o
 download_queue_test.o: download_queue_test.cpp download_queue.hpp
 	g++ -c download_queue_test.cpp $(CFLAGS)
 
+extractor: spider-cpp
+	./spider-cpp "http://www.google.com/"
+
 path_utilities.test: path_utilities_test.o
 	g++ path_utilities_test.o -lboost_unit_test_framework -o path_utilities.test $(CFLAGS)
 
@@ -76,6 +82,6 @@ url_test.o: url_test.cpp url.hpp
 
 .PHONY : clean
 clean:
-	-rm spider-cpp
+	-rm spider
 	-rm *.test
 	-rm *.o

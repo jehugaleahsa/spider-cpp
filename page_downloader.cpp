@@ -2,26 +2,28 @@
 #include <ios>
 #include <iostream>
 #include <iterator>
+#include <sstream>
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include "downloader.hpp"
 #include "http_request.hpp"
-#include "http_response.hpp"
 #include "page_downloader.hpp"
 #include "url.hpp"
 
 namespace spider {
 
-    std::string PageDownloader::download(Url const& url) const {
-        using std::back_inserter;
-        using std::copy;
+    std::string PageDownloader::download(
+        Url const& referrer,
+        Url const& url) const {
         using std::istream;
         using std::istream_iterator;
         using std::noskipws;
-        using std::ostream_iterator;
         using std::string;
-        using boost::shared_ptr;
 
         HttpRequest request(GET, url);
+        Downloader::addReferrerHeader(request, referrer);
+        Downloader::addUserAgentHeader(request);
+        Downloader::addAcceptHeader(request);
+        Downloader::addHostHeader(request, url);
         HttpRequest::response_ptr response = request.getResponse();
         istream & stream = response->getContent();
         stream >> noskipws;

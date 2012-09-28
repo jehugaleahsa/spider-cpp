@@ -79,11 +79,14 @@ namespace std {
 template <>
 struct equal_to<spider::Url> : public binary_function<spider::Url, spider::Url, bool> {
     result_type operator ()(first_argument_type const& first, second_argument_type const& second) const {
-        return std::equal_to<std::string>()(first.getScheme(), second.getScheme())
-            && std::equal_to<std::string>()(first.getHost(), second.getHost())
-            && std::equal_to<int>()(first.getPort(), second.getPort())
-            && std::equal_to<std::string>()(first.getPath(), second.getPath())
-            && std::equal_to<std::string>()(first.getQuery(), second.getQuery());
+        using std::equal_to;
+        using std::string;
+
+        return equal_to<string>()(first.getScheme(), second.getScheme())
+            && equal_to<string>()(first.getHost(), second.getHost())
+            && equal_to<int>()(first.getPort(), second.getPort())
+            && equal_to<string>()(first.getPath(), second.getPath())
+            && equal_to<string>()(first.getQuery(), second.getQuery());
     }
 };
 
@@ -94,11 +97,13 @@ namespace boost {
 template <>
 struct hash<spider::Url> : public std::unary_function<spider::Url, std::size_t> {
     result_type operator ()(argument_type const& url) const {
-        return hash<std::string>()(url.getScheme())
-            ^ hash<std::string>()(url.getHost())
+        using std::string;
+
+        return hash<string>()(url.getScheme())
+            ^ hash<string>()(url.getHost())
             ^ hash<int>()(url.getPort())
-            ^ hash<std::string>()(url.getPath())
-            ^ hash<std::string>()(url.getQuery());
+            ^ hash<string>()(url.getPath())
+            ^ hash<string>()(url.getQuery());
     }
 };
 
