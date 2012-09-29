@@ -14,11 +14,7 @@ spider-cpp was compiled on Ubuntu 12 with g++-4.6.3 installed. It was written us
 The hope is that given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while).
 
 ## TODO
-* Add the ability to specify the referrer in the page/file downloaders.
 * Convert back slashes to forward slashes in URLs. \ -> /
-* Write class for classifying URLs.
-    * Determine if URL refers to web page (.html, .htm, .asp, .php, .chm, etc.).
-    * Determine whether the URL refers to a desired content type (.jpeg, .mpg, etc.)
 * Spit out progress to command line as streaming text.
 
 ## What I've Learned So Far
