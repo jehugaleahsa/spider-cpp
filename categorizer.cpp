@@ -26,9 +26,7 @@ bool Categorizer::isDesired(Url const& url) const {
     string extension;
     if (rposition != path.rend()) {
         string::const_iterator position = rposition.base();
-        // throw away fragment identifier
-        string::const_iterator end = find(position, path.end(), '#');
-        extension = string(position, end);
+        extension = string(position, path.end());
         to_lower(extension);
     }
     return m_extensions.find(extension) != m_extensions.end();

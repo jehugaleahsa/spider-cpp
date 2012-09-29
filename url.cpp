@@ -8,16 +8,20 @@
 namespace spider {
 
 Url::Url(
-    std::string const& scheme,
     std::string const& host,
     int port,
     std::string const& path,
-    std::string const& query)
-    : m_scheme(scheme),
-    m_host(host),
+    std::string const& query,
+    std::string const& fragment,
+    std::string const& scheme,
+    std::string const& userInfo)
+    : m_scheme(boost::to_lower_copy(scheme)),
+    m_host(boost::to_lower_copy(host)),
     m_port(port),
     m_path(path),
-    m_query(query) {
+    m_query(query),
+    m_fragment(fragment),
+    m_userInfo(userInfo) {
 }
 
 std::string const& Url::getDefaultScheme() {
@@ -37,7 +41,7 @@ Url Url::parse(std::string const& urlString) {
     using boost::regex_match;
     using boost::smatch;
 
-    const static string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?]*)?(\\?(?<query>.*))?";
+    const static string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?((?<userinfo>[^@]*)@)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?#]*)?(\\?(?<query>[^#]*))?(#(?<fragment>.*))?";
     regex expression(urlFormat, regex::icase);
     smatch matches;
     bool found = regex_match(urlString, matches, expression);
@@ -48,6 +52,7 @@ Url Url::parse(std::string const& urlString) {
     if (scheme == "") {
         scheme = Url::getDefaultScheme();
     }
+    string userInfo = matches["userinfo"];
     string host = matches["host"];
     string portString = matches["port"];
     int port;
@@ -59,26 +64,33 @@ Url Url::parse(std::string const& urlString) {
     }
     string path = matches["path"];
     string query = matches["query"];
+    string fragment = matches["fragment"];
     // use '/' as default if there is a query but no path
-    if (path == "" && query != "") {
+    if (path == "" && (query != "" || fragment != "")) {
         path = "/";
     } else {
         replace_all(path, "//", "/");
     }
-    return Url(scheme, host, port, path, query);
+    return Url(host, port, path, query, fragment, scheme, userInfo);
 }
 
 std::ostream & operator<<(std::ostream & stream, Url const& url) {
     stream << url.getScheme() << "://";
+    if (url.getUserInfo() != "") {
+        stream << url.getUserInfo() << "@";
+    }
     stream << url.getHost();
     if (url.getPort() != Url::getDefaultPort()) {
         stream << ":" << url.getPort();
     }
-    if (url.getPath().size() > 0) {
+    if (url.getPath() != "") {
         stream << url.getPath();
     }
-    if (url.getQuery().size() > 0) {
+    if (url.getQuery() != "") {
         stream << "?" << url.getQuery();
+    }
+    if (url.getFragment() != "") {
+        stream << "#" << url.getFragment();
     }
     return stream;
 }

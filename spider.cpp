@@ -55,11 +55,13 @@ namespace {
 
         vector<Url> baseAddresses;
         Url baseUrl(
-            url.getScheme(),
             url.getHost(),
             url.getPort(),
             url.getPath(),
-            "");
+            "",  // query string
+            "",  // fragement identifier
+            url.getScheme(),
+            url.getUserInfo());
         extractor.getUrls(baseUrl, content, back_inserter(baseAddresses));
         if (baseAddresses.size() == 0) {
             return baseUrl;
