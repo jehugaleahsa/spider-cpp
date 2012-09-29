@@ -15,7 +15,7 @@
 
 namespace spider {
     HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
-        : m_stream(stream) {
+        : m_stream(stream), m_hasStatus(), m_statusCode(), m_hasHeaders() {
     }
 
     struct Line {
@@ -27,24 +27,33 @@ namespace spider {
         using boost::algorithm::is_any_of;
         using boost::algorithm::trim_right_if;
 
-        getline(input, line.value);
-        trim_right_if(line.value, is_any_of("\r\n"));
+        if (input) {
+            getline(input, line.value);
+            trim_right_if(line.value, is_any_of("\r\n"));
+        }
         return input;
     }
 
     void HttpResponse::getStatusCached() {
-        if (!m_hasStatus) {
-            using std::istringstream;
-            using std::noskipws;
+        using std::getline;
+        using std::istringstream;
+        using boost::algorithm::trim;
 
+        if (!m_hasStatus) {
             Line line;
-            *m_stream >> line;
-            istringstream reader(line.value);
-            reader >> m_version;
-            reader >> m_statusCode;
-            reader >> noskipws >> m_statusMessage;
-            // TODO: check for bad format
-            m_hasStatus = true;
+            if (*m_stream >> line) {
+                istringstream reader(line.value);
+                reader >> m_version;
+                reader >> m_statusCode;
+                getline(reader, m_statusMessage);
+                trim(m_statusMessage);
+                // TODO: check for bad format
+                m_hasStatus = true;
+            } else {
+                m_version = "HTTP/1.1";
+                m_statusCode = 500;
+                m_statusMessage = "Failed to connect";
+            }
         }
     }
 
@@ -74,9 +83,9 @@ namespace spider {
             value = "";
             return false;
         }
-        name = string(line.value.begin(), position);
+        name.assign(line.value.begin(), position);
         trim(name);
-        value = string(position + 1, line.value.end());
+        value.assign(position + 1, line.value.end());
         trim(value);
         return true;
     }
@@ -105,21 +114,22 @@ namespace spider {
     };
 
     void HttpResponse::getHeadersCached() {
-        if (!m_hasHeaders) {
-            using std::istream_iterator;
-            using std::not1;
-            using std::ptr_fun;
-            using std::string;
+        using std::istream_iterator;
+        using std::not1;
+        using std::ptr_fun;
+        using std::string;
 
+        if (!m_hasHeaders) {
             getStatusCached(); // cache the status code
-            string line;
-            istream_iterator<Line> begin(*m_stream);
-            istream_iterator<Line> end;
-            for_each_while(
-                begin, end,
-                not1(ptr_fun(isEmpty)),
-                HeaderAdded(m_headers));
-            m_hasHeaders = true;
+            if (*m_stream) {
+                istream_iterator<Line> begin(*m_stream);
+                istream_iterator<Line> end;
+                for_each_while(
+                    begin, end,
+                    not1(ptr_fun(isEmpty)),
+                    HeaderAdded(m_headers));
+                m_hasHeaders = true;
+            }
         }
     }
 

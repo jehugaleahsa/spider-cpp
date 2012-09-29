@@ -35,6 +35,13 @@ void Downloader::addHostHeader(spider::HttpRequest & request, spider::Url const&
     headers.addHeader("Host", url.getHost());
 }
 
+void Downloader::addConnectionHeader(spider::HttpRequest & request) {
+    using spider::HeaderCollection;
+
+    HeaderCollection & headers = request.getHeaders();
+    headers.addHeader("Connection", "close");
+}
+
 Downloader::Downloader() {
 }
 

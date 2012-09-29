@@ -4,6 +4,7 @@ export LD_LIBRARY_PATH=/home/travis/Projects/local/boost_1_50_0/stage/lib
 
 all: test spider-cpp
 
+.PHONY : spider
 spider: main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o categorizer.o url.o page_downloader.o file_downloader.o downloader.o download_queue.o
 	g++ main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o categorizer.o url.o page_downloader.o file_downloader.o downloader.o download_queue.o -lboost_system -lboost_thread -lpthread -lboost_regex -o spider $(CFLAGS)
 
@@ -65,8 +66,8 @@ download_queue.test: download_queue_test.o download_queue.o url.o
 download_queue_test.o: download_queue_test.cpp download_queue.hpp
 	g++ -c download_queue_test.cpp $(CFLAGS)
 
-extractor: spider-cpp
-	./spider-cpp "http://www.google.com/"
+extractor: spider
+	./spider "http://wallbase.cc/home"
 
 path_utilities.test: path_utilities_test.o
 	g++ path_utilities_test.o -lboost_unit_test_framework -o path_utilities.test $(CFLAGS)

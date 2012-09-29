@@ -1,7 +1,21 @@
 #include <algorithm>
+#include <iterator>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
 #include "header.hpp"
+
+namespace {
+
+bool isHeaderLessThanName(spider::Header const& header, std::string const& name) {
+    using std::less;
+    using std::string;
+
+    return less<string>()(header.getName(), name);
+}
+
+}
 
 namespace spider {
 
@@ -24,18 +38,27 @@ Header::iterator Header::end() const {
     return m_values.end();
 }
 
-inline bool isHeaderLessThanName(Header const& header, std::string const& name) {
-    using std::less;
+std::ostream & operator<<(std::ostream & output, Header const& header) {
+    using std::back_inserter;
+    using std::copy;
+    using std::ostringstream;
     using std::string;
+    using std::vector;
+    using boost::join;
 
-    return less<string>()(header.getName(), name);
+    output << header.getName() << ": ";
+    vector<string> values;
+    copy(header.begin(), header.end(), back_inserter(values));
+    output << join(values, ";");
+    return output;
 }
 
 void HeaderCollection::addHeader(std::string const& name, std::string const& value) {
     using std::lower_bound;
     using std::vector;
 
-    vector<Header>::iterator position = lower_bound(m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
+    vector<Header>::iterator position = lower_bound(
+        m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
     if (position == m_headers.end() || position->getName() != name) {
         position = m_headers.insert(position, Header(name));
     }
@@ -46,7 +69,8 @@ HeaderCollection::header_ptr HeaderCollection::getHeader(std::string const& name
     using std::lower_bound;
     using std::vector;
 
-    vector<Header>::const_iterator position = lower_bound(m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
+    vector<Header>::const_iterator position = lower_bound(
+        m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
     if (position == m_headers.end() || position->getName() != name) {
         return header_ptr();
     }

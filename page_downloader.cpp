@@ -19,11 +19,16 @@ namespace spider {
         using std::noskipws;
         using std::string;
 
+        if (url.getScheme() == "https") {
+            return "";
+        }
+
         HttpRequest request(GET, url);
         Downloader::addReferrerHeader(request, referrer);
         Downloader::addUserAgentHeader(request);
         Downloader::addAcceptHeader(request);
         Downloader::addHostHeader(request, url);
+        Downloader::addConnectionHeader(request);
         HttpRequest::response_ptr response = request.getResponse();
         istream & stream = response->getContent();
         stream >> noskipws;

@@ -43,35 +43,45 @@ std::string createFileName(spider::Url const& url) {
 
 namespace spider {
 
-    FileDownloader::FileDownloader(std::string const& directoryPath)
-        : m_directoryPath(directoryPath) {
+FileDownloader::FileDownloader(std::string const& directoryPath)
+    : m_directoryPath(directoryPath) {
+}
+
+void FileDownloader::download(Url const& referrer, Url const& url) const {
+    using std::copy;
+    using std::ios;
+    using std::istream;
+    using std::istream_iterator;
+    using std::noskipws;
+    using std::ofstream;
+    using std::ostream_iterator;
+    using std::string;
+
+    if (url.getScheme() == "https") {
+        return;
     }
 
-    void FileDownloader::download(Url const& referrer, Url const& url) const {
-        using std::copy;
-        using std::ios;
-        using std::istream_iterator;
-        using std::noskipws;
-        using std::ofstream;
-        using std::ostream_iterator;
-        using std::string;
+    HttpRequest request(GET, url);
+    Downloader::addReferrerHeader(request, referrer);
+    Downloader::addUserAgentHeader(request);
+    Downloader::addAcceptHeader(request);
+    Downloader::addHostHeader(request, url);
+    Downloader::addConnectionHeader(request);
+    HttpRequest::response_ptr response = request.getResponse();
 
-        HttpRequest request(GET, url);
-        Downloader::addReferrerHeader(request, referrer);
-        Downloader::addUserAgentHeader(request);
-        Downloader::addAcceptHeader(request);
-        Downloader::addHostHeader(request, url);
-        HttpRequest::response_ptr response = request.getResponse();
-
-        istream_iterator<unsigned char> begin(response->getContent() >> noskipws);
-        istream_iterator<unsigned char> end;
-
-        string fileName = createFileName(url);
-        string path = m_directoryPath + '/' + fileName;
-        ofstream file(path.c_str(), ios::out | ios::binary);
-        ostream_iterator<unsigned char> destination(file);
-
-        copy(begin, end, destination);
+    istream & stream = response->getContent();
+    stream >> noskipws;
+    if (!stream) {
+        return;
     }
+    istream_iterator<unsigned char> begin(stream);
+    istream_iterator<unsigned char> end;
+
+    string fileName = createFileName(url);
+    string path = m_directoryPath + '/' + fileName;
+    ofstream file(path.c_str(), ios::out | ios::binary);
+    ostream_iterator<unsigned char> destination(file);
+    copy(begin, end, destination);
+}
 
 }

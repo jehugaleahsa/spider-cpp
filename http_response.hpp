@@ -16,8 +16,6 @@ namespace spider {
 
         boost::shared_ptr<std::istream> m_stream;
 
-        bool m_isInitialized;
-
         bool m_hasStatus;
         void getStatusCached();
         std::string m_version;
@@ -34,13 +32,13 @@ namespace spider {
 
     public:
         std::string getVersion();
-        
+
         int getStatusCode();
-        
+
         std::string getStatusMessage();
-        
+
         HeaderCollection const& getHeaders() const;
-        
+
         std::istream & getContent();
     };
 }
