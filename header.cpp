@@ -4,18 +4,8 @@
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <boost/unordered_map.hpp>
 #include "header.hpp"
-
-namespace {
-
-bool isHeaderLessThanName(spider::Header const& header, std::string const& name) {
-    using std::less;
-    using std::string;
-
-    return less<string>()(header.getName(), name);
-}
-
-}
 
 namespace spider {
 
@@ -30,14 +20,6 @@ std::string Header::getName() const {
     return m_name;
 }
 
-Header::iterator Header::begin() const {
-    return m_values.begin();
-}
-
-Header::iterator Header::end() const {
-    return m_values.end();
-}
-
 std::ostream & operator<<(std::ostream & output, Header const& header) {
     using std::back_inserter;
     using std::copy;
@@ -48,41 +30,53 @@ std::ostream & operator<<(std::ostream & output, Header const& header) {
 
     output << header.getName() << ": ";
     vector<string> values;
-    copy(header.begin(), header.end(), back_inserter(values));
+    header.getValues(back_inserter(values));
     output << join(values, ";");
     return output;
 }
 
 void HeaderCollection::addHeader(std::string const& name, std::string const& value) {
-    using std::lower_bound;
-    using std::vector;
+    using std::pair;
+    using std::string;
+    using boost::unordered_map;
 
-    vector<Header>::iterator position = lower_bound(
-        m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
-    if (position == m_headers.end() || position->getName() != name) {
-        position = m_headers.insert(position, Header(name));
+    unordered_map<string, Header>::iterator position = m_headers.find(name);
+    if (position == m_headers.end()) {
+        position = m_headers.insert(
+            position, pair<string const, Header>(name, Header(name)));
     }
-    position->addValue(value);
+    position->second.addValue(value);
 }
 
-HeaderCollection::header_ptr HeaderCollection::getHeader(std::string const& name) const {
-    using std::lower_bound;
-    using std::vector;
+bool HeaderCollection::hasHeader(std::string const& name) const {
+    return m_headers.find(name) != m_headers.end();
+}
 
-    vector<Header>::const_iterator position = lower_bound(
-        m_headers.begin(), m_headers.end(), name, isHeaderLessThanName);
-    if (position == m_headers.end() || position->getName() != name) {
-        return header_ptr();
+Header const& HeaderCollection::getHeader(std::string const& name) const {
+    using std::string;
+    using boost::unordered_map;
+
+    unordered_map<string, Header>::const_iterator position = m_headers.find(name);
+    if (position == m_headers.end()) {
+        throw HeaderNotFoundException(name);
     }
-    return &*position;
+    return position->second;
 }
 
-HeaderCollection::iterator HeaderCollection::begin() const {
-    return m_headers.begin();
+HeaderNotFoundException::HeaderNotFoundException(
+    std::string const& headerName) throw() {
+    using std::ostringstream;
+
+    ostringstream builder;
+    builder << "The given header did not exist: " << headerName << ".";
+    m_what = builder.str();
 }
 
-HeaderCollection::iterator HeaderCollection::end() const {
-    return m_headers.end();
+HeaderNotFoundException::~HeaderNotFoundException() throw() {
+}
+
+char const* HeaderNotFoundException::what() const throw() {
+    return m_what.c_str();
 }
 
 }

@@ -87,7 +87,7 @@ HttpRequest::response_ptr HttpRequest::getResponse() const {
     }
     *tcpStream << " HTTP/1.0" << HttpRequest::getNewline();
     ostream_iterator<Header> destination(*tcpStream, HttpRequest::getNewline().c_str());
-    copy(m_headers.begin(), m_headers.end(), destination);
+    m_headers.getHeaders(destination);
     *tcpStream << HttpRequest::getNewline();
 
     response_ptr response(new HttpResponse(tcpStream));
