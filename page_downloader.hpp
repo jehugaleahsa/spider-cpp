@@ -7,10 +7,10 @@
 
 namespace spider {
 
-class PageDownloader : public virtual Downloader {
-public:
-    std::string download(Url const& referrer, Url const& url) const;
-};
+    class PageDownloader : public virtual Downloader {
+    public:
+        std::string download(Url const& referrer, Url const& url) const;
+    };
 
 }
 

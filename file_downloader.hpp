@@ -7,14 +7,14 @@
 
 namespace spider {
 
-class FileDownloader : public virtual Downloader {
-    std::string m_directoryPath;
+    class FileDownloader : public virtual Downloader {
+        std::string m_directoryPath;
 
-public:
-    FileDownloader(std::string const& directoryPath);
+    public:
+        FileDownloader(std::string const& directoryPath);
 
-    void download(Url const& referrer, Url const& url) const;
-};
+        void download(Url const& referrer, Url const& url) const;
+    };
 
 }
 

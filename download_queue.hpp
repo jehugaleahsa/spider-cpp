@@ -7,32 +7,32 @@
 
 namespace spider {
 
-class UrlContext {
-    Url m_referrer;
-    Url m_url;
-    int m_depth;
-public:
-    UrlContext(Url const& referrer, Url const& url, int depth);
+    class UrlContext {
+        Url m_referrer;
+        Url m_url;
+        int m_depth;
 
-    Url const& getReferrer() const;
-    Url const& getUrl() const;
-    int getDepth() const;
-};
+    public:
+        UrlContext(Url const& referrer, Url const& url, int depth);
 
-class DownloadQueue {
+        Url const& getReferrer() const;
+        Url const& getUrl() const;
+        int getDepth() const;
+    };
 
-    boost::unordered_set<Url> visitedUrls;
-    std::queue<UrlContext> urls;
+    class DownloadQueue {
+        boost::unordered_set<Url> visitedUrls;
+        std::queue<UrlContext> urls;
 
-public:
-    DownloadQueue();
+    public:
+        DownloadQueue();
 
-    void addUrl(Url const& referrer, Url const& url, int depth);
+        void addUrl(Url const& referrer, Url const& url, int depth);
 
-    bool hasMore() const;
+        bool hasMore() const;
 
-    UrlContext getNextUrl();
-};
+        UrlContext getNextUrl();
+    };
 
 }
 

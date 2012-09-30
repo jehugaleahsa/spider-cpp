@@ -4,60 +4,62 @@
 #include <algorithm>
 #include <string>
 
-namespace spider {
-
 namespace {
 
-std::string::const_iterator getFileNamePosition(std::string const& path) {
-    using std::find;
-    using std::string;
-    
-    // find everything after the last slash
-    string::const_reverse_iterator rposition = find(path.rbegin(), path.rend(), '/');
-    string::const_iterator position = (rposition == path.rend()) ? path.begin() : rposition.base();
-    // distinguish between files and directories based on whether they have extensions
-    string::const_iterator dotPosition = find(position, path.end(), '.');
-    if (dotPosition == path.end()) {
-        return path.end();
-    } else {
-        return position;
+    std::string::const_iterator getFileNamePosition(std::string const& path) {
+        using std::find;
+        using std::string;
+
+        // find everything after the last slash
+        string::const_reverse_iterator rposition = find(
+            path.rbegin(), path.rend(), '/');
+        string::const_iterator position = (rposition == path.rend())
+            ? path.begin() : rposition.base();
+        // distinguish between files and directories based on whether they have extensions
+        string::const_iterator dotPosition = find(position, path.end(), '.');
+        if (dotPosition == path.end()) {
+            return path.end();
+        } else {
+            return position;
+        }
     }
-}
 
 }
 
-std::string getFileName(std::string const& path) {
-    using std::string;
-    
-    string::const_iterator position = getFileNamePosition(path);
-    string fileName(position, path.end());
-    return fileName;
-}
+namespace spider {
 
-std::string getDirectory(std::string const& path) {
-    using std::string;
-    
-    string::const_iterator position = getFileNamePosition(path);
-    string directory(path.begin(), position);
-    if (directory.size() == 0 || directory[0] != '/') {
-        directory = '/' + directory;
+    std::string getFileName(std::string const& path) {
+        using std::string;
+
+        string::const_iterator position = getFileNamePosition(path);
+        string fileName(position, path.end());
+        return fileName;
     }
-    return directory;
-}
 
-std::string getExtension(std::string const& path) {
-    using std::find;
-    using std::string;
-    
-    string const fileName = getFileName(path);
-    string::const_reverse_iterator rposition = find(fileName.rbegin(), fileName.rend(), '.');
-    if (rposition == fileName.rend()) {
-        return "";
+    std::string getDirectory(std::string const& path) {
+        using std::string;
+
+        string::const_iterator position = getFileNamePosition(path);
+        string directory(path.begin(), position);
+        if (directory.size() == 0 || directory[0] != '/') {
+            directory = '/' + directory;
+        }
+        return directory;
     }
-    string::const_iterator position = rposition.base();
-    string extension(position, fileName.end());
-    return extension;
-}
+
+    std::string getExtension(std::string const& path) {
+        using std::find;
+        using std::string;
+
+        string const fileName = getFileName(path);
+        string::const_reverse_iterator rposition = find(fileName.rbegin(), fileName.rend(), '.');
+        if (rposition == fileName.rend()) {
+            return "";
+        }
+        string::const_iterator position = rposition.base();
+        string extension(position, fileName.end());
+        return extension;
+    }
 
 }
 

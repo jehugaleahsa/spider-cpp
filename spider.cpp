@@ -66,56 +66,56 @@ namespace {
 
 namespace spider {
 
-void Spider::run(std::ostream & output, Url const& topUrl) const {
-    using std::back_inserter;
-    using std::endl;
-    using std::partition;
-    using std::string;
-    using std::vector;
-    using boost::bind;
+    void Spider::run(std::ostream & output, Url const& topUrl) const {
+        using std::back_inserter;
+        using std::endl;
+        using std::partition;
+        using std::string;
+        using std::vector;
+        using boost::bind;
 
-    Categorizer pageCategorizer;
-    supportPageExtensions(pageCategorizer);
+        Categorizer pageCategorizer;
+        supportPageExtensions(pageCategorizer);
 
-    Categorizer mediaCategorizer;
-    supportMediaExtensions(mediaCategorizer);
+        Categorizer mediaCategorizer;
+        supportMediaExtensions(mediaCategorizer);
 
-    PageDownloader pageDownloader;
-    FileDownloader fileDownloader("/home/travis/temp/");
-    Stripper stripper("script");
-    UrlExtractor baseExtractor("base", "href");
-    UrlExtractor anchorExtractor("a", "href");
-    UrlExtractor imageExtractor("img", "src");
+        PageDownloader pageDownloader;
+        FileDownloader fileDownloader("/home/travis/temp/");
+        Stripper stripper("script");
+        UrlExtractor baseExtractor("base", "href");
+        UrlExtractor anchorExtractor("a", "href");
+        UrlExtractor imageExtractor("img", "src");
 
-    DownloadQueue queue;
-    queue.addUrl(topUrl, topUrl, 0);
+        DownloadQueue queue;
+        queue.addUrl(topUrl, topUrl, 0);
 
-    while (queue.hasMore()) {
-        UrlContext context = queue.getNextUrl();
-        output << context.getUrl() << endl;
+        while (queue.hasMore()) {
+            UrlContext context = queue.getNextUrl();
+            output << context.getUrl() << endl;
 
-        if (pageCategorizer.isDesired(context.getUrl())) {
-            string original = pageDownloader.download(
-                context.getReferrer(), context.getUrl());
-            string stripped = stripper.strip(original);
+            if (pageCategorizer.isDesired(context.getUrl())) {
+                string original = pageDownloader.download(
+                    context.getReferrer(), context.getUrl());
+                string stripped = stripper.strip(original);
 
-            Url baseUrl = getBaseUrl(baseExtractor, context.getUrl(), stripped);
-            vector<Url> urls;
-            anchorExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
-            imageExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
+                Url baseUrl = getBaseUrl(baseExtractor, context.getUrl(), stripped);
+                vector<Url> urls;
+                anchorExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
+                imageExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
 
-            for_each(
-                urls.begin(), urls.end(),
-                bind(
-                    &DownloadQueue::addUrl,
-                    &queue,
-                    context.getUrl(),
-                    _1,
-                    context.getDepth() + 1));
-        } else if (mediaCategorizer.isDesired(context.getUrl())) {
-            fileDownloader.download(context.getReferrer(), context.getUrl());
+                for_each(
+                    urls.begin(), urls.end(),
+                    bind(
+                        &DownloadQueue::addUrl,
+                        &queue,
+                        context.getUrl(),
+                        _1,
+                        context.getDepth() + 1));
+            } else if (mediaCategorizer.isDesired(context.getUrl())) {
+                fileDownloader.download(context.getReferrer(), context.getUrl());
+            }
         }
     }
-}
 
 }

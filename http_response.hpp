@@ -11,7 +11,6 @@
 namespace spider {
 
     class HttpResponse {
-    private:
         friend class HttpRequest;
 
         boost::shared_ptr<std::istream> m_stream;

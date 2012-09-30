@@ -6,10 +6,10 @@
 
 namespace spider {
 
-class Spider {
-public:
-    void run(std::ostream & output, Url const& topUrl) const;
-};
+    class Spider {
+    public:
+        void run(std::ostream & output, Url const& topUrl) const;
+    };
 
 }
 

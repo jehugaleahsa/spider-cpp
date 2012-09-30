@@ -6,19 +6,19 @@
 
 namespace spider {
 
-class Downloader {
-protected:
-    static void addReferrerHeader(HttpRequest & request, Url const& url);
-    static void addUserAgentHeader(HttpRequest & request);
-    static void addAcceptHeader(HttpRequest & request);
-    static void addHostHeader(HttpRequest & request, Url const& url);
-    static void addConnectionHeader(HttpRequest & request);
+    class Downloader {
+    protected:
+        static void addReferrerHeader(HttpRequest & request, Url const& url);
+        static void addUserAgentHeader(HttpRequest & request);
+        static void addAcceptHeader(HttpRequest & request);
+        static void addHostHeader(HttpRequest & request, Url const& url);
+        static void addConnectionHeader(HttpRequest & request);
 
-    Downloader();
+        Downloader();
 
-public:
-    virtual ~Downloader();
-};
+    public:
+        virtual ~Downloader();
+    };
 
 }
 

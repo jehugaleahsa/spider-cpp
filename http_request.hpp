@@ -10,41 +10,41 @@
 
 namespace spider {
 
-enum RequestMethod {
-    GET,
-    POST,
-    PUT,
-    DELETE,
-    HEAD,
-    TRACE,
-    CONNECT,
-};
+    enum RequestMethod {
+        GET,
+        POST,
+        PUT,
+        DELETE,
+        HEAD,
+        TRACE,
+        CONNECT,
+    };
 
-class HttpRequest {
-    RequestMethod m_method;
-    Url m_url;
-    HeaderCollection m_headers;
+    class HttpRequest {
+        RequestMethod m_method;
+        Url m_url;
+        HeaderCollection m_headers;
 
-    static std::string const& getNewline();
+        static std::string const& getNewline();
 
-public:
-    typedef boost::shared_ptr<HttpResponse> response_ptr;
+    public:
+        typedef boost::shared_ptr<HttpResponse> response_ptr;
 
-    HttpRequest(RequestMethod method, Url const& url);
+        HttpRequest(RequestMethod method, Url const& url);
 
-    HeaderCollection & getHeaders();
+        HeaderCollection & getHeaders();
 
-    response_ptr getResponse() const;
-};
+        response_ptr getResponse() const;
+    };
 
-class ConnectionException : public virtual std::exception {
-    std::string m_what;
+    class ConnectionException : public virtual std::exception {
+        std::string m_what;
 
-public:
-    ConnectionException(Url const& url) throw();
-    virtual ~ConnectionException() throw();
-    virtual char const* what() const throw();
-};
+    public:
+        ConnectionException(Url const& url) throw();
+        virtual ~ConnectionException() throw();
+        virtual char const* what() const throw();
+    };
 
 }
 

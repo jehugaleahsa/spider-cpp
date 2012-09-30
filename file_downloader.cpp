@@ -15,77 +15,77 @@
 
 namespace {
 
-std::string encode(std::string const& value) {
-    using std::string;
-    using boost::regex;
-    using boost::regex_replace;
+    std::string encode(std::string const& value) {
+        using std::string;
+        using boost::regex;
+        using boost::regex_replace;
 
-    static regex search("[\\/:*?\"'<>|.,]");
-    string result = regex_replace(value, search, "_");
-    return result;
-}
+        static regex search("[\\/:*?\"'<>|.,]");
+        string result = regex_replace(value, search, "_");
+        return result;
+    }
 
-std::string createFileName(spider::Url const& url) {
-    using std::ostringstream;
-    using std::string;
-    using spider::getDirectory;
-    using spider::getFileName;
+    std::string createFileName(spider::Url const& url) {
+        using std::ostringstream;
+        using std::string;
+        using spider::getDirectory;
+        using spider::getFileName;
 
-    string directory = getDirectory(url.getPath());
-    string fileName = getFileName(url.getPath());
+        string directory = getDirectory(url.getPath());
+        string fileName = getFileName(url.getPath());
 
-    ostringstream builder;
-    builder << encode(url.getHost()) << encode(directory) << fileName;
-    return builder.str();
-}
+        ostringstream builder;
+        builder << encode(url.getHost()) << encode(directory) << fileName;
+        return builder.str();
+    }
 
 }
 
 namespace spider {
 
-FileDownloader::FileDownloader(std::string const& directoryPath)
-    : m_directoryPath(directoryPath) {
-}
-
-void FileDownloader::download(Url const& referrer, Url const& url) const {
-    using std::copy;
-    using std::ios;
-    using std::istream;
-    using std::istream_iterator;
-    using std::noskipws;
-    using std::ofstream;
-    using std::ostream_iterator;
-    using std::string;
-
-    if (url.getScheme() == "https") {
-        return;
+    FileDownloader::FileDownloader(std::string const& directoryPath)
+        : m_directoryPath(directoryPath) {
     }
 
-    try {
-        HttpRequest request(GET, url);
-        Downloader::addReferrerHeader(request, referrer);
-        Downloader::addUserAgentHeader(request);
-        Downloader::addAcceptHeader(request);
-        Downloader::addHostHeader(request, url);
-        Downloader::addConnectionHeader(request);
-        HttpRequest::response_ptr response = request.getResponse();
+    void FileDownloader::download(Url const& referrer, Url const& url) const {
+        using std::copy;
+        using std::ios;
+        using std::istream;
+        using std::istream_iterator;
+        using std::noskipws;
+        using std::ofstream;
+        using std::ostream_iterator;
+        using std::string;
 
-        istream & stream = response->getContent();
-        stream >> noskipws;
-        if (!stream) {
+        if (url.getScheme() == "https") {
             return;
         }
-        istream_iterator<unsigned char> begin(stream);
-        istream_iterator<unsigned char> end;
 
-        string fileName = createFileName(url);
-        string path = m_directoryPath + '/' + fileName;
-        ofstream file(path.c_str(), ios::out | ios::binary);
-        ostream_iterator<unsigned char> destination(file);
-        copy(begin, end, destination);
-    } catch (ConnectionException const& exception) {
-        std::cerr << exception.what() << std::endl;
+        try {
+            HttpRequest request(GET, url);
+            Downloader::addReferrerHeader(request, referrer);
+            Downloader::addUserAgentHeader(request);
+            Downloader::addAcceptHeader(request);
+            Downloader::addHostHeader(request, url);
+            Downloader::addConnectionHeader(request);
+            HttpRequest::response_ptr response = request.getResponse();
+
+            istream & stream = response->getContent();
+            stream >> noskipws;
+            if (!stream) {
+                return;
+            }
+            istream_iterator<unsigned char> begin(stream);
+            istream_iterator<unsigned char> end;
+
+            string fileName = createFileName(url);
+            string path = m_directoryPath + '/' + fileName;
+            ofstream file(path.c_str(), ios::out | ios::binary);
+            ostream_iterator<unsigned char> destination(file);
+            copy(begin, end, destination);
+        } catch (ConnectionException const& exception) {
+            std::cerr << exception.what() << std::endl;
+        }
     }
-}
 
 }

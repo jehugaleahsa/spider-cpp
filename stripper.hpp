@@ -6,14 +6,14 @@
 
 namespace spider {
 
-class Stripper {
-    boost::regex m_regex;
+    class Stripper {
+        boost::regex m_regex;
 
-public:
-    Stripper(std::string const& tagName);
+    public:
+        Stripper(std::string const& tagName);
 
-    std::string strip(std::string const& content) const;
-};
+        std::string strip(std::string const& content) const;
+    };
 
 }
 
