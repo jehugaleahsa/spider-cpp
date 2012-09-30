@@ -41,7 +41,7 @@ Url Url::parse(std::string const& urlString) {
     using boost::regex_match;
     using boost::smatch;
 
-    const static string urlFormat = "^((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?((?<userinfo>[^@]*)@)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]{1,5}))?(?<path>/[^?#]*)?(\\?(?<query>[^#]*))?(#(?<fragment>.*))?$";
+    const static string urlFormat = "^((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?((?<userinfo>[^@]*)@)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]{1,5}))?(?<path>[/\\\\][^?#]*)?(\\?(?<query>[^#]*))?(#(?<fragment>.*))?$";
     regex expression(urlFormat, regex::icase);
     smatch matches;
     bool found = regex_match(urlString, matches, expression);
@@ -69,6 +69,7 @@ Url Url::parse(std::string const& urlString) {
     if (path == "" && (query != "" || fragment != "")) {
         path = "/";
     } else {
+        replace_all(path, "\\", "/");
         replace_all(path, "//", "/");
     }
     return Url(host, port, path, query, fragment, scheme, userInfo);

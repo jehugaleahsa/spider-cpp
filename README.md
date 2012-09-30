@@ -15,7 +15,6 @@ The hope is that given a URL, the code will eventually extract additional URLs f
 
 ## TODO
 * Handle SSL handshaking.
-* Convert back slashes to forward slashes in URLs. \ -> /
 * Spit out progress to command line as streaming text.
 
 ## What I've Learned So Far
