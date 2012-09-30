@@ -14,7 +14,9 @@ spider-cpp was compiled on Ubuntu 12 with g++-4.6.3 installed. It was written us
 The hope is that given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while).
 
 ## TODO
+These are the tasks I have to do yet.
 * Handle SSL handshaking.
+* Use threading to support downloading in parallel.
 * Spit out progress to command line as streaming text.
 
 ## What I've Learned So Far
@@ -37,7 +39,8 @@ I came into this project completely inexperienced writing realistic applications
 * the iostream library is extremely powerful and flexible at the same time.
 * `fstream` only accepts `char *` for file names.
 * `fstream` doesn't recognize ~ and other special path indicators. No exceptions thrown.
-* prior to C++11, default function template arguments weren't allowed.
+* prior to C++ 11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
 * inheriting from types in the `<functional>` header is painful. Use `ptr_fun`, etc. when possible.
 * because `std::exception`\`s `what` method returns `char const *`, returning the results of `c_str` on a locally built error message is a bug. The message must be built within the ctor.
+* there may be some value in creating simple wrapper classes around primitive types to make sure they are given the same treatment as user-defined types within ctors.
