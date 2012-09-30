@@ -37,6 +37,15 @@ public:
     response_ptr getResponse() const;
 };
 
+class ConnectionException : public virtual std::exception {
+    Url m_url;
+
+public:
+    ConnectionException(Url const& url) throw();
+    virtual ~ConnectionException() throw();
+    virtual char const* what() const throw();
+};
+
 }
 
 #endif // end SPIDER_CPP_HTTP_REQUEST

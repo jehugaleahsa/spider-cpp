@@ -21,7 +21,7 @@ class Url {
 
 public:
     Url(std::string const& host,
-        int port = getDefaultPort(),
+        int port = Url::getDefaultPort(),
         std::string const& path = "",
         std::string const& query = "",
         std::string const& fragment = "",

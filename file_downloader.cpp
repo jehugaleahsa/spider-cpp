@@ -61,27 +61,31 @@ void FileDownloader::download(Url const& referrer, Url const& url) const {
         return;
     }
 
-    HttpRequest request(GET, url);
-    Downloader::addReferrerHeader(request, referrer);
-    Downloader::addUserAgentHeader(request);
-    Downloader::addAcceptHeader(request);
-    Downloader::addHostHeader(request, url);
-    Downloader::addConnectionHeader(request);
-    HttpRequest::response_ptr response = request.getResponse();
+    try {
+        HttpRequest request(GET, url);
+        Downloader::addReferrerHeader(request, referrer);
+        Downloader::addUserAgentHeader(request);
+        Downloader::addAcceptHeader(request);
+        Downloader::addHostHeader(request, url);
+        Downloader::addConnectionHeader(request);
+        HttpRequest::response_ptr response = request.getResponse();
 
-    istream & stream = response->getContent();
-    stream >> noskipws;
-    if (!stream) {
-        return;
+        istream & stream = response->getContent();
+        stream >> noskipws;
+        if (!stream) {
+            return;
+        }
+        istream_iterator<unsigned char> begin(stream);
+        istream_iterator<unsigned char> end;
+
+        string fileName = createFileName(url);
+        string path = m_directoryPath + '/' + fileName;
+        ofstream file(path.c_str(), ios::out | ios::binary);
+        ostream_iterator<unsigned char> destination(file);
+        copy(begin, end, destination);
+    } catch (ConnectionException const& exception) {
+        std::cerr << exception.what() << std::endl;
     }
-    istream_iterator<unsigned char> begin(stream);
-    istream_iterator<unsigned char> end;
-
-    string fileName = createFileName(url);
-    string path = m_directoryPath + '/' + fileName;
-    ofstream file(path.c_str(), ios::out | ios::binary);
-    ostream_iterator<unsigned char> destination(file);
-    copy(begin, end, destination);
 }
 
 }

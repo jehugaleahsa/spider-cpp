@@ -30,7 +30,7 @@ std::string const& Url::getDefaultScheme() {
 }
 
 int Url::getDefaultPort() {
-    return 80;
+    return 0;
 }
 
 Url Url::parse(std::string const& urlString) {
@@ -41,7 +41,7 @@ Url Url::parse(std::string const& urlString) {
     using boost::regex_match;
     using boost::smatch;
 
-    const static string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?((?<userinfo>[^@]*)@)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]+))?(?<path>/[^?#]*)?(\\?(?<query>[^#]*))?(#(?<fragment>.*))?";
+    const static string urlFormat = "^((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?((?<userinfo>[^@]*)@)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]{1,5}))?(?<path>/[^?#]*)?(\\?(?<query>[^#]*))?(#(?<fragment>.*))?$";
     regex expression(urlFormat, regex::icase);
     smatch matches;
     bool found = regex_match(urlString, matches, expression);

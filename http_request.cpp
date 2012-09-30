@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/unordered_map.hpp>
@@ -62,39 +63,50 @@ HeaderCollection & HttpRequest::getHeaders() {
 }
 
 HttpRequest::response_ptr HttpRequest::getResponse() const {
-    using std::istream;
     using std::ostream_iterator;
     using std::string;
-    using std::stringstream;
     using boost::asio::ip::tcp;
+    using boost::lexical_cast;
     using boost::shared_ptr;
 
-    string const& host = m_url.getHost();
-    string const& scheme = m_url.getScheme();
-
     shared_ptr<tcp::iostream> tcpStream(new tcp::iostream());
-    tcpStream->connect(host, scheme);
-
-    shared_ptr<istream> stream;
-    if (*tcpStream) {
-        *tcpStream << str(m_method) << " " << m_url.getPath();
-        string const& query = m_url.getQuery();
-        if (query.size() > 0) {
-            *tcpStream << "?" << query;
-        }
-        *tcpStream << " HTTP/1.0" << HttpRequest::getNewline();
-        ostream_iterator<Header> destination(*tcpStream, HttpRequest::getNewline().c_str());
-        copy(m_headers.begin(), m_headers.end(), destination);
-        *tcpStream << HttpRequest::getNewline();
-        stream = tcpStream;
+    if (m_url.getPort() == Url::getDefaultPort()) {
+        tcpStream->connect(m_url.getHost(), m_url.getScheme());
     } else {
-        shared_ptr<stringstream> stringStream(
-            new stringstream("HTTP/1.1 500 Failed to connect"));
-        stream = shared_ptr<istream>(stringStream);
+        tcpStream->connect(m_url.getHost(), lexical_cast<string>(m_url.getPort()));
     }
 
-    response_ptr response(new HttpResponse(stream));
+    if (!*tcpStream) {
+        throw ConnectionException(m_url);
+    }
+
+    *tcpStream << str(m_method) << " " << m_url.getPath();
+    string const& query = m_url.getQuery();
+    if (query.size() > 0) {
+        *tcpStream << "?" << query;
+    }
+    *tcpStream << " HTTP/1.0" << HttpRequest::getNewline();
+    ostream_iterator<Header> destination(*tcpStream, HttpRequest::getNewline().c_str());
+    copy(m_headers.begin(), m_headers.end(), destination);
+    *tcpStream << HttpRequest::getNewline();
+
+    response_ptr response(new HttpResponse(tcpStream));
     return response;
+}
+
+ConnectionException::ConnectionException(Url const& url) throw()
+    : m_url(url) {
+}
+
+ConnectionException::~ConnectionException() throw() {
+}
+
+char const* ConnectionException::what() const throw() {
+    using std::ostringstream;
+
+    ostringstream builder;
+    builder << "Failed to connect to " << m_url << ".";
+    return builder.str().c_str();
 }
 
 }

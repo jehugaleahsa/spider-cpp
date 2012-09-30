@@ -23,19 +23,23 @@ namespace spider {
             return "";
         }
 
-        HttpRequest request(GET, url);
-        Downloader::addReferrerHeader(request, referrer);
-        Downloader::addUserAgentHeader(request);
-        Downloader::addAcceptHeader(request);
-        Downloader::addHostHeader(request, url);
-        Downloader::addConnectionHeader(request);
-        HttpRequest::response_ptr response = request.getResponse();
-        istream & stream = response->getContent();
-        stream >> noskipws;
-        istream_iterator<char> begin(stream);
-        istream_iterator<char> end;
-        string content(begin, end);
-        return content;
+        try {
+            HttpRequest request(GET, url);
+            Downloader::addReferrerHeader(request, referrer);
+            Downloader::addUserAgentHeader(request);
+            Downloader::addAcceptHeader(request);
+            Downloader::addHostHeader(request, url);
+            Downloader::addConnectionHeader(request);
+            HttpRequest::response_ptr response = request.getResponse();
+            istream & stream = response->getContent();
+            stream >> noskipws;
+            istream_iterator<char> begin(stream);
+            istream_iterator<char> end;
+            string content(begin, end);
+            return content;
+        } catch (ConnectionException const& exception) {
+            std::cerr << exception.what() << std::endl;
+        }
     }
 
 }
