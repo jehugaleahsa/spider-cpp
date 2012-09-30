@@ -98,8 +98,8 @@ ConnectionException::ConnectionException(Url const& url) throw() {
     using std::ostringstream;
 
     ostringstream builder;
-    builder << "Failed to connect to " << url << ".";
-    m_what = builder.str().c_str();
+    builder << "Failed to connect to " << url;
+    m_what = builder.str();
 }
 
 ConnectionException::~ConnectionException() throw() {

@@ -3,11 +3,15 @@
 
 namespace spider {
 
-    template <typename TInputIterator, typename TPredicate, typename TAction>
-    void for_each_while(TInputIterator first, TInputIterator past, TPredicate predicate, TAction action) {
-         for (; first != past && predicate(*first); ++first) {
-            action(*first);
-         }   
+    template <typename TInputIterator, typename TOutputIterator, typename TPredicate>
+    TOutputIterator copy_while(
+        TInputIterator first, TInputIterator past,
+        TOutputIterator destination,
+        TPredicate predicate) {
+        for (; first != past && predicate(*first); ++first) {
+           *destination = *first;
+        }
+        return destination;
     }
 
 }

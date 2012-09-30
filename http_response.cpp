@@ -6,17 +6,13 @@
 #include <string>
 #include <utility>
 #include <boost/algorithm/string.hpp>
-#include <boost/iterator/transform_iterator.hpp>
+#include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
 #include "algorithm.hpp"
 #include "header.hpp"
 #include "http_response.hpp"
 
-namespace spider {
-    HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
-        : m_stream(stream), m_hasStatus(), m_statusCode(), m_hasHeaders() {
-    }
+namespace {
 
     struct Line {
         std::string value;
@@ -34,6 +30,14 @@ namespace spider {
         return input;
     }
 
+}
+
+namespace spider {
+
+    HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
+        : m_stream(stream), m_hasStatus(), m_statusCode(), m_hasHeaders() {
+    }
+
     void HttpResponse::getStatusCached() {
         using std::getline;
         using std::istringstream;
@@ -49,10 +53,6 @@ namespace spider {
                 trim(m_statusMessage);
                 // TODO: check for bad format
                 m_hasStatus = true;
-            } else {
-                m_version = "HTTP/1.1";
-                m_statusCode = 500;
-                m_statusMessage = "Failed to connect";
             }
         }
     }
@@ -72,62 +72,69 @@ namespace spider {
         return m_statusMessage;
     }
 
-    bool makeHeaderPair(Line const& line, std::string & name, std::string & value) {
+    std::pair<std::string, std::string> parseHeaderPair(Line const& line) {
         using std::find;
+        using std::pair;
         using std::string;
         using boost::algorithm::trim;
 
         string::const_iterator position = find(line.value.begin(), line.value.end(), ':');
         if (position == line.value.end()) {
-            name = "";
-            value = "";
-            return false;
+            return pair<string, string>("", "");
         }
-        name.assign(line.value.begin(), position);
+        string name(line.value.begin(), position);
         trim(name);
-        value.assign(position + 1, line.value.end());
+        string value(position + 1, line.value.end());
         trim(value);
-        return true;
+        return pair<string, string>(name, value);
     }
-
-    inline bool isEmpty(Line const& line) {
-        return line.value.empty();
-    }
-
-    class HeaderAdded : public std::unary_function<void, std::string> {
-        HeaderCollection & m_headers;
-
-    public:
-        HeaderAdded(HeaderCollection & headers) : m_headers(headers) {
-        }
-
-        void operator ()(Line const& line) {
-            using std::pair;
-            using std::string;
-
-            string name;
-            string value;
-            if (makeHeaderPair(line, name, value)) {
-                m_headers.addHeader(name, value);
-            }
-        }
-    };
 
     void HttpResponse::getHeadersCached() {
+        using std::back_inserter;
+        using std::equal_to;
+        using std::for_each;
         using std::istream_iterator;
-        using std::not1;
-        using std::ptr_fun;
+        using std::pair;
         using std::string;
+        using std::remove_if;
+        using std::transform;
+        using std::vector;
+        using boost::bind;
+
+        typedef pair<string, string> HeaderPair;
 
         if (!m_hasHeaders) {
             getStatusCached(); // cache the status code
             if (*m_stream) {
                 istream_iterator<Line> begin(*m_stream);
                 istream_iterator<Line> end;
-                for_each_while(
+
+                // grab each header line
+                vector<Line> lines;
+                copy_while(
                     begin, end,
-                    not1(ptr_fun(isEmpty)),
-                    HeaderAdded(m_headers));
+                    back_inserter(lines),
+                    !bind(equal_to<string>(), bind(&Line::value, _1), string()));
+
+                // split the lines at the first colon (:)
+                vector<HeaderPair> headerPairs;
+                transform(
+                    lines.begin(), lines.end(),
+                    back_inserter(headerPairs),
+                    parseHeaderPair);
+
+                // ignore any headers without a name
+                vector<HeaderPair>::iterator pastHeaders = remove_if(
+                    headerPairs.begin(), headerPairs.end(),
+                    bind(equal_to<string>(),
+                        bind(&HeaderPair::first, _1), string()));
+
+                // add each header pair to the header collection
+                for_each(
+                    headerPairs.begin(), pastHeaders,
+                    bind(&HeaderCollection::addHeader, &m_headers,
+                        bind(&HeaderPair::first, _1),
+                        bind(&HeaderPair::second, _1)));
                 m_hasHeaders = true;
             }
         }

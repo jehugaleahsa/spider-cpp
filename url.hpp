@@ -81,6 +81,7 @@ std::ostream & operator<<(std::ostream & stream, Url const& url);
 
 class BadUrlException : public virtual std::exception {
     std::string m_what;
+
 public:
     BadUrlException(std::string const& url) throw();
     virtual ~BadUrlException() throw();
