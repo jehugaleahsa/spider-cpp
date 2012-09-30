@@ -54,17 +54,9 @@ namespace {
         using spider::Url;
 
         vector<Url> baseAddresses;
-        Url baseUrl(
-            url.getHost(),
-            url.getPort(),
-            url.getPath(),
-            "",  // query string
-            "",  // fragement identifier
-            url.getScheme(),
-            url.getUserInfo());
-        extractor.getUrls(baseUrl, content, back_inserter(baseAddresses));
+        extractor.getUrls(url, content, back_inserter(baseAddresses));
         if (baseAddresses.size() == 0) {
-            return baseUrl;
+            return url;
         } else {
             return baseAddresses.back();
         }

@@ -35,15 +35,49 @@ Url UrlExtractor::buildUrl(
     using boost::istarts_with;
 
     string urlString = match.str("url");
+    // skip blank links
+    if (urlString == "") {
+        return baseAddress;
+    }
+    // ignore javascript links
     if (istarts_with(urlString, "javascript:")) {
         return baseAddress;
     }
+    // handle shortened paths
     if (!istarts_with(urlString, "http://")
         && !istarts_with(urlString, "https://")) {
-        ostringstream builder;
-        builder << baseAddress;
-        builder << urlString;
-        urlString = builder.str();
+        // we don't care about fragment identifiers
+        if (urlString[0] == '#') {
+            return baseAddress;
+        // handle semi-absolute URLs
+        } else if (urlString[0] == '/') {
+            Url forAbsolute(
+                baseAddress.getHost(),
+                baseAddress.getPort(),
+                "",  // path
+                "",  // query
+                "",  // fragment
+                baseAddress.getScheme(),
+                baseAddress.getUserInfo());
+            ostringstream builder;
+            builder << forAbsolute;
+            builder << urlString;
+            urlString = builder.str();
+        // handle relative URLs
+        } else {
+            Url forRelative(
+                baseAddress.getHost(),
+                baseAddress.getPort(),
+                baseAddress.getPath(),
+                "",  // query
+                "",  // fragment
+                baseAddress.getScheme(),
+                baseAddress.getUserInfo());
+            ostringstream builder;
+            builder << forRelative;
+            builder << urlString;
+            urlString = builder.str();
+        }
     }
     try {
         return Url::parse(urlString);
