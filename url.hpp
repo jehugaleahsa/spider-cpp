@@ -80,9 +80,8 @@ inline std::string const& Url::getFragment() const {
 std::ostream & operator<<(std::ostream & stream, Url const& url);
 
 class BadUrlException : public virtual std::exception {
-    std::string m_url;
+    std::string m_what;
 public:
-    BadUrlException() throw();
     BadUrlException(std::string const& url) throw();
     virtual ~BadUrlException() throw();
     virtual char const* what() const throw();

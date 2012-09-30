@@ -94,19 +94,19 @@ HttpRequest::response_ptr HttpRequest::getResponse() const {
     return response;
 }
 
-ConnectionException::ConnectionException(Url const& url) throw()
-    : m_url(url) {
+ConnectionException::ConnectionException(Url const& url) throw() {
+    using std::ostringstream;
+
+    ostringstream builder;
+    builder << "Failed to connect to " << url << ".";
+    m_what = builder.str().c_str();
 }
 
 ConnectionException::~ConnectionException() throw() {
 }
 
 char const* ConnectionException::what() const throw() {
-    using std::ostringstream;
-
-    ostringstream builder;
-    builder << "Failed to connect to " << m_url << ".";
-    return builder.str().c_str();
+    return m_what.c_str();
 }
 
 }

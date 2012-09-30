@@ -82,6 +82,7 @@ Url UrlExtractor::buildUrl(
     try {
         return Url::parse(urlString);
     } catch (BadUrlException const& exception) {
+        std::cerr << exception.what() << std::endl;
         return baseAddress;
     }
 }

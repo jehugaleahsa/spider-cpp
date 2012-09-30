@@ -40,3 +40,4 @@ I came into this project completely inexperienced writing realistic applications
 * prior to C++11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
 * inheriting from types in the `<functional>` header is painful. Use `ptr_fun`, etc. when possible.
+* because `std::exception`\`s `what` method returns `char const *`, returning the results of `c_str` on a locally built error message is a bug. The message must be built within the ctor.

@@ -96,25 +96,19 @@ std::ostream & operator<<(std::ostream & stream, Url const& url) {
     return stream;
 }
 
-BadUrlException::BadUrlException() throw() {
-}
+BadUrlException::BadUrlException(std::string const& url) throw() {
+    using std::ostringstream;
 
-BadUrlException::BadUrlException(std::string const& url) throw()
-    : m_url(url) {
+    ostringstream builder;
+    builder << "The given string was not a valid URL: " << url;
+    m_what = builder.str();
 }
 
 BadUrlException::~BadUrlException() throw() {
 }
 
 char const* BadUrlException::what() const throw() {
-    using std::string;
-    using std::ostringstream;
-    using std::endl;
-
-    ostringstream builder;
-    builder << "The given string was not a valid URL: " << m_url << endl;
-    string result = builder.str();
-    return result.c_str();
+    return m_what.c_str();
 }
 
 }

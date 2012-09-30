@@ -38,7 +38,7 @@ public:
 };
 
 class ConnectionException : public virtual std::exception {
-    Url m_url;
+    std::string m_what;
 
 public:
     ConnectionException(Url const& url) throw();
