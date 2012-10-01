@@ -39,6 +39,7 @@ namespace spider {
             return content;
         } catch (ConnectionException const& exception) {
             std::cerr << exception.what() << std::endl;
+            return "";
         }
     }
 

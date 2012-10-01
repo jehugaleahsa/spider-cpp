@@ -1,5 +1,5 @@
 BOOST_PATH=/home/travis/Projects/local/boost_1_50_0
-CFLAGS=-I$(BOOST_PATH) -L$(BOOST_PATH)/stage/lib
+CFLAGS=-Wall -I$(BOOST_PATH) -L$(BOOST_PATH)/stage/lib
 export LD_LIBRARY_PATH=/home/travis/Projects/local/boost_1_50_0/stage/lib
 
 all: test spider-cpp
@@ -67,7 +67,7 @@ download_queue_test.o: download_queue_test.cpp download_queue.hpp
 	g++ -c download_queue_test.cpp $(CFLAGS)
 
 extractor: spider
-	./spider "http://wallbase.cc/home"
+	./spider $(SITE)
 
 path_utilities.test: path_utilities_test.o
 	g++ path_utilities_test.o -lboost_unit_test_framework -o path_utilities.test $(CFLAGS)

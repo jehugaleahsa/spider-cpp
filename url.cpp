@@ -15,12 +15,12 @@ namespace spider {
         std::string const& fragment,
         std::string const& scheme,
         std::string const& userInfo)
-        : m_scheme(boost::to_lower_copy(scheme)),
-        m_host(boost::to_lower_copy(host)),
+        : m_host(boost::to_lower_copy(host)),
         m_port(port),
         m_path(path),
         m_query(query),
         m_fragment(fragment),
+        m_scheme(boost::to_lower_copy(scheme)),
         m_userInfo(userInfo) {
     }
 

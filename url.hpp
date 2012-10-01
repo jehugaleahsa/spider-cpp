@@ -11,13 +11,13 @@
 namespace spider {
 
     class Url {
-        std::string m_scheme;
-        std::string m_userInfo;
         std::string m_host;
         int m_port;
         std::string m_path;
         std::string m_query;
         std::string m_fragment;
+        std::string m_scheme;
+        std::string m_userInfo;
 
     public:
         Url(std::string const& host,
