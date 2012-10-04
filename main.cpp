@@ -13,6 +13,18 @@ std::string getStartingUrl() {
     return urlString;
 }
 
+class Printer {
+    int m_value;
+
+public:
+    Printer(int value) : m_value(value) {
+    }
+
+    void operator()() {
+        std::cout << m_value << std::endl;
+    }
+};
+
 int main(int argc, char** argv) {
     using std::cout;
     using std::string;
@@ -23,4 +35,6 @@ int main(int argc, char** argv) {
     Url topUrl = Url::parse(topUrlString);
     Spider spider;
     spider.run(cout, topUrl);
+
+    return 0;
 }
