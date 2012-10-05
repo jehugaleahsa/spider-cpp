@@ -1,16 +1,13 @@
-#include <algorithm>
-#include <ios>
-#include <iostream>
-#include <iterator>
-#include <vector>
-#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 #include "categorizer.hpp"
-#include "download_queue.hpp"
+#include "counter.hpp"
+#include "downloader.hpp"
 #include "extractor.hpp"
-#include "file_downloader.hpp"
 #include "page_downloader.hpp"
 #include "spider.hpp"
 #include "stripper.hpp"
+#include "thread_pool.hpp"
+#include "tracker.hpp"
 #include "url.hpp"
 
 namespace {
@@ -45,34 +42,12 @@ namespace {
         categorizer.supportExtension("bmp");
     }
 
-    spider::Url getBaseUrl(
-        spider::UrlExtractor const& extractor,
-        spider::Url const& url,
-        std::string const& content) {
-        using std::back_inserter;
-        using std::vector;
-        using spider::Url;
-
-        vector<Url> baseAddresses;
-        extractor.getUrls(url, content, back_inserter(baseAddresses));
-        if (baseAddresses.size() == 0) {
-            return url;
-        } else {
-            return baseAddresses.back();
-        }
-    }
-
 }
 
 namespace spider {
 
     void Spider::run(std::ostream & output, Url const& topUrl) const {
-        using std::back_inserter;
-        using std::endl;
-        using std::partition;
-        using std::string;
-        using std::vector;
-        using boost::bind;
+        using boost::shared_ptr;
 
         Categorizer pageCategorizer;
         supportPageExtensions(pageCategorizer);
@@ -80,42 +55,34 @@ namespace spider {
         Categorizer mediaCategorizer;
         supportMediaExtensions(mediaCategorizer);
 
-        PageDownloader pageDownloader;
-        FileDownloader fileDownloader("/home/travis/temp/");
         Stripper stripper("script");
         UrlExtractor baseExtractor("base", "href");
         UrlExtractor anchorExtractor("a", "href");
         UrlExtractor imageExtractor("img", "src");
 
-        DownloadQueue queue;
-        queue.addUrl(topUrl, topUrl, 0);
+        Counter counter;
+        ThreadPool<Downloader> pool(10);
+        UrlTracker tracker;
+        tracker.addUrl(topUrl);
 
-        while (queue.hasMore()) {
-            UrlContext context = queue.getNextUrl();
-            output << context.getUrl() << endl;
-
-            if (pageCategorizer.isDesired(context.getUrl())) {
-                string original = pageDownloader.download(
-                    context.getReferrer(), context.getUrl());
-                string stripped = stripper.strip(original);
-
-                Url baseUrl = getBaseUrl(baseExtractor, context.getUrl(), stripped);
-                vector<Url> urls;
-                anchorExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
-                imageExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
-
-                for_each(
-                    urls.begin(), urls.end(),
-                    bind(
-                        &DownloadQueue::addUrl,
-                        &queue,
-                        context.getUrl(),
-                        _1,
-                        context.getDepth() + 1));
-            } else if (mediaCategorizer.isDesired(context.getUrl())) {
-                fileDownloader.download(context.getReferrer(), context.getUrl());
-            }
+        {
+            shared_ptr<Downloadable> home(new PageDownloadable(
+                counter,
+                topUrl,
+                topUrl,
+                pool,
+                tracker,
+                pageCategorizer,
+                mediaCategorizer,
+                stripper,
+                baseExtractor,
+                anchorExtractor,
+                imageExtractor
+            ));
+            pool.addTask(makeDownloader(home));
         }
+
+        counter.wait();
     }
 
 }

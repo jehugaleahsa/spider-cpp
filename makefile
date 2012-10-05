@@ -1,6 +1,6 @@
 BOOST_PATH=/home/travis/Projects/local/boost_1_50_0
 CFLAGS=-Wall -I$(BOOST_PATH) -L$(BOOST_PATH)/stage/lib
-OBJS = main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o categorizer.o url.o page_downloader.o file_downloader.o downloader.o download_queue.o
+OBJS = main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o categorizer.o url.o page_downloader.o file_downloader.o downloader.o tracker.o
 
 export LD_LIBRARY_PATH=/home/travis/Projects/local/boost_1_50_0/stage/lib
 
@@ -13,7 +13,7 @@ spider: $(OBJS)
 main.o: main.cpp spider.hpp url.hpp thread_pool.hpp counter.hpp
 	g++ -c main.cpp $(CFLAGS)
 
-spider.o: spider.cpp categorizer.hpp download_queue.hpp extractor.hpp file_downloader.hpp page_downloader.hpp spider.hpp stripper.hpp url.hpp
+spider.o: spider.cpp categorizer.hpp tracker.hpp extractor.hpp file_downloader.hpp page_downloader.hpp spider.hpp stripper.hpp url.hpp
 	g++ -c spider.cpp $(CFLAGS)
 
 http_request.o: http_request.cpp header.hpp http_request.hpp http_response.hpp url.hpp
@@ -46,8 +46,8 @@ page_downloader.o: page_downloader.cpp downloader.hpp http_request.hpp page_down
 file_downloader.o: file_downloader.cpp downloader.hpp file_downloader.hpp http_request.hpp http_response.hpp path_utilities.hpp url.hpp
 	g++ -c file_downloader.cpp $(CFLAGS)
 
-download_queue.o: download_queue.cpp download_queue.hpp url.hpp
-	g++ -c download_queue.cpp $(CFLAGS)
+tracker.o: tracker.cpp tracker.hpp url.hpp
+	g++ -c tracker.cpp $(CFLAGS)
 
 extractor: spider
 	./spider $(SITE)

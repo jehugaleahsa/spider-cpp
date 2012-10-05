@@ -1,52 +1,90 @@
+#include "counter.hpp"
 #include "downloader.hpp"
 #include "http_request.hpp"
+#include "thread_pool.hpp"
 #include "url.hpp"
 
 namespace spider {
 
-    void Downloader::addReferrerHeader(
-        spider::HttpRequest & request, spider::Url const& url) {
+    void Downloadable::addReferrerHeader(spider::HttpRequest & request) const {
         using std::ostringstream;
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         ostringstream referrerBuilder;
-        referrerBuilder << url;
+        referrerBuilder << m_referrer;
         headers.addHeader("referer", referrerBuilder.str());
     }
 
-    void Downloader::addUserAgentHeader(spider::HttpRequest & request) {
+    void Downloadable::addUserAgentHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         headers.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1");
     }
 
-    void Downloader::addAcceptHeader(spider::HttpRequest & request) {
+    void Downloadable::addAcceptHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         headers.addHeader("Accept", "*/*");
     }
 
-    void Downloader::addHostHeader(spider::HttpRequest & request, spider::Url const& url) {
+    void Downloadable::addHostHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
-        headers.addHeader("Host", url.getHost());
+        headers.addHeader("Host", m_url.getHost());
     }
 
-    void Downloader::addConnectionHeader(spider::HttpRequest & request) {
+    void Downloadable::addConnectionHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         headers.addHeader("Connection", "close");
     }
 
-    Downloader::Downloader() {
+    Downloadable::Downloadable(
+        Counter & counter,
+        Url const& url,
+        Url const& referrer)
+        : m_counter(counter), m_url(url), m_referrer(referrer) {
+        m_counter.increment();
     }
 
-    Downloader::~Downloader() {
+    Counter & Downloadable::getCounter() {
+        return m_counter;
     }
 
+    Url const& Downloadable::getUrl() const {
+        return m_url;
+    }
+
+    Url const& Downloadable::getReferrer() const {
+        return m_referrer;
+    }
+
+    Downloadable::Downloadable(Downloadable const& other)
+        :
+        m_counter(other.m_counter),
+        m_url(other.m_url),
+        m_referrer(other.m_referrer) {
+        m_counter.increment();
+    }
+
+    Downloadable::~Downloadable() {
+        m_counter.decrement();
+    }
+
+    Downloader::Downloader(boost::shared_ptr<Downloadable> downloadable)
+        : m_downloadable(downloadable) {
+    }
+
+    void Downloader::operator()() {
+        m_downloadable->download();
+    }
+
+    Downloader makeDownloader(boost::shared_ptr<Downloadable> downloadable) {
+        return Downloader(downloadable);
+    }
 }

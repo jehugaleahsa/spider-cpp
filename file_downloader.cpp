@@ -43,11 +43,16 @@ namespace {
 
 namespace spider {
 
-    FileDownloader::FileDownloader(std::string const& directoryPath)
-        : m_directoryPath(directoryPath) {
+    FileDownloadable::FileDownloadable(
+        Counter & counter,
+        Url const& url,
+        Url const& referrer,
+        std::string const& directoryPath
+    )
+        : Downloadable(counter, url, referrer), m_directoryPath(directoryPath) {
     }
 
-    void FileDownloader::download(Url const& referrer, Url const& url) const {
+    void FileDownloadable::download() {
         using std::copy;
         using std::ios;
         using std::istream;
@@ -57,17 +62,18 @@ namespace spider {
         using std::ostream_iterator;
         using std::string;
 
+        Url const& url = getUrl();
         if (url.getScheme() == "https") {
             return;
         }
 
         try {
             HttpRequest request(GET, url);
-            Downloader::addReferrerHeader(request, referrer);
-            Downloader::addUserAgentHeader(request);
-            Downloader::addAcceptHeader(request);
-            Downloader::addHostHeader(request, url);
-            Downloader::addConnectionHeader(request);
+            addReferrerHeader(request);
+            addUserAgentHeader(request);
+            addAcceptHeader(request);
+            addHostHeader(request);
+            addConnectionHeader(request);
             HttpRequest::response_ptr response = request.getResponse();
 
             istream & stream = response->getContent();
@@ -75,6 +81,9 @@ namespace spider {
             if (!stream) {
                 return;
             }
+
+            std::cerr << "Downloading file: " << getUrl() << std::endl;
+
             istream_iterator<unsigned char> begin(stream);
             istream_iterator<unsigned char> end;
 
