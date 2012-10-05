@@ -8,19 +8,19 @@ spider-cpp is dependent on **Boost 1.50**. It requires access to the libraries:
 * boost thread
 * boost unit test framework
 
-spider-cpp was compiled on Ubuntu 12 with g++-4.6.3 installed. It was written using VIM and gedit. I used GNU make to automate my builds.
+spider-cpp was compiled on Ubuntu 12 with g++-4.6.3 installed. It was written using VIM, gedit and sublime. I used GNU make to automate my builds.
 
 ## Purpose
-The hope is that given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while).
+The hope is that, given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while). Additionally, URLs referring to certain types of resources (movies, images, etc.) will be downloaded to a local file.
 
 ## TODO
 These are the tasks I have to do yet.
 * Handle SSL handshaking.
-* Use threading to support downloading in parallel.
-* Spit out progress to command line as streaming text.
+* Spit out download progress to the command line as streaming text.
 
 ## What I've Learned So Far
 I came into this project completely inexperienced writing realistic applications with C++. Previously, I only wrote simple command-line applications that worked within the STL. That means no database access, no network access and almost no file system access. Already, I have learned a lot about writing realistic C++ applications. It has made me more appreciative of how hard it can be to write large scale software in such a low-level language. Amongst the things I have learned, here is a short list:
+
 * make files are a lot of work.
 * separate compilation allows pushing off linking until the last second.
 * Boost's unit testing framework is pretty awesome, but relies on macros.
@@ -42,5 +42,8 @@ I came into this project completely inexperienced writing realistic applications
 * prior to C++ 11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
 * inheriting from types in the `<functional>` header is painful. Use `ptr_fun`, etc. when possible.
-* because `std::exception`\`s `what` method returns `char const *`, returning the results of `c_str` on a locally built error message is a bug. The message must be built within the ctor.
+* because `std::exception`\`s `what` method returns `char const *`, returning the results of `c_str` on a locally built error string is a bug. The message must be built within the ctor.
 * there may be some value in creating simple wrapper classes around primitive types to make sure they are given the same treatment as user-defined types within ctors.
+* Boost's `bind` function can save from creating lots of little functor classes.
+* Polymorphism can rarely be used with references; pointers work more naturally.
+* There's not a convenient formatting for ctors withlots of parameters or long initializer lists.
