@@ -10,7 +10,7 @@ all: spider
 spider: $(OBJS)
 	g++ $(OBJS) -lboost_system -lboost_thread -lpthread -lboost_regex -o spider $(CFLAGS)
 
-main.o: main.cpp spider.hpp url.hpp thread_pool.hpp
+main.o: main.cpp spider.hpp url.hpp thread_pool.hpp counter.hpp
 	g++ -c main.cpp $(CFLAGS)
 
 spider.o: spider.cpp categorizer.hpp download_queue.hpp extractor.hpp file_downloader.hpp page_downloader.hpp spider.hpp stripper.hpp url.hpp
