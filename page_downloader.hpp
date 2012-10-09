@@ -6,6 +6,7 @@
 #include "downloader.hpp"
 #include "extractor.hpp"
 #include "stripper.hpp"
+#include "thread_pool.hpp"
 #include "tracker.hpp"
 #include "url.hpp"
 

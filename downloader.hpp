@@ -3,7 +3,6 @@
 
 #include "counter.hpp"
 #include "http_request.hpp"
-#include "thread_pool.hpp"
 #include "url.hpp"
 
 namespace spider {

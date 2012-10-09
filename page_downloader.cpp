@@ -6,11 +6,16 @@
 #include <string>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include "categorizer.hpp"
+#include "counter.hpp"
 #include "downloader.hpp"
 #include "extractor.hpp"
 #include "file_downloader.hpp"
 #include "http_request.hpp"
 #include "page_downloader.hpp"
+#include "stripper.hpp"
+#include "thread_pool.hpp"
+#include "tracker.hpp"
 #include "url.hpp"
 
 namespace spider {

@@ -8,9 +8,7 @@
 
 namespace spider {
 
-    int getProcessorCount() {
-        return boost::thread::hardware_concurrency();
-    }
+    int getProcessorCount();
 
     template <typename TCallable>
     class Consumer {
