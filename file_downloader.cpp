@@ -4,6 +4,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 #include "downloader.hpp"
@@ -61,6 +62,7 @@ namespace spider {
         using std::ofstream;
         using std::ostream_iterator;
         using std::string;
+        using boost::filesystem::exists;
 
         Url const& url = getUrl();
         if (url.getScheme() == "https") {
@@ -82,13 +84,17 @@ namespace spider {
                 return;
             }
 
-            std::cerr << "Downloading file: " << getUrl() << std::endl;
-
-            istream_iterator<unsigned char> begin(stream);
-            istream_iterator<unsigned char> end;
-
             string fileName = createFileName(url);
             string path = m_directoryPath + '/' + fileName;
+            if (exists(path)) {
+                return;
+            }
+            
+            std::cerr << "Downloading file: " << getUrl() << std::endl;
+            
+            istream_iterator<unsigned char> begin(stream);
+            istream_iterator<unsigned char> end;
+            
             ofstream file(path.c_str(), ios::out | ios::binary);
             ostream_iterator<unsigned char> destination(file);
             copy(begin, end, destination);

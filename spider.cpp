@@ -61,7 +61,10 @@ namespace spider {
         UrlExtractor imageExtractor("img", "src");
 
         Counter counter;
-        ThreadPool<Downloader> pool(10);
+        int processorCount = getProcessorCount();
+        ThreadPool<Downloader> pool(processorCount + 2);
+        pool.start();
+        
         UrlTracker tracker;
         tracker.addUrl(topUrl);
 

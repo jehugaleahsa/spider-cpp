@@ -1,19 +1,19 @@
-BOOST_PATH=/home/travis/Projects/local/boost_1_50_0
-CFLAGS=-Wall -I$(BOOST_PATH) -L$(BOOST_PATH)/stage/lib
+BOOST_PATH=/home/travis/Projects/local/boost_1_51_0
+CFLAGS=-Wall -I$(BOOST_PATH) -L$(BOOST_PATH)/stage/lib -g
 OBJS = main.o spider.o http_request.o http_response.o header.o extractor.o stripper.o categorizer.o url.o page_downloader.o file_downloader.o downloader.o tracker.o
 
-export LD_LIBRARY_PATH=/home/travis/Projects/local/boost_1_50_0/stage/lib
+export LD_LIBRARY_PATH=$(BOOST_PATH)/stage/lib
 
 all: spider
 
 .PHONY : spider
 spider: $(OBJS)
-	g++ $(OBJS) -lboost_system -lboost_thread -lpthread -lboost_regex -o spider $(CFLAGS)
+	g++ $(OBJS) -lboost_filesystem -lboost_regex -lboost_system -lboost_thread -lpthread -o spider $(CFLAGS)
 
-main.o: main.cpp spider.hpp url.hpp thread_pool.hpp counter.hpp
+main.o: main.cpp
 	g++ -c main.cpp $(CFLAGS)
 
-spider.o: spider.cpp categorizer.hpp tracker.hpp extractor.hpp file_downloader.hpp page_downloader.hpp spider.hpp stripper.hpp url.hpp
+spider.o: spider.cpp categorizer.hpp tracker.hpp extractor.hpp file_downloader.hpp page_downloader.hpp spider.hpp stripper.hpp url.hpp thread_pool.hpp
 	g++ -c spider.cpp $(CFLAGS)
 
 http_request.o: http_request.cpp header.hpp http_request.hpp http_response.hpp url.hpp
