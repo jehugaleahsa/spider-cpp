@@ -67,57 +67,62 @@ namespace spider {
 
     void PageDownloadable::queuePageDownloads(
         std::vector<Url>::const_iterator begin,
-        std::vector<Url>::const_iterator end
-    ) {
+        std::vector<Url>::const_iterator end) {
+        using std::for_each;
         using std::vector;
         using boost::bind;
-        using boost::shared_ptr;
 
-        Counter & counter = getCounter();
-        Url const& referrer = getUrl();
-        for (vector<Url>::const_iterator current = begin;
-            current != end;
-            ++current) {
-            if (m_tracker.addUrl(*current)) {
-                shared_ptr<Downloadable> downloadable(new PageDownloadable(
-                    counter,
-                    *current,
-                    referrer,
-                    m_pool,
-                    m_tracker,
-                    m_pageCategorizer,
-                    m_mediaCategorizer,
-                    m_stripper,
-                    m_baseExtractor,
-                    m_anchorExtractor,
-                    m_imageExtractor
-                ));
-                m_pool.addTask(bind(&Downloadable::download, downloadable));
-            }
+        for_each(begin, end, bind(&PageDownloadable::queuePageDownload, this, _1));
+    }
+    
+    void PageDownloadable::queuePageDownload(Url const& url) {
+        using boost::bind;
+        using boost::shared_ptr;
+    
+        if (m_tracker.addUrl(url)) {
+            Counter & counter = getCounter();
+            Url const& referrer = getUrl();
+            shared_ptr<Downloadable> downloadable(new PageDownloadable(
+                counter,
+                url,
+                referrer,
+                m_pool,
+                m_tracker,
+                m_pageCategorizer,
+                m_mediaCategorizer,
+                m_stripper,
+                m_baseExtractor,
+                m_anchorExtractor,
+                m_imageExtractor
+            ));
+            m_pool.addTask(bind(&Downloadable::download, downloadable));
         }
     }
 
     void PageDownloadable::queueFileDownloads(
         std::vector<Url>::const_iterator begin,
         std::vector<Url>::const_iterator end) {
+        using std::for_each;
         using std::vector;
         using boost::bind;
+        
+        for_each(begin, end, bind(&PageDownloadable::queueFileDownload, this, _1));
+    }
+    
+    void PageDownloadable::queueFileDownload(Url const& url) {
+        using boost::bind;
         using boost::shared_ptr;
-
-        Counter & counter = getCounter();
-        Url const& referrer = getUrl();
-        for (vector<Url>::const_iterator current = begin;
-            current != end;
-            ++current) {
-            if (m_tracker.addUrl(*current)) {
-                shared_ptr<Downloadable> downloadable(new FileDownloadable(
-                    counter,
-                    *current,
-                    referrer,
-                    "/home/travis/temp/"  // TODO - make this path configurable
-                ));
-                m_pool.addTask(bind(&Downloadable::download, downloadable));
-            }
+        
+        if (m_tracker.addUrl(url)) {
+            Counter & counter = getCounter();
+            Url const& referrer = getUrl();
+            shared_ptr<Downloadable> downloadable(new FileDownloadable(
+                counter,
+                url,
+                referrer,
+                "/home/travis/temp/"  // TODO - make this path configurable
+            ));
+            m_pool.addTask(bind(&Downloadable::download, downloadable));
         }
     }
 
@@ -132,8 +137,7 @@ namespace spider {
         Stripper const& stripper,
         UrlExtractor const& baseExtractor,
         UrlExtractor const& anchorExtractor,
-        UrlExtractor const& imageExtractor
-    )
+        UrlExtractor const& imageExtractor)
         :
         Downloadable(counter, url, referrer),
         m_pool(pool),

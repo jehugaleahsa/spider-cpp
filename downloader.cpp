@@ -63,14 +63,6 @@ namespace spider {
         return m_referrer;
     }
 
-    Downloadable::Downloadable(Downloadable const& other)
-        :
-        m_counter(other.m_counter),
-        m_url(other.m_url),
-        m_referrer(other.m_referrer) {
-        m_counter.increment();
-    }
-
     Downloadable::~Downloadable() {
         m_counter.decrement();
     }

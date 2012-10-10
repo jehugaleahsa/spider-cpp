@@ -31,11 +31,15 @@ namespace spider {
             std::vector<Url>::const_iterator begin,
             std::vector<Url>::const_iterator end
         );
+        
+        void queuePageDownload(Url const& url);
 
         void queueFileDownloads(
             std::vector<Url>::const_iterator begin,
             std::vector<Url>::const_iterator end
         );
+        
+        void queueFileDownload(Url const& url);
 
 
     public:

@@ -104,7 +104,7 @@ namespace spider {
         typedef pair<string, string> HeaderPair;
 
         if (!m_hasHeaders) {
-            getStatusCached(); // cache the status code
+            getStatusCached();
             if (*m_stream) {
                 istream_iterator<Line> begin(*m_stream);
                 istream_iterator<Line> end;

@@ -11,6 +11,9 @@ namespace spider {
         Counter & m_counter;
         Url m_url;
         Url m_referrer;
+        
+        Downloadable(Downloadable const& other);
+        Downloadable & operator=(Downloadable const& downloadable);
 
     protected:
         void addReferrerHeader(HttpRequest & request) const;
@@ -32,8 +35,6 @@ namespace spider {
         Url const& getReferrer() const;
 
     public:
-        Downloadable(Downloadable const& other);
-
         virtual ~Downloadable();
 
         virtual void download() = 0;

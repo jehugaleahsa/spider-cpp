@@ -8,8 +8,8 @@ namespace spider {
         TInputIterator first, TInputIterator past,
         TOutputIterator destination,
         TPredicate predicate) {
-        for (; first != past && predicate(*first); ++first) {
-           *destination = *first;
+        while (first != past && predicate(*first)) {
+           *destination++ = *first++;
         }
         return destination;
     }

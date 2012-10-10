@@ -9,6 +9,9 @@ namespace spider {
 
     class FileDownloadable : public virtual Downloadable {
         std::string m_directoryPath;
+        
+        FileDownloadable(FileDownloadable const& other);
+        FileDownloadable & operator=(FileDownloadable const& other);
 
     public:
         FileDownloadable(
