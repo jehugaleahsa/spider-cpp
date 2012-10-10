@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include "categorizer.hpp"
 #include "counter.hpp"
@@ -69,6 +70,7 @@ namespace spider {
         std::vector<Url>::const_iterator end
     ) {
         using std::vector;
+        using boost::bind;
         using boost::shared_ptr;
 
         Counter & counter = getCounter();
@@ -90,16 +92,16 @@ namespace spider {
                     m_anchorExtractor,
                     m_imageExtractor
                 ));
-                m_pool.addTask(makeDownloader(downloadable));
+                m_pool.addTask(bind(&Downloadable::download, downloadable));
             }
         }
     }
 
     void PageDownloadable::queueFileDownloads(
         std::vector<Url>::const_iterator begin,
-        std::vector<Url>::const_iterator end
-    ) {
+        std::vector<Url>::const_iterator end) {
         using std::vector;
+        using boost::bind;
         using boost::shared_ptr;
 
         Counter & counter = getCounter();
@@ -114,7 +116,7 @@ namespace spider {
                     referrer,
                     "/home/travis/temp/"  // TODO - make this path configurable
                 ));
-                m_pool.addTask(makeDownloader(downloadable));
+                m_pool.addTask(bind(&Downloadable::download, downloadable));
             }
         }
     }
@@ -123,7 +125,7 @@ namespace spider {
         Counter & counter,
         Url const& url,
         Url const& referrer,
-        ThreadPool<Downloader> & pool,
+        ThreadPool & pool,
         UrlTracker & tracker,
         Categorizer const& pageCategorizer,
         Categorizer const& mediaCategorizer,

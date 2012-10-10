@@ -2,6 +2,7 @@
 #define SPIDER_PAGE_DOWNLOADER_HPP
 
 #include <string>
+#include <boost/function.hpp>
 #include "categorizer.hpp"
 #include "downloader.hpp"
 #include "extractor.hpp"
@@ -13,7 +14,7 @@
 namespace spider {
 
     class PageDownloadable : public virtual Downloadable {
-        ThreadPool<Downloader> & m_pool;
+        ThreadPool & m_pool;
         UrlTracker & m_tracker;
         Categorizer const& m_pageCategorizer;
         Categorizer const& m_mediaCategorizer;
@@ -42,7 +43,7 @@ namespace spider {
             Counter & counter,
             Url const& url,
             Url const& referrer,
-            ThreadPool<Downloader> & pool,
+            ThreadPool & pool,
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,

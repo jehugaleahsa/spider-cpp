@@ -1,3 +1,4 @@
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include "categorizer.hpp"
 #include "counter.hpp"
@@ -39,7 +40,7 @@ namespace {
         categorizer.supportExtension("gif");
         categorizer.supportExtension("jpg");
         categorizer.supportExtension("tif");
-        categorizer.supportExtension("bmp");
+        categorizer.supportExtension("bmp"); 
     }
 
 }
@@ -47,6 +48,7 @@ namespace {
 namespace spider {
 
     void Spider::run(std::ostream & output, Url const& topUrl) const {
+        using boost::function;
         using boost::shared_ptr;
 
         Categorizer pageCategorizer;
@@ -62,7 +64,7 @@ namespace spider {
 
         Counter counter;
         int processorCount = getProcessorCount();
-        ThreadPool<Downloader> pool(processorCount + 2);
+        ThreadPool pool(processorCount + 2);
         pool.start();
         
         UrlTracker tracker;
@@ -82,7 +84,7 @@ namespace spider {
                 anchorExtractor,
                 imageExtractor
             ));
-            pool.addTask(makeDownloader(home));
+            pool.addTask(bind(&Downloadable::download, home));
         }
 
         counter.wait();

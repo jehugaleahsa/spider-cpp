@@ -10,6 +10,7 @@ HEADER = header.hpp
 COUNTER = counter.hpp
 PATH_UTILITIES = path_utilities.hpp
 STRIPPER = stripper.hpp
+THREAD_POOL = thread_pool.hpp
 TRACKER = tracker.hpp $(URL)
 HTTP_RESPONSE = http_response.hpp $(HEADER)
 HTTP_REQUEST = http_request.hpp $(HEADER) $(URL)

@@ -39,17 +39,6 @@ namespace spider {
         virtual void download() = 0;
     };
 
-    class Downloader {
-        boost::shared_ptr<Downloadable> m_downloadable;
-
-    public:
-        Downloader(boost::shared_ptr<Downloadable> downloadable);
-
-        void operator()();
-    };
-
-    Downloader makeDownloader(boost::shared_ptr<Downloadable> downloadable);
-
 }
 
 #endif // end SPIDER_DOWNLOADER_HPP

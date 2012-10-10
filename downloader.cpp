@@ -74,16 +74,4 @@ namespace spider {
     Downloadable::~Downloadable() {
         m_counter.decrement();
     }
-
-    Downloader::Downloader(boost::shared_ptr<Downloadable> downloadable)
-        : m_downloadable(downloadable) {
-    }
-
-    void Downloader::operator()() {
-        m_downloadable->download();
-    }
-
-    Downloader makeDownloader(boost::shared_ptr<Downloadable> downloadable) {
-        return Downloader(downloadable);
-    }
 }
