@@ -7,13 +7,13 @@
 
 namespace spider {
 
-    class Downloadable {
+    class Downloader {
         Counter & m_counter;
         Url m_url;
         Url m_referrer;
         
-        Downloadable(Downloadable const& other);
-        Downloadable & operator=(Downloadable const& downloadable);
+        Downloader(Downloader const& other);
+        Downloader & operator=(Downloader const& downloadable);
 
     protected:
         void addReferrerHeader(HttpRequest & request) const;
@@ -26,7 +26,7 @@ namespace spider {
 
         void addConnectionHeader(HttpRequest & request) const;
 
-        Downloadable(Counter & counter, Url const& url, Url const& referrer);
+        Downloader(Counter & counter, Url const& url, Url const& referrer);
 
         Counter & getCounter();
 
@@ -35,7 +35,7 @@ namespace spider {
         Url const& getReferrer() const;
 
     public:
-        virtual ~Downloadable();
+        virtual ~Downloader();
 
         virtual void download() = 0;
     };

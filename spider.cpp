@@ -71,7 +71,7 @@ namespace spider {
         tracker.addUrl(topUrl);
 
         {
-            shared_ptr<Downloadable> home(new PageDownloadable(
+            shared_ptr<Downloader> home(new PageDownloader(
                 counter,
                 topUrl,
                 topUrl,
@@ -84,7 +84,7 @@ namespace spider {
                 anchorExtractor,
                 imageExtractor
             ));
-            pool.addTask(bind(&Downloadable::download, home));
+            pool.addTask(bind(&Downloader::download, home));
         }
 
         counter.wait();

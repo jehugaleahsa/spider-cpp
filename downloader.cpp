@@ -5,7 +5,7 @@
 
 namespace spider {
 
-    void Downloadable::addReferrerHeader(spider::HttpRequest & request) const {
+    void Downloader::addReferrerHeader(spider::HttpRequest & request) const {
         using std::ostringstream;
         using spider::HeaderCollection;
 
@@ -15,35 +15,35 @@ namespace spider {
         headers.addHeader("referer", referrerBuilder.str());
     }
 
-    void Downloadable::addUserAgentHeader(spider::HttpRequest & request) const {
+    void Downloader::addUserAgentHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         headers.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1");
     }
 
-    void Downloadable::addAcceptHeader(spider::HttpRequest & request) const {
+    void Downloader::addAcceptHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         headers.addHeader("Accept", "*/*");
     }
 
-    void Downloadable::addHostHeader(spider::HttpRequest & request) const {
+    void Downloader::addHostHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         headers.addHeader("Host", m_url.getHost());
     }
 
-    void Downloadable::addConnectionHeader(spider::HttpRequest & request) const {
+    void Downloader::addConnectionHeader(spider::HttpRequest & request) const {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
         headers.addHeader("Connection", "close");
     }
 
-    Downloadable::Downloadable(
+    Downloader::Downloader(
         Counter & counter,
         Url const& url,
         Url const& referrer)
@@ -51,19 +51,19 @@ namespace spider {
         m_counter.increment();
     }
 
-    Counter & Downloadable::getCounter() {
+    Counter & Downloader::getCounter() {
         return m_counter;
     }
 
-    Url const& Downloadable::getUrl() const {
+    Url const& Downloader::getUrl() const {
         return m_url;
     }
 
-    Url const& Downloadable::getReferrer() const {
+    Url const& Downloader::getReferrer() const {
         return m_referrer;
     }
 
-    Downloadable::~Downloadable() {
+    Downloader::~Downloader() {
         m_counter.decrement();
     }
 }

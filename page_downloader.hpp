@@ -13,7 +13,7 @@
 
 namespace spider {
 
-    class PageDownloadable : public virtual Downloadable {
+    class PageDownloader : public virtual Downloader {
         ThreadPool & m_pool;
         UrlTracker & m_tracker;
         Categorizer const& m_pageCategorizer;
@@ -43,7 +43,7 @@ namespace spider {
 
 
     public:
-        PageDownloadable(
+        PageDownloader(
             Counter & counter,
             Url const& url,
             Url const& referrer,

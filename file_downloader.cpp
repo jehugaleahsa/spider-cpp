@@ -44,16 +44,16 @@ namespace {
 
 namespace spider {
 
-    FileDownloadable::FileDownloadable(
+    FileDownloader::FileDownloader(
         Counter & counter,
         Url const& url,
         Url const& referrer,
         std::string const& directoryPath
     )
-        : Downloadable(counter, url, referrer), m_directoryPath(directoryPath) {
+        : Downloader(counter, url, referrer), m_directoryPath(directoryPath) {
     }
 
-    void FileDownloadable::download() {
+    void FileDownloader::download() {
         using std::copy;
         using std::ios;
         using std::istream;
