@@ -21,34 +21,34 @@
 
 namespace spider {
 
-    std::string PageDownloader::getContent() const {
-        using std::istream;
-        using std::istream_iterator;
-        using std::noskipws;
-        using std::string;
-
+    HttpRequest::response_ptr PageDownloader::getResponse() const {
         Url const& url = getUrl();
-        if (url.getScheme() == "https") {
-            return "";
-        }
-
         try {
             HttpRequest request(GET, url);
             addReferrerHeader(request);
             addUserAgentHeader(request);
             addAcceptHeader(request);
             addHostHeader(request);
-            addConnectionHeader(request);
+            //addConnectionHeader(request);
             HttpRequest::response_ptr response = request.getResponse();
-            istream & stream = response->getContent();
-            stream >> noskipws;
-            istream_iterator<char> begin(stream);
-            istream_iterator<char> end;
-            return string(begin, end);
+            return response;
         } catch (ConnectionException const& exception) {
             std::cerr << exception.what() << std::endl;
-            return "";
+            return HttpRequest::response_ptr();
         }
+    }
+
+    std::string PageDownloader::getContent(HttpRequest::response_ptr response) const {
+        using std::istream;
+        using std::istream_iterator;
+        using std::noskipws;
+        using std::string;
+
+        istream & stream = response->getContent();
+        stream >> noskipws;
+        istream_iterator<char> begin(stream);
+        istream_iterator<char> end;
+        return string(begin, end);
     }
 
     Url PageDownloader::getBaseUrl(std::string const& content) const {
@@ -57,7 +57,7 @@ namespace spider {
 
         Url const& url = getUrl();
         vector<Url> baseAddresses;
-        m_baseExtractor.getUrls(url, content, back_inserter(baseAddresses));
+        m_baseExtractor.getUrls(url, content, baseAddresses);
         if (baseAddresses.size() == 0) {
             return url;
         } else {
@@ -72,16 +72,21 @@ namespace spider {
         using std::vector;
         using boost::bind;
 
-        for_each(begin, end, bind(&PageDownloader::queuePageDownload, this, _1));
+        for_each(begin, end, bind(&PageDownloader::queuePageDownload, this, _1, false));
     }
     
-    void PageDownloader::queuePageDownload(Url const& url) {
+    void PageDownloader::queuePageDownload(Url const& url, bool reuseReferrer) {
         using boost::bind;
         using boost::shared_ptr;
     
         if (m_tracker.addUrl(url)) {
             Counter & counter = getCounter();
-            Url const& referrer = getUrl();
+            shared_ptr<Url> referrer;
+            if (reuseReferrer) {
+                referrer = getReferrer();
+            } else { 
+                referrer = shared_ptr<Url>(new Url(getUrl()));
+            }
             shared_ptr<Downloader> downloader(new PageDownloader(
                 counter,
                 url,
@@ -92,8 +97,7 @@ namespace spider {
                 m_mediaCategorizer,
                 m_stripper,
                 m_baseExtractor,
-                m_anchorExtractor,
-                m_imageExtractor
+                m_extractor
             ));
             m_pool.addTask(bind(&Downloader::download, downloader));
         }
@@ -115,7 +119,7 @@ namespace spider {
         
         if (m_tracker.addUrl(url)) {
             Counter & counter = getCounter();
-            Url const& referrer = getUrl();
+            shared_ptr<Url> referrer(new Url(getUrl()));
             shared_ptr<Downloader> downloadable(new FileDownloader(
                 counter,
                 url,
@@ -129,15 +133,14 @@ namespace spider {
     PageDownloader::PageDownloader(
         Counter & counter,
         Url const& url,
-        Url const& referrer,
+        boost::shared_ptr<Url> const referrer,
         ThreadPool & pool,
         UrlTracker & tracker,
         Categorizer const& pageCategorizer,
         Categorizer const& mediaCategorizer,
         Stripper const& stripper,
         UrlExtractor const& baseExtractor,
-        UrlExtractor const& anchorExtractor,
-        UrlExtractor const& imageExtractor)
+        UrlExtractor const& extractor)
         :
         Downloader(counter, url, referrer),
         m_pool(pool),
@@ -146,33 +149,46 @@ namespace spider {
         m_mediaCategorizer(mediaCategorizer),
         m_stripper(stripper),
         m_baseExtractor(baseExtractor),
-        m_anchorExtractor(anchorExtractor),
-        m_imageExtractor(imageExtractor) {
+        m_extractor(extractor) {
     }
 
     void PageDownloader::download() {
-        using std::partition;
         using std::string;
         using std::vector;
         using boost::bind;
 
         std::cerr << "Downloading page: " << getUrl() << std::endl;
 
-        string original = getContent();
+        HttpRequest::response_ptr response = getResponse();
+        if (!response) {
+            return;
+        }
+
+        string original = getContent(response);
+
+        int statusCode = response->getStatusCode();
+        if (statusCode >= 300 && statusCode < 400) {
+            try {
+                Url redirect = Url::parse(original);
+                queuePageDownload(redirect, true);
+            } catch (BadUrlException const& exception) {
+            }
+            return;
+        }
+
         string stripped = m_stripper.strip(original);
 
         Url baseUrl = getBaseUrl(stripped);
         vector<Url> urls;
-        m_anchorExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
-        m_imageExtractor.getUrls(baseUrl, stripped, back_inserter(urls));
+        m_extractor.getUrls(baseUrl, stripped, urls);
 
-        vector<Url>::iterator end1 = partition(urls.begin(), urls.end(),
+        vector<Url>::iterator end = partition(urls.begin(), urls.end(),
             bind(&Categorizer::isDesired, &m_pageCategorizer, _1));
-        queuePageDownloads(urls.begin(), end1);
+        queuePageDownloads(urls.begin(), end);
 
-        vector<Url>::iterator end2 = partition(end1, urls.end(),
+        end = partition(urls.begin(), urls.end(),
             bind(&Categorizer::isDesired, &m_mediaCategorizer, _1));
-        queueFileDownloads(end1, end2);
+        queueFileDownloads(urls.begin(), end);
     }
 
 }

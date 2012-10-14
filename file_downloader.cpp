@@ -47,7 +47,7 @@ namespace spider {
     FileDownloader::FileDownloader(
         Counter & counter,
         Url const& url,
-        Url const& referrer,
+        boost::shared_ptr<Url> const referrer,
         std::string const& directoryPath
     )
         : Downloader(counter, url, referrer), m_directoryPath(directoryPath) {

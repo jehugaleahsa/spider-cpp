@@ -36,11 +36,11 @@ namespace {
         categorizer.supportExtension("wmv");
         categorizer.supportExtension("mov");
         categorizer.supportExtension("rm");
-        categorizer.supportExtension("png");
-        categorizer.supportExtension("gif");
-        categorizer.supportExtension("jpg");
-        categorizer.supportExtension("tif");
-        categorizer.supportExtension("bmp"); 
+        //categorizer.supportExtension("png");
+        //categorizer.supportExtension("gif");
+        //categorizer.supportExtension("jpg");
+        //categorizer.supportExtension("tif");
+        //categorizer.supportExtension("bmp"); 
     }
 
 }
@@ -58,9 +58,21 @@ namespace spider {
         supportMediaExtensions(mediaCategorizer);
 
         Stripper stripper("script");
-        UrlExtractor baseExtractor("base", "href");
-        UrlExtractor anchorExtractor("a", "href");
-        UrlExtractor imageExtractor("img", "src");
+        TagUrlExtractor baseExtractor("base", "href");
+        shared_ptr<UrlExtractor> anchorExtractor(new TagUrlExtractor("a", "href"));
+        shared_ptr<UrlExtractor> imageExtractor(new TagUrlExtractor("img", "src"));
+        shared_ptr<UrlExtractor> videoExtractor(new TagUrlExtractor("video", "src"));
+        shared_ptr<UrlExtractor> sourceExtractor(new TagUrlExtractor("source", "src"));
+        shared_ptr<UrlExtractor> embedExtractor(new TagUrlExtractor("embed", "flashvars"));
+        shared_ptr<UrlExtractor> paramExtractor(new TagUrlExtractor("param", "value"));
+        CompoundExtractor extractor;
+        extractor.addExtractor(anchorExtractor);
+        extractor.addExtractor(imageExtractor);
+        extractor.addExtractor(videoExtractor);
+        extractor.addExtractor(sourceExtractor);
+        extractor.addExtractor(embedExtractor);
+        extractor.addExtractor(paramExtractor);
+
 
         Counter counter;
         int processorCount = getProcessorCount();
@@ -74,15 +86,14 @@ namespace spider {
             shared_ptr<Downloader> home(new PageDownloader(
                 counter,
                 topUrl,
-                topUrl,
+                shared_ptr<Url>(),
                 pool,
                 tracker,
                 pageCategorizer,
                 mediaCategorizer,
                 stripper,
                 baseExtractor,
-                anchorExtractor,
-                imageExtractor
+                extractor
             ));
             pool.addTask(bind(&Downloader::download, home));
         }

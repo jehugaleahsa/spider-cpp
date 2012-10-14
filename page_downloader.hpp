@@ -20,10 +20,11 @@ namespace spider {
         Categorizer const& m_mediaCategorizer;
         Stripper const& m_stripper;
         UrlExtractor const& m_baseExtractor;
-        UrlExtractor const& m_anchorExtractor;
-        UrlExtractor const& m_imageExtractor;
+        UrlExtractor const& m_extractor;
 
-        std::string getContent() const;
+        HttpRequest::response_ptr getResponse() const;
+
+        std::string getContent(HttpRequest::response_ptr response) const;
 
         Url getBaseUrl(std::string const& content) const;
 
@@ -32,7 +33,7 @@ namespace spider {
             std::vector<Url>::const_iterator end
         );
         
-        void queuePageDownload(Url const& url);
+        void queuePageDownload(Url const& url, bool reuseReferrer);
 
         void queueFileDownloads(
             std::vector<Url>::const_iterator begin,
@@ -46,15 +47,14 @@ namespace spider {
         PageDownloader(
             Counter & counter,
             Url const& url,
-            Url const& referrer,
+            boost::shared_ptr<Url> const referrer,
             ThreadPool & pool,
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
             Stripper const& stripper,
             UrlExtractor const& baseExtractor,
-            UrlExtractor const& anchorExtractor,
-            UrlExtractor const& imageExtractor
+            UrlExtractor const& extractor
         );
 
         virtual void download();

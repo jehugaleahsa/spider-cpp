@@ -70,6 +70,7 @@ namespace spider {
         using boost::shared_ptr;
 
         shared_ptr<tcp::iostream> tcpStream(new tcp::iostream());
+        //tcpStream->expires_from_now(boost::posix_time::seconds(60));
         if (m_url.getPort() == Url::getDefaultPort()) {
             tcpStream->connect(m_url.getHost(), m_url.getScheme());
         } else {
@@ -82,15 +83,19 @@ namespace spider {
         }
 
         *tcpStream << str(m_method) << " " << m_url.getPath();
+
         string const& query = m_url.getQuery();
         if (query != "") {
             *tcpStream << "?" << query;
         }
-        *tcpStream << " HTTP/1.0" << HttpRequest::getNewline();
+        *tcpStream << " HTTP/1.1" << HttpRequest::getNewline();
+
         ostream_iterator<Header> destination(
             *tcpStream, HttpRequest::getNewline().c_str());
         m_headers.getHeaders(destination);
+
         *tcpStream << HttpRequest::getNewline();
+        tcpStream->flush();
 
         response_ptr response(new HttpResponse(tcpStream));
         return response;

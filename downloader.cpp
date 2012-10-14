@@ -9,6 +9,9 @@ namespace spider {
         using std::ostringstream;
         using spider::HeaderCollection;
 
+        if (!m_referrer) {
+            return;
+        }
         HeaderCollection & headers = request.getHeaders();
         ostringstream referrerBuilder;
         referrerBuilder << m_referrer;
@@ -19,7 +22,8 @@ namespace spider {
         using spider::HeaderCollection;
 
         HeaderCollection & headers = request.getHeaders();
-        headers.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1");
+        //headers.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1");
+        headers.addHeader("User-Agent", "curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3");
     }
 
     void Downloader::addAcceptHeader(spider::HttpRequest & request) const {
@@ -46,7 +50,7 @@ namespace spider {
     Downloader::Downloader(
         Counter & counter,
         Url const& url,
-        Url const& referrer)
+        boost::shared_ptr<Url> const referrer)
         : m_counter(counter), m_url(url), m_referrer(referrer) {
         m_counter.increment();
     }
@@ -59,7 +63,7 @@ namespace spider {
         return m_url;
     }
 
-    Url const& Downloader::getReferrer() const {
+    boost::shared_ptr<Url> const Downloader::getReferrer() const {
         return m_referrer;
     }
 
