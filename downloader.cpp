@@ -14,7 +14,7 @@ namespace spider {
         }
         HeaderCollection & headers = request.getHeaders();
         ostringstream referrerBuilder;
-        referrerBuilder << m_referrer;
+        referrerBuilder << *m_referrer;
         headers.addHeader("referer", referrerBuilder.str());
     }
 
