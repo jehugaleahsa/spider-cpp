@@ -13,6 +13,17 @@ std::string getStartingUrl() {
     return urlString;
 }
 
+std::string getDownloadDirectory() {
+    using std::cin;
+    using std::cout;
+    using std::string;
+
+    cout << "Please enter the download directory: ";
+    string downloadDirectory;
+    cin >> downloadDirectory;
+    return downloadDirectory;
+}
+
 int main(int argc, char** argv) {
     using std::cout;
     using std::string;
@@ -20,9 +31,10 @@ int main(int argc, char** argv) {
     using spider::Url;
 
     string topUrlString = (argc < 2) ? getStartingUrl() : argv[1];
+    string downloadDirectory = (argc < 3) ? getDownloadDirectory() : argv[2];
     Url topUrl = Url::parse(topUrlString);
     Spider spider;
-    spider.run(cout, topUrl);
+    spider.run(cout, topUrl, downloadDirectory);
 
     return 0;
 }

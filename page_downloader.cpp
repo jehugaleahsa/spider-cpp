@@ -91,6 +91,7 @@ namespace spider {
                 counter,
                 url,
                 referrer,
+                m_downloadDirectory,
                 m_pool,
                 m_tracker,
                 m_pageCategorizer,
@@ -124,7 +125,7 @@ namespace spider {
                 counter,
                 url,
                 referrer,
-                "/home/travis/temp/"  // TODO - make this path configurable
+                m_downloadDirectory
             ));
             m_pool.addTask(bind(&Downloader::download, downloadable));
         }
@@ -134,6 +135,7 @@ namespace spider {
         Counter & counter,
         Url const& url,
         boost::shared_ptr<Url> const referrer,
+        std::string const& downloadDirectory,
         ThreadPool & pool,
         UrlTracker & tracker,
         Categorizer const& pageCategorizer,
@@ -143,6 +145,7 @@ namespace spider {
         UrlExtractor const& extractor)
         :
         Downloader(counter, url, referrer),
+        m_downloadDirectory(downloadDirectory),
         m_pool(pool),
         m_tracker(tracker),
         m_pageCategorizer(pageCategorizer),
@@ -161,6 +164,7 @@ namespace spider {
 
         HttpRequest::response_ptr response = getResponse();
         if (!response) {
+            std::cerr << "There was not response to: " << getUrl() << std::endl;
             return;
         }
 
@@ -169,11 +173,20 @@ namespace spider {
         int statusCode = response->getStatusCode();
         if (statusCode >= 300 && statusCode < 400) {
             try {
-                Url redirect = Url::parse(original);
+                string urlString = original;
+                if (urlString.size() == 0) {
+                    HeaderCollection const& headers = response->getHeaders();
+                    if (headers.hasHeader("Location")) {
+                        urlString = headers.getHeader("Location").getValue(0);
+                    } else {
+                        return;
+                    }
+                }
+                Url redirect = Url::parse(urlString);
                 queuePageDownload(redirect, true);
             } catch (BadUrlException const& exception) {
+                return;
             }
-            return;
         }
 
         string stripped = m_stripper.strip(original);

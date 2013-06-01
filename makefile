@@ -1,5 +1,4 @@
-BOOST_PATH=/home/travis/Projects/local/boost_1_51_0
-CFLAGS=-Wall -I$(BOOST_PATH) -L$(BOOST_PATH)/stage/lib -g
+CFLAGS=-Wall -pedantic -L/usr/lib -g
 OBJS = categorizer.o downloader.o extractor.o file_downloader.o header.o http_request.o http_response.o main.o page_downloader.o spider.o stripper.o thread_pool.o tracker.o url.o
 
 # define header dependencies
@@ -21,14 +20,14 @@ FILE_DOWNLOADER = file_downloader.hpp $(DOWNLOADER) $(URL)
 PAGE_DOWNLOADER = page_downloader.hpp $(CATEGORIZER) $(DOWNLOADER) $(EXTRACTOR) $(STRIPPER) $(THREAD_POOL) $(TRACKER) $(URL)
 SPIDER = spider.hpp $(URL)
 
-export LD_LIBRARY_PATH=$(BOOST_PATH)/stage/lib
-
 all: spider
 
 # binaries
 
+export LD_LIBRARY_PATH=/usr/lib
+
 extractor: spider
-	./spider $(SITE)
+	./spider $(SITE) $(DIR)
 
 .PHONY : spider
 spider: $(OBJS)

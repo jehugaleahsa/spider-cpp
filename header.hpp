@@ -24,6 +24,8 @@ namespace spider {
 
         inline size_type getValueCount() const;
 
+        std::string const& getValue(size_type index) const;
+
         template <typename TOutputIterator>
         TOutputIterator getValues(TOutputIterator destination) const;
     };

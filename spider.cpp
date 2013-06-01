@@ -36,18 +36,21 @@ namespace {
         categorizer.supportExtension("wmv");
         categorizer.supportExtension("mov");
         categorizer.supportExtension("rm");
-        //categorizer.supportExtension("png");
-        //categorizer.supportExtension("gif");
-        //categorizer.supportExtension("jpg");
-        //categorizer.supportExtension("tif");
-        //categorizer.supportExtension("bmp"); 
+        categorizer.supportExtension("png");
+        categorizer.supportExtension("gif");
+        categorizer.supportExtension("jpg");
+        categorizer.supportExtension("tif");
+        categorizer.supportExtension("bmp"); 
     }
 
 }
 
 namespace spider {
 
-    void Spider::run(std::ostream & output, Url const& topUrl) const {
+    void Spider::run(
+        std::ostream & output, 
+        Url const& topUrl,
+        std::string const& downloadDirectory) const {
         using boost::function;
         using boost::shared_ptr;
 
@@ -87,6 +90,7 @@ namespace spider {
                 counter,
                 topUrl,
                 shared_ptr<Url>(),
+                downloadDirectory,
                 pool,
                 tracker,
                 pageCategorizer,

@@ -17,7 +17,7 @@ namespace spider {
         DELETE,
         HEAD,
         TRACE,
-        CONNECT,
+        CONNECT
     };
 
     class HttpRequest {

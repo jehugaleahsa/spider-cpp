@@ -14,6 +14,7 @@
 namespace spider {
 
     class PageDownloader : public virtual Downloader {
+        std::string m_downloadDirectory;
         ThreadPool & m_pool;
         UrlTracker & m_tracker;
         Categorizer const& m_pageCategorizer;
@@ -21,6 +22,7 @@ namespace spider {
         Stripper const& m_stripper;
         UrlExtractor const& m_baseExtractor;
         UrlExtractor const& m_extractor;
+
 
         HttpRequest::response_ptr getResponse() const;
 
@@ -48,6 +50,7 @@ namespace spider {
             Counter & counter,
             Url const& url,
             boost::shared_ptr<Url> const referrer,
+            std::string const& downloadDirectory,
             ThreadPool & pool,
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,

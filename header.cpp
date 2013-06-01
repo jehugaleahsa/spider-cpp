@@ -20,6 +20,10 @@ namespace spider {
         return m_name;
     }
 
+    std::string const& Header::getValue(size_type index) const {
+        return m_values[index];
+    }
+
     std::ostream & operator<<(std::ostream & output, Header const& header) {
         using std::back_inserter;
         using std::copy;

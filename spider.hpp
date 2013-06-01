@@ -8,7 +8,10 @@ namespace spider {
 
     class Spider {
     public:
-        void run(std::ostream & output, Url const& topUrl) const;
+        void run(
+            std::ostream & output, 
+            Url const& topUrl, 
+            std::string const& downloadDirectory) const;
     };
 
 }
