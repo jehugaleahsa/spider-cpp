@@ -1,5 +1,5 @@
+#include <memory>
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
 #include "categorizer.hpp"
 #include "counter.hpp"
 #include "downloader.hpp"
@@ -45,64 +45,60 @@ namespace {
 
 }
 
-namespace spider {
+void spider::Spider::run(
+    std::ostream & output, 
+    Url const& topUrl,
+    std::string const& downloadDirectory) const {
+    using boost::function;
+    using std::shared_ptr;
 
-    void Spider::run(
-        std::ostream & output, 
-        Url const& topUrl,
-        std::string const& downloadDirectory) const {
-        using boost::function;
-        using boost::shared_ptr;
+    Categorizer pageCategorizer;
+    supportPageExtensions(pageCategorizer);
 
-        Categorizer pageCategorizer;
-        supportPageExtensions(pageCategorizer);
+    Categorizer mediaCategorizer;
+    supportMediaExtensions(mediaCategorizer);
 
-        Categorizer mediaCategorizer;
-        supportMediaExtensions(mediaCategorizer);
-
-        Stripper stripper("script");
-        TagUrlExtractor baseExtractor("base", "href");
-        shared_ptr<UrlExtractor> anchorExtractor(new TagUrlExtractor("a", "href"));
-        shared_ptr<UrlExtractor> imageExtractor(new TagUrlExtractor("img", "src"));
-        shared_ptr<UrlExtractor> videoExtractor(new TagUrlExtractor("video", "src"));
-        shared_ptr<UrlExtractor> sourceExtractor(new TagUrlExtractor("source", "src"));
-        shared_ptr<UrlExtractor> embedExtractor(new TagUrlExtractor("embed", "flashvars"));
-        shared_ptr<UrlExtractor> paramExtractor(new TagUrlExtractor("param", "value"));
-        CompoundExtractor extractor;
-        extractor.addExtractor(anchorExtractor);
-        extractor.addExtractor(imageExtractor);
-        extractor.addExtractor(videoExtractor);
-        extractor.addExtractor(sourceExtractor);
-        extractor.addExtractor(embedExtractor);
-        extractor.addExtractor(paramExtractor);
+    Stripper stripper("script");
+    TagUrlExtractor baseExtractor("base", "href");
+    shared_ptr<UrlExtractor> anchorExtractor(new TagUrlExtractor("a", "href"));
+    shared_ptr<UrlExtractor> imageExtractor(new TagUrlExtractor("img", "src"));
+    shared_ptr<UrlExtractor> videoExtractor(new TagUrlExtractor("video", "src"));
+    shared_ptr<UrlExtractor> sourceExtractor(new TagUrlExtractor("source", "src"));
+    shared_ptr<UrlExtractor> embedExtractor(new TagUrlExtractor("embed", "flashvars"));
+    shared_ptr<UrlExtractor> paramExtractor(new TagUrlExtractor("param", "value"));
+    CompoundExtractor extractor;
+    extractor.addExtractor(anchorExtractor);
+    extractor.addExtractor(imageExtractor);
+    extractor.addExtractor(videoExtractor);
+    extractor.addExtractor(sourceExtractor);
+    extractor.addExtractor(embedExtractor);
+    extractor.addExtractor(paramExtractor);
 
 
-        Counter counter;
-        int processorCount = getProcessorCount();
-        ThreadPool pool(processorCount + 2);
-        pool.start();
-        
-        UrlTracker tracker;
-        tracker.addUrl(topUrl);
+    Counter counter;
+    int processorCount = getProcessorCount();
+    ThreadPool pool(processorCount + 2);
+    pool.start();
+    
+    UrlTracker tracker;
+    tracker.addUrl(topUrl);
 
-        {
-            shared_ptr<Downloader> home(new PageDownloader(
-                counter,
-                topUrl,
-                shared_ptr<Url>(),
-                downloadDirectory,
-                pool,
-                tracker,
-                pageCategorizer,
-                mediaCategorizer,
-                stripper,
-                baseExtractor,
-                extractor
-            ));
-            pool.addTask(bind(&Downloader::download, home));
-        }
-
-        counter.wait();
+    {
+        shared_ptr<Downloader> home(new PageDownloader(
+            counter,
+            topUrl,
+            shared_ptr<Url>(),
+            downloadDirectory,
+            pool,
+            tracker,
+            pageCategorizer,
+            mediaCategorizer,
+            stripper,
+            baseExtractor,
+            extractor
+        ));
+        pool.addTask(bind(&Downloader::download, home));
     }
 
+    counter.wait();
 }

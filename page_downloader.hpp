@@ -1,6 +1,7 @@
 #ifndef SPIDER_PAGE_DOWNLOADER_HPP
 #define SPIDER_PAGE_DOWNLOADER_HPP
 
+#include <memory>
 #include <string>
 #include <boost/function.hpp>
 #include "categorizer.hpp"
@@ -49,7 +50,7 @@ namespace spider {
         PageDownloader(
             Counter & counter,
             Url const& url,
-            boost::shared_ptr<Url> const referrer,
+            std::shared_ptr<Url> const referrer,
             std::string const& downloadDirectory,
             ThreadPool & pool,
             UrlTracker & tracker,

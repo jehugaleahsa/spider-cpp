@@ -47,73 +47,68 @@ namespace {
 
 }
 
-namespace spider {
+std::string const& spider::HttpRequest::getNewline() {
+     static const std::string newline = "\r\n";
+     return newline;
+}
 
-    std::string const& HttpRequest::getNewline() {
-         static const std::string newline = "\r\n";
-         return newline;
+spider::HttpRequest::HttpRequest(RequestMethod method, Url const& url)
+    : m_method(method), m_url(url) {
+}
+
+spider::HeaderCollection & spider::HttpRequest::getHeaders() {
+    return m_headers;
+}
+
+spider::HttpRequest::response_ptr spider::HttpRequest::getResponse() const {
+    using std::ostream_iterator;
+    using std::string;
+    using boost::asio::ip::tcp;
+    using boost::lexical_cast;
+    using boost::shared_ptr;
+
+    shared_ptr<tcp::iostream> tcpStream(new tcp::iostream());
+    if (m_url.getPort() == Url::getDefaultPort()) {
+        tcpStream->connect(m_url.getHost(), m_url.getScheme());
+    } else {
+        tcpStream->connect(
+            m_url.getHost(), lexical_cast<string>(m_url.getPort()));
     }
 
-    HttpRequest::HttpRequest(RequestMethod method, Url const& url)
-        : m_method(method), m_url(url) {
+    if (!*tcpStream) {
+        throw ConnectionException(m_url);
     }
 
-    HeaderCollection & HttpRequest::getHeaders() {
-        return m_headers;
+    *tcpStream << str(m_method) << " " << m_url.getPath();
+
+    string const& query = m_url.getQuery();
+    if (query != "") {
+        *tcpStream << "?" << query;
     }
+    *tcpStream << " HTTP/1.1" << HttpRequest::getNewline();
 
-    HttpRequest::response_ptr HttpRequest::getResponse() const {
-        using std::ostream_iterator;
-        using std::string;
-        using boost::asio::ip::tcp;
-        using boost::lexical_cast;
-        using boost::shared_ptr;
+    ostream_iterator<Header> destination(
+        *tcpStream, HttpRequest::getNewline().c_str());
+    m_headers.getHeaders(destination);
 
-        shared_ptr<tcp::iostream> tcpStream(new tcp::iostream());
-        //tcpStream->expires_from_now(boost::posix_time::seconds(60));
-        if (m_url.getPort() == Url::getDefaultPort()) {
-            tcpStream->connect(m_url.getHost(), m_url.getScheme());
-        } else {
-            tcpStream->connect(
-                m_url.getHost(), lexical_cast<string>(m_url.getPort()));
-        }
+    *tcpStream << HttpRequest::getNewline();
+    tcpStream->flush();
 
-        if (!*tcpStream) {
-            throw ConnectionException(m_url);
-        }
+    response_ptr response(new HttpResponse(tcpStream));
+    return response;
+}
 
-        *tcpStream << str(m_method) << " " << m_url.getPath();
+spider::ConnectionException::ConnectionException(Url const& url) throw() {
+    using std::ostringstream;
 
-        string const& query = m_url.getQuery();
-        if (query != "") {
-            *tcpStream << "?" << query;
-        }
-        *tcpStream << " HTTP/1.1" << HttpRequest::getNewline();
+    ostringstream builder;
+    builder << "Failed to connect to " << url;
+    m_what = builder.str();
+}
 
-        ostream_iterator<Header> destination(
-            *tcpStream, HttpRequest::getNewline().c_str());
-        m_headers.getHeaders(destination);
+spider::ConnectionException::~ConnectionException() throw() {
+}
 
-        *tcpStream << HttpRequest::getNewline();
-        tcpStream->flush();
-
-        response_ptr response(new HttpResponse(tcpStream));
-        return response;
-    }
-
-    ConnectionException::ConnectionException(Url const& url) throw() {
-        using std::ostringstream;
-
-        ostringstream builder;
-        builder << "Failed to connect to " << url;
-        m_what = builder.str();
-    }
-
-    ConnectionException::~ConnectionException() throw() {
-    }
-
-    char const* ConnectionException::what() const throw() {
-        return m_what.c_str();
-    }
-
+char const* spider::ConnectionException::what() const throw() {
+    return m_what.c_str();
 }

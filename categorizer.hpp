@@ -2,13 +2,13 @@
 #define SPIDER_CATEGORIZER_HPP
 
 #include <string>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include "url.hpp"
 
 namespace spider {
 
     class Categorizer {
-        boost::unordered_set<std::string> m_extensions;
+        std::unordered_set<std::string> m_extensions;
 
     public:
         void supportExtension(std::string const& extension);

@@ -21,16 +21,12 @@ namespace {
 
 }
 
-namespace spider {
+spider::Stripper::Stripper(std::string const& tagName)
+    : m_regex(getRegex(tagName)) {
+}
 
-    Stripper::Stripper(std::string const& tagName)
-        : m_regex(getRegex(tagName)) {
-    }
+std::string spider::Stripper::strip(std::string const& content) const {
+    using boost::regex_replace;
 
-    std::string Stripper::strip(std::string const& content) const {
-        using boost::regex_replace;
-
-        return regex_replace(content, m_regex, "");
-    }
-
+    return regex_replace(content, m_regex, "");
 }

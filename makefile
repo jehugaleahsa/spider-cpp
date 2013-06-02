@@ -1,4 +1,4 @@
-CFLAGS=-Wall -pedantic -L/usr/lib -g
+CFLAGS=-std=c++11 -Wall -pedantic -L/usr/lib -g
 OBJS = categorizer.o downloader.o extractor.o file_downloader.o header.o http_request.o http_response.o main.o page_downloader.o spider.o stripper.o thread_pool.o tracker.o url.o
 
 # define header dependencies

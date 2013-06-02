@@ -30,48 +30,6 @@ namespace {
         return input;
     }
 
-}
-
-namespace spider {
-
-    HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
-        : m_stream(stream), m_hasStatus(), m_statusCode(), m_hasHeaders() {
-    }
-
-    void HttpResponse::getStatusCached() {
-        using std::getline;
-        using std::istringstream;
-        using boost::algorithm::trim;
-
-        if (!m_hasStatus) {
-            Line line;
-            if (*m_stream >> line) {
-                istringstream reader(line.value);
-                reader >> m_version;
-                reader >> m_statusCode;
-                getline(reader, m_statusMessage);
-                trim(m_statusMessage);
-                // TODO: check for bad format
-                m_hasStatus = true;
-            }
-        }
-    }
-
-    std::string HttpResponse::getVersion() {
-        getStatusCached();
-        return m_version;
-    }
-
-    int HttpResponse::getStatusCode() {
-        getStatusCached();
-        return m_statusCode;
-    }
-
-    std::string HttpResponse::getStatusMessage() {
-        getStatusCached();
-        return m_statusMessage;
-    }
-
     std::pair<std::string, std::string> parseHeaderPair(Line const& line) {
         using std::find;
         using std::pair;
@@ -88,64 +46,102 @@ namespace spider {
         trim(value);
         return pair<string, string>(name, value);
     }
+}
 
-    void HttpResponse::getHeadersCached() {
-        using std::back_inserter;
-        using std::equal_to;
-        using std::for_each;
-        using std::istream_iterator;
-        using std::pair;
-        using std::string;
-        using std::remove_if;
-        using std::transform;
-        using std::vector;
-        using boost::bind;
+spider::HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
+    : m_stream(stream), m_hasStatus(), m_statusCode(), m_hasHeaders() {
+}
 
-        typedef pair<string, string> HeaderPair;
+void spider::HttpResponse::getStatusCached() {
+    using std::getline;
+    using std::istringstream;
+    using boost::algorithm::trim;
 
-        if (!m_hasHeaders) {
-            getStatusCached();
-            if (*m_stream) {
-                istream_iterator<Line> begin(*m_stream);
-                istream_iterator<Line> end;
-
-                // grab each header line
-                vector<Line> lines;
-                copy_while(
-                    begin, end,
-                    back_inserter(lines),
-                    !bind(equal_to<string>(), bind(&Line::value, _1), string()));
-
-                // split the lines at the first colon (:)
-                vector<HeaderPair> headerPairs;
-                transform(
-                    lines.begin(), lines.end(),
-                    back_inserter(headerPairs),
-                    parseHeaderPair);
-
-                // ignore any headers without a name
-                vector<HeaderPair>::iterator pastHeaders = remove_if(
-                    headerPairs.begin(), headerPairs.end(),
-                    bind(equal_to<string>(),
-                        bind(&HeaderPair::first, _1), string()));
-
-                // add each header pair to the header collection
-                for_each(
-                    headerPairs.begin(), pastHeaders,
-                    bind(&HeaderCollection::addHeader, &m_headers,
-                        bind(&HeaderPair::first, _1),
-                        bind(&HeaderPair::second, _1)));
-                m_hasHeaders = true;
-            }
+    if (!m_hasStatus) {
+        Line line;
+        if (*m_stream >> line) {
+            istringstream reader(line.value);
+            reader >> m_version;
+            reader >> m_statusCode;
+            getline(reader, m_statusMessage);
+            trim(m_statusMessage);
+            // TODO: check for bad format
+            m_hasStatus = true;
         }
     }
+}
 
-    HeaderCollection const& HttpResponse::getHeaders() const {
-        return m_headers;
-    }
+std::string spider::HttpResponse::getVersion() {
+    getStatusCached();
+    return m_version;
+}
 
-    std::istream & HttpResponse::getContent() {
-        getHeadersCached();
-        return *m_stream;
+int spider::HttpResponse::getStatusCode() {
+    getStatusCached();
+    return m_statusCode;
+}
+
+std::string spider::HttpResponse::getStatusMessage() {
+    getStatusCached();
+    return m_statusMessage;
+}
+
+void spider::HttpResponse::getHeadersCached() {
+    using std::back_inserter;
+    using std::equal_to;
+    using std::for_each;
+    using std::istream_iterator;
+    using std::pair;
+    using std::string;
+    using std::remove_if;
+    using std::transform;
+    using std::vector;
+    using boost::bind;
+
+    typedef pair<string, string> HeaderPair;
+
+    if (!m_hasHeaders) {
+        getStatusCached();
+        if (*m_stream) {
+            istream_iterator<Line> begin(*m_stream);
+            istream_iterator<Line> end;
+
+            // grab each header line
+            vector<Line> lines;
+            copy_while(
+                begin, end,
+                back_inserter(lines),
+                !bind(equal_to<string>(), bind(&Line::value, _1), string()));
+
+            // split the lines at the first colon (:)
+            vector<HeaderPair> headerPairs;
+            transform(
+                lines.begin(), lines.end(),
+                back_inserter(headerPairs),
+                parseHeaderPair);
+
+            // ignore any headers without a name
+            vector<HeaderPair>::iterator pastHeaders = remove_if(
+                headerPairs.begin(), headerPairs.end(),
+                bind(equal_to<string>(),
+                    bind(&HeaderPair::first, _1), string()));
+
+            // add each header pair to the header collection
+            for_each(
+                headerPairs.begin(), pastHeaders,
+                bind(&HeaderCollection::addHeader, &m_headers,
+                    bind(&HeaderPair::first, _1),
+                    bind(&HeaderPair::second, _1)));
+            m_hasHeaders = true;
+        }
     }
+}
+
+spider::HeaderCollection const& spider::HttpResponse::getHeaders() const {
+    return m_headers;
+}
+
+std::istream & spider::HttpResponse::getContent() {
+    getHeadersCached();
+    return *m_stream;
 }

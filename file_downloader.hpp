@@ -1,6 +1,7 @@
 #ifndef SPIDER_FILE_DOWNLOADER_HPP
 #define SPIDER_FILE_DOWNLOADER_HPP
 
+#include <memory>
 #include <string>
 #include "downloader.hpp"
 #include "url.hpp"
@@ -17,7 +18,7 @@ namespace spider {
         FileDownloader(
             Counter & counter,
             Url const& url,
-            boost::shared_ptr<Url> const referrer,
+            std::shared_ptr<Url> const referrer,
             std::string const& directoryPath
         );
 

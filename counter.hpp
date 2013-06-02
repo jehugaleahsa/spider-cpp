@@ -1,13 +1,13 @@
 #ifndef SPIDER_COUNTER_HPP
 #define SPIDER_COUNTER_HPP
 
-#include <boost/thread.hpp>
+#include <mutex>
 
 namespace spider {
 
     class Counter {
-        boost::mutex m_wait_mutex;
-        boost::mutex m_counter_mutex;
+        std::mutex m_wait_mutex;
+        std::mutex m_counter_mutex;
         int m_counter;
 
         Counter(Counter const& other);
@@ -19,16 +19,16 @@ namespace spider {
         }
 
         void increment() {
-            using boost::lock_guard;
-            using boost::mutex;
+            using std::lock_guard;
+            using std::mutex;
 
             lock_guard<mutex> guard(m_counter_mutex);
             ++m_counter;
         }
 
         void decrement() {
-            using boost::lock_guard;
-            using boost::mutex;
+            using std::lock_guard;
+            using std::mutex;
 
             lock_guard<mutex> guard(m_counter_mutex);
             if (m_counter == 0 || --m_counter == 0) {

@@ -1,7 +1,7 @@
 #ifndef SPIDER_DOWNLOADER_HPP
 #define SPIDER_DOWNLOADER_HPP
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "counter.hpp"
 #include "http_request.hpp"
 #include "url.hpp"
@@ -11,7 +11,7 @@ namespace spider {
     class Downloader {
         Counter & m_counter;
         Url m_url;
-        boost::shared_ptr<Url> m_referrer;
+        std::shared_ptr<Url> m_referrer;
         
         Downloader(Downloader const& other);
         Downloader & operator=(Downloader const& downloadable);
@@ -30,13 +30,13 @@ namespace spider {
         Downloader(
             Counter & counter,
             Url const& url, 
-            boost::shared_ptr<Url> const referrer);
+            std::shared_ptr<Url> const referrer);
 
         Counter & getCounter();
 
         Url const& getUrl() const;
 
-        boost::shared_ptr<Url> const getReferrer() const;
+        std::shared_ptr<Url> const getReferrer() const;
 
     public:
         virtual ~Downloader();

@@ -2,10 +2,10 @@
 #define SPIDER_EXTRACTOR_HPP
 
 #include <algorithm>
+#include <functional>
+#include <memory>
 #include <string>
-#include <boost/bind.hpp>
 #include <boost/regex.hpp>
-#include <boost/shared_ptr.hpp>
 #include "url.hpp"
 
 namespace spider {
@@ -39,10 +39,10 @@ namespace spider {
     };
 
     class CompoundExtractor : public virtual UrlExtractor {
-        std::vector<boost::shared_ptr<UrlExtractor> > m_extractors;
+        std::vector<std::shared_ptr<UrlExtractor>> m_extractors;
 
     public:
-        void addExtractor(boost::shared_ptr<UrlExtractor> const& extractor);
+        void addExtractor(std::shared_ptr<UrlExtractor> const& extractor);
 
         virtual void getUrls(
             Url const& baseAddress,
