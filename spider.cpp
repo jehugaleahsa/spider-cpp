@@ -82,20 +82,21 @@ void spider::Spider::run(
     tracker.addUrl(topUrl);
 
     {
-        shared_ptr<Downloader> home(new PageDownloader(
+        shared_ptr<PageDownloader> home(new PageDownloader(
             counter,
             topUrl,
-            shared_ptr<Url>(),
-            downloadDirectory,
-            pool,
-            tracker,
-            pageCategorizer,
-            mediaCategorizer,
-            stripper,
-            baseExtractor,
-            extractor
-        ));
-        pool.addTask(bind(&Downloader::download, home));
+            shared_ptr<Url>()));
+        pool.addTask([&,home]() {
+            home->download(
+                downloadDirectory,
+                pool,
+                tracker,
+                pageCategorizer,
+                mediaCategorizer,
+                stripper,
+                baseExtractor,
+                extractor);
+        });
     }
 
     counter.wait();

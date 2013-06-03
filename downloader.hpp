@@ -40,8 +40,6 @@ namespace spider {
 
     public:
         virtual ~Downloader();
-
-        virtual void download() = 0;
     };
 
 }

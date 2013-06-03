@@ -1,4 +1,4 @@
-#include <boost/thread.hpp>
+#include <mutex>
 #include "tracker.hpp"
 #include "url.hpp"
 
@@ -6,9 +6,8 @@ spider::UrlTracker::UrlTracker() {
 }
 
 bool spider::UrlTracker::addUrl(Url const& url) {
-    using boost::lock_guard;
-    using boost::mutex;
-    using boost::unordered_set;
+    using std::lock_guard;
+    using std::mutex;
 
 
     lock_guard<mutex> guard(m_urls_mutex);

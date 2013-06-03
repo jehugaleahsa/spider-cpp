@@ -9,8 +9,6 @@
 namespace spider {
 
     class FileDownloader : public virtual Downloader {
-        std::string m_directoryPath;
-        
         FileDownloader(FileDownloader const& other);
         FileDownloader & operator=(FileDownloader const& other);
 
@@ -18,11 +16,9 @@ namespace spider {
         FileDownloader(
             Counter & counter,
             Url const& url,
-            std::shared_ptr<Url> const referrer,
-            std::string const& directoryPath
-        );
+            std::shared_ptr<Url> const referrer);
 
-        virtual void download();
+        void download(std::string const& downloadDirectory);
     };
 
 }
