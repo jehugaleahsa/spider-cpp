@@ -1,14 +1,16 @@
 #spider-cpp
 
 ##Dependencies
-spider-cpp is dependent on **Boost 1.50**. It requires access to the libraries:
+spider-cpp is dependent on **Boost 1.53**. It requires access to the libraries:
 * boost asio
 * boost regex
 * boost system
-* boost thread
-* boost unit test framework
 
-spider-cpp was compiled on Ubuntu 12 with g++-4.6.3 installed. It was written using VIM, gedit and sublime. I used GNU make to automate my builds.
+spider-cpp was compiled on Ubuntu 12/Slackware 14 with g++-4.8.1 installed. It was written using VIM. I used GNU make to automate my builds.
+
+##Usage
+Assuming you have boost installed under `/usr`, the following should build and run the spider:
+    make extractor SITE=root_url DIR=download_directory
 
 ## Purpose
 The hope is that, given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while). Additionally, URLs referring to certain types of resources (movies, images, etc.) will be downloaded to a local file.
@@ -38,9 +40,12 @@ I came into this project completely inexperienced writing realistic applications
 * when you can't figure out the cause of a segmentation fault, use gdb.
 * the iostream library is extremely powerful and flexible at the same time.
 * `fstream` only accepts `char *` for file names.
-* `fstream` doesn't recognize ~ and other special path indicators. No exceptions thrown.
+* `fstream` doesn't recognize `~` and other special path indicators. No exceptions thrown.
 * prior to C++ 11, default function template arguments weren't allowed.
 * template member functions lead to ugly syntax, in many cases.
+* Boost and C++11's function template simplifies working with threads.
+* C++11's regex doesn't support named capture groups.
+* C++11's `bind` can't easily be negated. Boost's `bind` could be proceeded by `!`.
 * inheriting from types in the `<functional>` header is painful. Use `ptr_fun`, etc. when possible.
 * because `std::exception`\`s `what` method returns `char const *`, returning the results of `c_str` on a locally built error string is a bug. The message must be built within the ctor.
 * there may be some value in creating simple wrapper classes around primitive types to make sure they are given the same treatment as user-defined types within ctors.

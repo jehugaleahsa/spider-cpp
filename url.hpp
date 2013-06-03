@@ -6,7 +6,6 @@
 #include <functional>
 #include <iosfwd>
 #include <string>
-#include <boost/functional/hash.hpp>
 
 namespace spider {
 
@@ -112,7 +111,7 @@ namespace std {
 
 }
 
-namespace boost {
+namespace std {
 
     template <>
     struct hash<spider::Url> : public std::unary_function<spider::Url, std::size_t> {

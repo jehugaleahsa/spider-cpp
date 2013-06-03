@@ -1,3 +1,4 @@
+#include <sstream>
 #include "counter.hpp"
 #include "downloader.hpp"
 #include "http_request.hpp"
