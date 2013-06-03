@@ -19,7 +19,7 @@ DOWNLOADER = downloader.hpp $(COUNTER) $(HTTP_REQUEST) $(URL)
 EXTRACTOR = extractor.hpp $(URL)
 FILE_DOWNLOADER = file_downloader.hpp $(DOWNLOADER) $(URL)
 PAGE_DOWNLOADER = page_downloader.hpp $(CATEGORIZER) $(DOWNLOADER) $(EXTRACTOR) $(STRIPPER) $(THREAD_POOL) $(TRACKER) $(URL)
-SPIDER = spider.hpp $(URL)
+SPIDER = spider.hpp $(URL) $(SCOPED_COUNTER)
 
 all: spider
 

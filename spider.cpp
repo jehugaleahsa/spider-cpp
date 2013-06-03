@@ -4,6 +4,7 @@
 #include "downloader.hpp"
 #include "extractor.hpp"
 #include "page_downloader.hpp"
+#include "scoped_counter.hpp"
 #include "spider.hpp"
 #include "stripper.hpp"
 #include "thread_pool.hpp"
@@ -83,13 +84,14 @@ void spider::Spider::run(
 
     {
         shared_ptr<PageDownloader> home(new PageDownloader(
-            counter,
             topUrl,
             shared_ptr<Url>()));
         pool.addTask([&,home]() {
+            ScopedCounter scoped(counter);
             home->download(
                 downloadDirectory,
                 pool,
+                counter,
                 tracker,
                 pageCategorizer,
                 mediaCategorizer,

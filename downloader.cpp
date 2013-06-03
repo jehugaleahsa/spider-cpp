@@ -1,5 +1,4 @@
 #include <sstream>
-#include "counter.hpp"
 #include "downloader.hpp"
 #include "http_request.hpp"
 #include "url.hpp"
@@ -21,8 +20,7 @@ void spider::Downloader::addUserAgentHeader(spider::HttpRequest & request) const
     using spider::HeaderCollection;
 
 HeaderCollection & headers = request.getHeaders();
-    //headers.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1");
-    headers.addHeader("User-Agent", "curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3");
+    headers.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1");
 }
 
 void spider::Downloader::addAcceptHeader(spider::HttpRequest & request) const {
@@ -47,17 +45,12 @@ void spider::Downloader::addConnectionHeader(spider::HttpRequest & request) cons
 }
 
 spider::Downloader::Downloader(
-    Counter & counter,
     Url const& url,
     std::shared_ptr<Url> const referrer)
-    : m_counter(counter), m_url(url), m_referrer(referrer) {
+    : m_url(url), m_referrer(referrer) {
 }
 
 spider::Downloader::~Downloader() {
-}
-
-spider::Counter & spider::Downloader::getCounter() {
-    return m_counter;
 }
 
 spider::Url const& spider::Downloader::getUrl() const {

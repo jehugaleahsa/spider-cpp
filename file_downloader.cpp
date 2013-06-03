@@ -43,10 +43,9 @@ namespace {
 }
 
 spider::FileDownloader::FileDownloader(
-    Counter & counter,
     Url const& url,
     std::shared_ptr<Url> const referrer)
-    : Downloader(counter, url, referrer) {
+    : Downloader(url, referrer) {
 }
 
 void spider::FileDownloader::download(std::string const& downloadDirectory) {

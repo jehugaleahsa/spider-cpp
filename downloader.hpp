@@ -2,14 +2,12 @@
 #define SPIDER_DOWNLOADER_HPP
 
 #include <memory>
-#include "counter.hpp"
 #include "http_request.hpp"
 #include "url.hpp"
 
 namespace spider {
 
     class Downloader {
-        Counter & m_counter;
         Url m_url;
         std::shared_ptr<Url> m_referrer;
         
@@ -28,11 +26,8 @@ namespace spider {
         void addConnectionHeader(HttpRequest & request) const;
 
         Downloader(
-            Counter & counter,
             Url const& url, 
             std::shared_ptr<Url> const referrer);
-
-        Counter & getCounter();
 
         Url const& getUrl() const;
 

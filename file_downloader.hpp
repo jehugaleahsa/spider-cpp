@@ -14,7 +14,6 @@ namespace spider {
 
     public:
         FileDownloader(
-            Counter & counter,
             Url const& url,
             std::shared_ptr<Url> const referrer);
 
