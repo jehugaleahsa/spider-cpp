@@ -2,10 +2,10 @@
 #define SPIDER_HTTP_RESPONSE_HPP
 
 #include <iosfwd>
+#include <memory>
 #include <set>
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "header.hpp"
 
 namespace spider {
@@ -13,7 +13,7 @@ namespace spider {
     class HttpResponse {
         friend class HttpRequest;
 
-        boost::shared_ptr<std::istream> m_stream;
+        std::shared_ptr<std::istream> m_stream;
 
         bool m_hasStatus;
         void getStatusCached();
@@ -25,7 +25,7 @@ namespace spider {
         void getHeadersCached();
         HeaderCollection m_headers;
 
-        HttpResponse(boost::shared_ptr<std::istream> stream);
+        HttpResponse(std::shared_ptr<std::istream> stream);
 
         bool readLine(std::string & line);
 

@@ -1,5 +1,4 @@
 #include <memory>
-#include <boost/function.hpp>
 #include "categorizer.hpp"
 #include "counter.hpp"
 #include "downloader.hpp"
@@ -49,7 +48,6 @@ void spider::Spider::run(
     std::ostream & output, 
     Url const& topUrl,
     std::string const& downloadDirectory) const {
-    using boost::function;
     using std::shared_ptr;
 
     Categorizer pageCategorizer;

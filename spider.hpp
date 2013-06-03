@@ -2,6 +2,7 @@
 #define SPIDER_SPIDER_HPP
 
 #include <iosfwd>
+#include <string>
 #include "url.hpp"
 
 namespace spider {

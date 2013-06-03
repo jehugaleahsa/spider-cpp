@@ -1,18 +1,19 @@
+#include <functional>
+#include <memory>
+#include <mutex>
 #include <queue>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <boost/thread.hpp>
+#include <thread>
 #include "thread_pool.hpp"
 
 int spider::getProcessorCount() {
-    return boost::thread::hardware_concurrency();
+    return std::thread::hardware_concurrency();
 }
 
-boost::function<void(void)> spider::Consumer::getTask() {
-    using boost::defer_lock;
-    using boost::function;
-    using boost::mutex;
-    using boost::unique_lock;
+std::function<void(void)> spider::Consumer::getTask() {
+    using std::defer_lock;
+    using std::function;
+    using std::mutex;
+    using std::unique_lock;
 
     unique_lock<mutex> queue_access_lock(m_queue_mutex, defer_lock);
     lock(queue_access_lock, m_has_tasks_mutex);
@@ -25,7 +26,7 @@ boost::function<void(void)> spider::Consumer::getTask() {
 }
 
 void spider::Consumer::consume() {
-    using boost::function;
+    using std::function;
     
     while (true) {
         function<void(void)> callable = getTask();
@@ -37,9 +38,9 @@ void spider::Consumer::consume() {
 }
 
 spider::Consumer::Consumer(
-    std::queue<boost::function<void(void)> > & tasks,
-    boost::mutex & queue_mutex,
-    boost::mutex & has_tasks_mutex)
+    std::queue<std::function<void(void)> > & tasks,
+    std::mutex & queue_mutex,
+    std::mutex & has_tasks_mutex)
 :
     m_tasks(tasks),
     m_queue_mutex(queue_mutex),
@@ -47,16 +48,16 @@ spider::Consumer::Consumer(
 }
 
 void spider::Consumer::start() {
-    using boost::bind;
-    using boost::function;
-    using boost::shared_ptr;
-    using boost::thread;
+    using std::bind;
+    using std::function;
+    using std::shared_ptr;
+    using std::thread;
     
     m_thread = shared_ptr<thread>(new thread(bind(&Consumer::consume, this)));
 }
 
-boost::shared_ptr<spider::Consumer> spider::ThreadPool::create() {
-    using boost::shared_ptr;
+std::shared_ptr<spider::Consumer> spider::ThreadPool::create() {
+    using std::shared_ptr;
     
     return shared_ptr<Consumer>(new Consumer(
         m_tasks,
@@ -66,10 +67,10 @@ boost::shared_ptr<spider::Consumer> spider::ThreadPool::create() {
 
 spider::ThreadPool::ThreadPool(int size) {
     using std::back_inserter;
+    using std::bind;
     using std::generate_n;
-    using boost::bind;
-    using boost::ref;
-    using boost::shared_ptr;
+    using std::ref;
+    using std::shared_ptr;
     
     m_has_tasks_mutex.lock();
     generate_n(
@@ -80,18 +81,19 @@ spider::ThreadPool::ThreadPool(int size) {
 
 void spider::ThreadPool::start() {
     using std::for_each;
-    using boost::bind;
+    using std::bind;
+    using std::placeholders::_1;
     
     for_each(
         m_pool.begin(), m_pool.end(), 
         bind(&Consumer::start, _1));
 }
 
-void spider::ThreadPool::addTask(boost::function<void(void)> callable) {
-    using boost::defer_lock;
-    using boost::lock_guard;
-    using boost::mutex;
-    using boost::unique_lock;
+void spider::ThreadPool::addTask(std::function<void(void)> callable) {
+    using std::defer_lock;
+    using std::lock_guard;
+    using std::mutex;
+    using std::unique_lock;
 
     lock_guard<mutex> queue_access_lock(m_queue_mutex);
     m_tasks.push(callable);

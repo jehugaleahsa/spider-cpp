@@ -25,7 +25,9 @@ namespace spider {
     class TagUrlExtractor : public virtual UrlExtractor{
         boost::regex m_regex;
 
-        Url buildUrl(Url const& baseAddress, boost::smatch const& match) const;
+        Url buildUrl(
+            Url const& baseAddress, 
+            boost::smatch const& match) const;
 
     public:
         explicit TagUrlExtractor(

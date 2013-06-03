@@ -2,9 +2,9 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <boost/algorithm/string.hpp>
-#include <boost/unordered_map.hpp>
 #include "header.hpp"
 
 spider::Header::Header(std::string const& name) : m_name(name) {
@@ -42,7 +42,7 @@ void spider::HeaderCollection::addHeader(
     std::string const& value) {
     using std::pair;
     using std::string;
-    using boost::unordered_map;
+    using std::unordered_map;
 
     unordered_map<string, Header>::iterator position = m_headers.find(name);
     if (position == m_headers.end()) {
@@ -58,7 +58,7 @@ bool spider::HeaderCollection::hasHeader(std::string const& name) const {
 
 spider::Header const& spider::HeaderCollection::getHeader(std::string const& name) const {
     using std::string;
-    using boost::unordered_map;
+    using std::unordered_map;
 
     unordered_map<string, Header>::const_iterator position = m_headers.find(name);
     if (position == m_headers.end()) {

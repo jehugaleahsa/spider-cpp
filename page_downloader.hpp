@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <string>
-#include <boost/function.hpp>
 #include "categorizer.hpp"
 #include "downloader.hpp"
 #include "extractor.hpp"
@@ -66,4 +65,4 @@ namespace spider {
 
 }
 
-#endif
+#endif  // SPIDER_PAGE_DOWNLOADER_HPP

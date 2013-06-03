@@ -2,11 +2,11 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/unordered_map.hpp>
 #include <boost/asio.hpp>
 #include "header.hpp"
 #include "http_request.hpp"
@@ -62,10 +62,10 @@ spider::HeaderCollection & spider::HttpRequest::getHeaders() {
 
 spider::HttpRequest::response_ptr spider::HttpRequest::getResponse() const {
     using std::ostream_iterator;
+    using std::shared_ptr;
     using std::string;
     using boost::asio::ip::tcp;
     using boost::lexical_cast;
-    using boost::shared_ptr;
 
     shared_ptr<tcp::iostream> tcpStream(new tcp::iostream());
     if (m_url.getPort() == Url::getDefaultPort()) {

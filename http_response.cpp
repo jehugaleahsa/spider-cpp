@@ -2,12 +2,11 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
 #include "algorithm.hpp"
 #include "header.hpp"
 #include "http_response.hpp"
@@ -48,7 +47,7 @@ namespace {
     }
 }
 
-spider::HttpResponse::HttpResponse(boost::shared_ptr<std::istream> stream)
+spider::HttpResponse::HttpResponse(std::shared_ptr<std::istream> stream)
     : m_stream(stream), m_hasStatus(), m_statusCode(), m_hasHeaders() {
 }
 
@@ -88,15 +87,17 @@ std::string spider::HttpResponse::getStatusMessage() {
 
 void spider::HttpResponse::getHeadersCached() {
     using std::back_inserter;
+    using std::bind;
     using std::equal_to;
     using std::for_each;
     using std::istream_iterator;
+    using std::not1;
     using std::pair;
+    using std::placeholders::_1;
     using std::string;
     using std::remove_if;
     using std::transform;
     using std::vector;
-    using boost::bind;
 
     typedef pair<string, string> HeaderPair;
 
@@ -111,7 +112,9 @@ void spider::HttpResponse::getHeadersCached() {
             copy_while(
                 begin, end,
                 back_inserter(lines),
-                !bind(equal_to<string>(), bind(&Line::value, _1), string()));
+                [](Line const& line) { 
+                    return !line.value.empty(); 
+                });
 
             // split the lines at the first colon (:)
             vector<HeaderPair> headerPairs;
@@ -123,15 +126,16 @@ void spider::HttpResponse::getHeadersCached() {
             // ignore any headers without a name
             vector<HeaderPair>::iterator pastHeaders = remove_if(
                 headerPairs.begin(), headerPairs.end(),
-                bind(equal_to<string>(),
-                    bind(&HeaderPair::first, _1), string()));
+                [](HeaderPair const& pair) { 
+                    return pair.first.empty(); 
+                });
 
             // add each header pair to the header collection
             for_each(
                 headerPairs.begin(), pastHeaders,
-                bind(&HeaderCollection::addHeader, &m_headers,
-                    bind(&HeaderPair::first, _1),
-                    bind(&HeaderPair::second, _1)));
+                [&](HeaderPair const& pair) { 
+                    m_headers.addHeader(pair.first, pair.second);
+                });
             m_hasHeaders = true;
         }
     }

@@ -30,15 +30,15 @@ namespace spider {
 
     std::string getFileName(std::string const& path) {
         using std::string;
-
+    
         string::const_iterator position = getFileNamePosition(path);
         string fileName(position, path.end());
         return fileName;
     }
-
+    
     std::string getDirectory(std::string const& path) {
         using std::string;
-
+    
         string::const_iterator position = getFileNamePosition(path);
         string directory(path.begin(), position);
         if (directory.size() == 0 || directory[0] != '/') {
@@ -46,11 +46,11 @@ namespace spider {
         }
         return directory;
     }
-
+    
     std::string getExtension(std::string const& path) {
         using std::find;
         using std::string;
-
+    
         string const fileName = getFileName(path);
         string::const_reverse_iterator rposition = find(fileName.rbegin(), fileName.rend(), '.');
         if (rposition == fileName.rend()) {

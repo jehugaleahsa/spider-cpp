@@ -6,7 +6,6 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <boost/function.hpp>
 #include "categorizer.hpp"
 #include "counter.hpp"
 #include "downloader.hpp"

@@ -1,9 +1,9 @@
 #ifndef SPIDER_CPP_HTTP_REQUEST
 #define SPIDER_CPP_HTTP_REQUEST
 
+#include <memory>
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include "header.hpp"
 #include "http_response.hpp"
 #include "url.hpp"
@@ -28,7 +28,7 @@ namespace spider {
         static std::string const& getNewline();
 
     public:
-        typedef boost::shared_ptr<HttpResponse> response_ptr;
+        typedef std::shared_ptr<HttpResponse> response_ptr;
 
         HttpRequest(RequestMethod method, Url const& url);
 

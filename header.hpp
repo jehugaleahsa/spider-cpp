@@ -1,9 +1,10 @@
 #ifndef SPIDER_HEADER_HPP
 #define SPIDER_HEADER_HPP
 
+#include <algorithm>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include <boost/unordered_map.hpp>
 
 namespace spider {
 
@@ -64,10 +65,10 @@ namespace {
 namespace spider {
 
     class HeaderCollection {
-        boost::unordered_map<std::string, Header> m_headers;
+        std::unordered_map<std::string, Header> m_headers;
 
     public:
-        typedef boost::unordered_map<std::string, Header>::size_type size_type;
+        typedef std::unordered_map<std::string, Header>::size_type size_type;
 
         void addHeader(std::string const& name, std::string const& value);
 
