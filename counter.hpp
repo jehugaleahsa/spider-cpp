@@ -14,31 +14,13 @@ namespace spider {
         Counter& operator=(Counter const& other);
 
     public:
-        Counter() : m_counter(0) {
-            m_wait_mutex.lock();
-        }
+        Counter();
 
-        void increment() {
-            using std::lock_guard;
-            using std::mutex;
+        void increment();
 
-            lock_guard<mutex> guard(m_counter_mutex);
-            ++m_counter;
-        }
+        void decrement();
 
-        void decrement() {
-            using std::lock_guard;
-            using std::mutex;
-
-            lock_guard<mutex> guard(m_counter_mutex);
-            if (m_counter == 0 || --m_counter == 0) {
-                m_wait_mutex.unlock();
-            }
-        }
-
-        void wait() {
-            m_wait_mutex.lock();
-        }
+        void wait();
     };
 }
 

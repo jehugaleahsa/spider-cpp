@@ -13,6 +13,7 @@
 #include "file_downloader.hpp"
 #include "http_request.hpp"
 #include "page_downloader.hpp"
+#include "scoped_counter.hpp"
 #include "stripper.hpp"
 #include "thread_pool.hpp"
 #include "tracker.hpp"

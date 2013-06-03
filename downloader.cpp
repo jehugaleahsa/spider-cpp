@@ -50,7 +50,9 @@ spider::Downloader::Downloader(
     Url const& url,
     std::shared_ptr<Url> const referrer)
     : m_counter(counter), m_url(url), m_referrer(referrer) {
-    m_counter.increment();
+}
+
+spider::Downloader::~Downloader() {
 }
 
 spider::Counter & spider::Downloader::getCounter() {
@@ -63,8 +65,4 @@ spider::Url const& spider::Downloader::getUrl() const {
 
 std::shared_ptr<spider::Url> const spider::Downloader::getReferrer() const {
     return m_referrer;
-}
-
-spider::Downloader::~Downloader() {
-    m_counter.decrement();
 }

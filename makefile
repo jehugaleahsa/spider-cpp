@@ -1,5 +1,5 @@
 CFLAGS=-std=c++11 -Wall -pedantic -L/usr/lib -g
-OBJS = categorizer.o downloader.o extractor.o file_downloader.o header.o http_request.o http_response.o main.o page_downloader.o spider.o stripper.o thread_pool.o tracker.o url.o
+OBJS = categorizer.o counter.o downloader.o extractor.o file_downloader.o header.o http_request.o http_response.o main.o page_downloader.o scoped_counter.o spider.o stripper.o thread_pool.o tracker.o url.o
 
 # define header dependencies
 
@@ -7,6 +7,7 @@ ALGORITHM = algorithm.hpp
 URL = url.hpp
 HEADER = header.hpp
 COUNTER = counter.hpp
+SCOPED_COUNTER = scoped_counter.hpp $(COUNTER)
 PATH_UTILITIES = path_utilities.hpp
 STRIPPER = stripper.hpp
 THREAD_POOL = thread_pool.hpp
@@ -38,6 +39,12 @@ spider: $(OBJS)
 categorizer.o: categorizer.cpp $(CATEGORIZER) $(URL)
 	g++ -c categorizer.cpp $(CFLAGS)
 	
+counter.o: counter.cpp $(COUNTER)
+	g++ -c counter.cpp $(CFLAGS)
+
+scoped_counter.o: scoped_counter.cpp $(SCOPED_COUNTER)
+	g++ -c scoped_counter.cpp $(CFLAGS)
+
 downloader.o: downloader.cpp $(COUNTER) $(DOWNLOADER) $(HTTP_REQUEST) $(URL)
 	g++ -c downloader.cpp $(CFLAGS)
 	
@@ -59,7 +66,7 @@ http_response.o: http_response.cpp $(ALGORITHM) $(HEADER) $(HTTP_RESPONSE)
 main.o: main.cpp $(SPIDER) $(URL)
 	g++ -c main.cpp $(CFLAGS)
 	
-page_downloader.o: page_downloader.cpp $(CATEGORIZER) $(COUNTER) $(DOWNLOADER) $(EXTRACTOR) $(FILE_DOWNLOADER) $(HTTP_REQUEST) $(PAGE_DOWNLOADER) $(STRIPPER) $(THREAD_POOL) $(TRACKER) $(URL)
+page_downloader.o: page_downloader.cpp $(CATEGORIZER) $(COUNTER) $(DOWNLOADER) $(EXTRACTOR) $(FILE_DOWNLOADER) $(HTTP_REQUEST) $(PAGE_DOWNLOADER) $(SCOPED_COUNTER) $(STRIPPER) $(THREAD_POOL) $(TRACKER) $(URL)
 	g++ -c page_downloader.cpp $(CFLAGS)
 
 spider.o: spider.cpp $(CATEGORIZER) $(COUNTER) $(DOWNLOADER) $(EXTRACTOR) $(PAGE_DOWNLOADER) $(SPIDER) $(STRIPPER) $(THREAD_POOL) $(TRACKER) $(URL)
