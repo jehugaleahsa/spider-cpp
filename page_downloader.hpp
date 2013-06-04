@@ -14,9 +14,20 @@
 namespace spider {
 
     class PageDownloader : public virtual Downloader {
-        HttpRequest::response_ptr getResponse() const;
+        HttpResponse getResponse() const;
 
-        std::string getContent(HttpRequest::response_ptr response) const;
+        std::string getContent(HttpResponse & response) const;
+
+        void handleRedirect(
+            HttpResponse & response,
+            std::string const& downloadDirectory,
+            ThreadPool & pool,
+            UrlTracker & tracker,
+            Categorizer const& pageCategorizer,
+            Categorizer const& mediaCategorizer,
+            Stripper const& stripper,
+            UrlExtractor const& baseExtractor,
+            UrlExtractor const& extractor) const;
 
         Url getBaseUrl(UrlExtractor const& baseExtractor, std::string const& content) const;
 
@@ -31,7 +42,7 @@ namespace spider {
             Stripper const& stripper,
             UrlExtractor const& baseExtractor,
             UrlExtractor const& extractor
-        );
+        ) const;
         
         void queuePageDownload(
             Url const& url, 
@@ -44,7 +55,7 @@ namespace spider {
             Stripper const& stripper,
             UrlExtractor const& baseExtractor,
             UrlExtractor const& extractor
-        );
+        ) const;
 
         void queueFileDownloads(
             std::vector<Url>::const_iterator begin,
@@ -52,13 +63,13 @@ namespace spider {
             ThreadPool & pool,
             UrlTracker & tracker,
             std::string const& downloadDirectory
-        );
+        ) const;
         
         void queueFileDownload(
             Url const& url,
             ThreadPool & pool,
             UrlTracker & tracker,
-            std::string const& downloadDirectory);
+            std::string const& downloadDirectory) const;
 
     public:
         PageDownloader(Url const& url, Url const& referrer);
@@ -71,7 +82,7 @@ namespace spider {
             Categorizer const& mediaCategorizer,
             Stripper const& stripper,
             UrlExtractor const& baseExtractor,
-            UrlExtractor const& extractor);
+            UrlExtractor const& extractor) const;
     };
 
 }

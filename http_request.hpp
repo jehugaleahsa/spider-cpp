@@ -34,7 +34,7 @@ namespace spider {
 
         HeaderCollection & getHeaders();
 
-        response_ptr getResponse() const;
+        HttpResponse getResponse() const;
     };
 
     class ConnectionException : public virtual std::exception {

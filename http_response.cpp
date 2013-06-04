@@ -51,6 +51,14 @@ spider::HttpResponse::HttpResponse(std::shared_ptr<std::istream> stream)
     : m_stream(stream), m_hasStatus(), m_statusCode(), m_hasHeaders() {
 }
 
+spider::HttpResponse::HttpResponse(HttpResponse const& other)
+    : 
+    m_stream(other.m_stream), 
+    m_hasStatus(other.m_hasStatus), 
+    m_statusCode(other.m_statusCode), 
+    m_hasHeaders(other.m_hasHeaders) {
+}
+
 void spider::HttpResponse::getStatusCached() {
     using std::getline;
     using std::istringstream;

@@ -18,34 +18,62 @@
 #include "tracker.hpp"
 #include "url.hpp"
 
-spider::HttpRequest::response_ptr spider::PageDownloader::getResponse() const {
+spider::HttpResponse spider::PageDownloader::getResponse() const {
     Url const& url = getUrl();
-    try {
-        HttpRequest request(GET, url);
-        addReferrerHeader(request);
-        addUserAgentHeader(request);
-        addAcceptHeader(request);
-        addHostHeader(request);
-        //addConnectionHeader(request);
-        HttpRequest::response_ptr response = request.getResponse();
-        return response;
-    } catch (ConnectionException const& exception) {
-        std::cerr << exception.what() << std::endl;
-        return HttpRequest::response_ptr();
-    }
+    HttpRequest request(GET, url);
+    addReferrerHeader(request);
+    addUserAgentHeader(request);
+    addAcceptHeader(request);
+    addHostHeader(request);
+    //addConnectionHeader(request);
+    return request.getResponse();
 }
 
-std::string spider::PageDownloader::getContent(HttpRequest::response_ptr response) const {
+std::string spider::PageDownloader::getContent(HttpResponse & response) const {
     using std::istream;
     using std::istream_iterator;
     using std::noskipws;
     using std::string;
 
-    istream & stream = response->getContent();
+    istream & stream = response.getContent();
     stream >> noskipws;
     istream_iterator<char> begin(stream);
     istream_iterator<char> end;
     return string(begin, end);
+}
+        
+void spider::PageDownloader::handleRedirect(
+    HttpResponse & response,
+    std::string const& downloadDirectory,
+    ThreadPool & pool,
+    UrlTracker & tracker,
+    Categorizer const& pageCategorizer,
+    Categorizer const& mediaCategorizer,
+    Stripper const& stripper,
+    UrlExtractor const& baseExtractor,
+    UrlExtractor const& extractor) const {
+    using std::string;
+
+    HeaderCollection const& headers = response.getHeaders();
+    if (!headers.hasHeader("Location")) {
+        return;
+    }
+    string urlString = headers.getHeader("Location").getValue(0);
+    try {
+        Url redirect = Url::parse(urlString);
+        queuePageDownload(
+            redirect, 
+            true,
+            downloadDirectory,
+            pool,
+            tracker,
+            pageCategorizer,
+            mediaCategorizer,
+            stripper,
+            baseExtractor,
+            extractor);
+    } catch (...) {
+    }
 }
 
 spider::Url spider::PageDownloader::getBaseUrl(
@@ -74,7 +102,7 @@ void spider::PageDownloader::queuePageDownloads(
     Categorizer const& mediaCategorizer,
     Stripper const& stripper,
     UrlExtractor const& baseExtractor,
-    UrlExtractor const& extractor) {
+    UrlExtractor const& extractor) const {
     using std::for_each;
     using std::vector;
 
@@ -103,7 +131,7 @@ void spider::PageDownloader::queuePageDownload(
     Categorizer const& mediaCategorizer,
     Stripper const& stripper,
     UrlExtractor const& baseExtractor,
-    UrlExtractor const& extractor) {
+    UrlExtractor const& extractor) const {
     using std::bind;
     using std::shared_ptr;
 
@@ -129,7 +157,7 @@ void spider::PageDownloader::queueFileDownloads(
     std::vector<Url>::const_iterator end,
     ThreadPool & pool,
     UrlTracker & tracker,
-    std::string const& downloadDirectory) {
+    std::string const& downloadDirectory) const {
     using std::for_each;
     using std::vector;
     
@@ -142,7 +170,7 @@ void spider::PageDownloader::queueFileDownload(
     Url const& url, 
     ThreadPool & pool,
     UrlTracker & tracker,
-    std::string const& downloadDirectory) {
+    std::string const& downloadDirectory) const {
     using std::shared_ptr;
     
     if (tracker.addUrl(url)) {
@@ -168,36 +196,19 @@ void spider::PageDownloader::download(
     Categorizer const& mediaCategorizer,
     Stripper const& stripper,
     UrlExtractor const& baseExtractor,
-    UrlExtractor const& extractor) {
+    UrlExtractor const& extractor) const {
     using std::string;
     using std::vector;
 
-    std::cerr << "Downloading page: " << getUrl() << std::endl;
+    try {
+        std::cerr << "Downloading page: " << getUrl() << std::endl;
+    
+        HttpResponse response = getResponse();
 
-    HttpRequest::response_ptr response = getResponse();
-    if (!response) {
-        std::cerr << "There was not response to: " << getUrl() << std::endl;
-        return;
-    }
-
-    string original = getContent(response);
-
-    int statusCode = response->getStatusCode();
-    if (statusCode >= 300 && statusCode < 400) {
-        try {
-            string urlString = original;
-            if (urlString.empty()) {
-                HeaderCollection const& headers = response->getHeaders();
-                if (headers.hasHeader("Location")) {
-                    urlString = headers.getHeader("Location").getValue(0);
-                } else {
-                    return;
-                }
-            }
-            Url redirect = Url::parse(urlString);
-            queuePageDownload(
-                redirect, 
-                true,
+        int statusCode = response.getStatusCode();
+        if (statusCode >= 300 && statusCode < 400) {
+            handleRedirect(
+                response,
                 downloadDirectory,
                 pool,
                 tracker,
@@ -207,33 +218,38 @@ void spider::PageDownloader::download(
                 baseExtractor,
                 extractor);
             return;
-        } catch (BadUrlException const& exception) {
-            return;
         }
+
+        string content = getContent(response);
+        content = stripper.strip(content);
+
+        Url baseUrl = getBaseUrl(baseExtractor, content);
+        vector<Url> urls;
+        extractor.getUrls(baseUrl, content, urls);
+
+        vector<Url>::iterator pageEnd = partition(
+            urls.begin(), urls.end(), 
+            [&](Url const& url) { return pageCategorizer.isDesired(url); });
+        queuePageDownloads(
+            urls.begin(), pageEnd,
+            downloadDirectory,
+            pool,
+            tracker,
+            pageCategorizer,
+            mediaCategorizer,
+            stripper,
+            baseExtractor,
+            extractor);
+
+        vector<Url>::iterator mediaEnd = partition(
+            urls.begin(), urls.end(), 
+            [&](Url const& url) { return mediaCategorizer.isDesired(url); });
+        queueFileDownloads(
+            urls.begin(), mediaEnd, 
+            pool, 
+            tracker, 
+            downloadDirectory);
+    } catch (ConnectionException const& exception) {
+        std::cerr << exception.what() << std::endl;
     }
-
-    string stripped = stripper.strip(original);
-
-    Url baseUrl = getBaseUrl(baseExtractor, stripped);
-    vector<Url> urls;
-    extractor.getUrls(baseUrl, stripped, urls);
-
-    vector<Url>::iterator pageEnd = partition(urls.begin(), urls.end(), [&](Url const& url) {
-        return pageCategorizer.isDesired(url);
-    });
-    queuePageDownloads(
-        urls.begin(), pageEnd,
-        downloadDirectory,
-        pool,
-        tracker,
-        pageCategorizer,
-        mediaCategorizer,
-        stripper,
-        baseExtractor,
-        extractor);
-
-    vector<Url>::iterator mediaEnd = partition(urls.begin(), urls.end(), [&](Url const& url) {
-        return mediaCategorizer.isDesired(url);
-    });
-    queueFileDownloads(urls.begin(), mediaEnd, pool, tracker, downloadDirectory);
 }

@@ -60,7 +60,7 @@ spider::HeaderCollection & spider::HttpRequest::getHeaders() {
     return m_headers;
 }
 
-spider::HttpRequest::response_ptr spider::HttpRequest::getResponse() const {
+spider::HttpResponse spider::HttpRequest::getResponse() const {
     using std::ostream_iterator;
     using std::make_shared;
     using std::shared_ptr;
@@ -95,8 +95,7 @@ spider::HttpRequest::response_ptr spider::HttpRequest::getResponse() const {
     *tcpStream << HttpRequest::getNewline();
     tcpStream->flush();
 
-    response_ptr response(new HttpResponse(tcpStream));
-    return response;
+    return HttpResponse(tcpStream);
 }
 
 spider::ConnectionException::ConnectionException(Url const& url) throw() {

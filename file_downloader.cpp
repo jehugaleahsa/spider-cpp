@@ -69,9 +69,9 @@ void spider::FileDownloader::download(std::string const& downloadDirectory) {
         addAcceptHeader(request);
         addHostHeader(request);
         addConnectionHeader(request);
-        HttpRequest::response_ptr response = request.getResponse();
+        HttpResponse response = request.getResponse();
 
-        istream & stream = response->getContent();
+        istream & stream = response.getContent();
         stream >> noskipws;
         if (!stream) {
             return;

@@ -30,6 +30,8 @@ namespace spider {
         bool readLine(std::string & line);
 
     public:
+        HttpResponse(HttpResponse const& other);
+
         std::string getVersion();
 
         int getStatusCode();
