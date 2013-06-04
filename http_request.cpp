@@ -62,12 +62,13 @@ spider::HeaderCollection & spider::HttpRequest::getHeaders() {
 
 spider::HttpRequest::response_ptr spider::HttpRequest::getResponse() const {
     using std::ostream_iterator;
+    using std::make_shared;
     using std::shared_ptr;
     using std::string;
     using boost::asio::ip::tcp;
     using boost::lexical_cast;
 
-    shared_ptr<tcp::iostream> tcpStream(new tcp::iostream());
+    shared_ptr<tcp::iostream> tcpStream = make_shared<tcp::iostream>();
     if (m_url.getPort() == Url::getDefaultPort()) {
         tcpStream->connect(m_url.getHost(), m_url.getScheme());
     } else {

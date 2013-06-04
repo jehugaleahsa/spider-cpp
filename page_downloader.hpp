@@ -18,9 +18,7 @@ namespace spider {
 
         std::string getContent(HttpRequest::response_ptr response) const;
 
-        Url getBaseUrl(
-            UrlExtractor const& baseExtractor,
-            std::string const& content) const;
+        Url getBaseUrl(UrlExtractor const& baseExtractor, std::string const& content) const;
 
         void queuePageDownloads(
             std::vector<Url>::const_iterator begin,
@@ -74,7 +72,6 @@ namespace spider {
             Stripper const& stripper,
             UrlExtractor const& baseExtractor,
             UrlExtractor const& extractor);
-
     };
 
 }

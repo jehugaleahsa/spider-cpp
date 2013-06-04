@@ -42,9 +42,7 @@ namespace {
 
 }
 
-spider::FileDownloader::FileDownloader(
-    Url const& url,
-    Url const& referrer)
+spider::FileDownloader::FileDownloader(Url const& url, Url const& referrer)
     : Downloader(url, referrer) {
 }
 

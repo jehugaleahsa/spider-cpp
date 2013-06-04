@@ -25,14 +25,12 @@ namespace spider {
     class TagUrlExtractor : public virtual UrlExtractor{
         boost::regex m_regex;
 
-        Url buildUrl(
-            Url const& baseAddress, 
-            boost::smatch const& match) const;
+        Url buildUrl(Url const& baseAddress, boost::smatch const& match) const;
 
     public:
-        explicit TagUrlExtractor(
-            std::string const& tagName,
-            std::string const& attributeName);
+        TagUrlExtractor(std::string const& tagName, std::string const& attributeName);
+
+        TagUrlExtractor(TagUrlExtractor const& other);
 
         virtual void getUrls(
             Url const& baseAddress,
@@ -44,7 +42,7 @@ namespace spider {
         std::vector<std::shared_ptr<UrlExtractor>> m_extractors;
 
     public:
-        void addExtractor(std::shared_ptr<UrlExtractor> const& extractor);
+        void addExtractor(std::shared_ptr<UrlExtractor> extractor);
 
         virtual void getUrls(
             Url const& baseAddress,

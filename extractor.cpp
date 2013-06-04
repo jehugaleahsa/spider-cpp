@@ -98,10 +98,8 @@ void spider::TagUrlExtractor::getUrls(
     std::string const& content, 
     std::vector<Url> & destination) const {
     using std::back_inserter;
-    using std::bind;
-    using std::placeholders::_1;
-    using std::ref;
     using std::transform;
+    using boost::smatch;
     using boost::sregex_iterator;
 
     sregex_iterator regex_begin(content.begin(), content.end(), m_regex);
@@ -109,7 +107,9 @@ void spider::TagUrlExtractor::getUrls(
     transform(
         regex_begin, regex_end,
         back_inserter(destination),
-        bind(&TagUrlExtractor::buildUrl, this, ref(baseAddress), _1));
+        [&](smatch const& match) {
+            return buildUrl(baseAddress, match);
+        });
 }
 
 
@@ -118,8 +118,11 @@ spider::TagUrlExtractor::TagUrlExtractor(
     : m_regex(getRegex(tagName, attributeName)) {
 }
 
-void spider::CompoundExtractor::addExtractor(
-    std::shared_ptr<spider::UrlExtractor> const& extractor) {
+spider::TagUrlExtractor::TagUrlExtractor(TagUrlExtractor const& other) 
+    : m_regex(other.m_regex) {
+}
+
+void spider::CompoundExtractor::addExtractor(std::shared_ptr<UrlExtractor> extractor) {
     m_extractors.push_back(extractor);
 }
 
@@ -128,15 +131,11 @@ void spider::CompoundExtractor::getUrls(
     std::string const& content,
     std::vector<Url> & destination) const {
     using std::for_each;
-    using std::bind;
-    using std::placeholders::_1;
-    using std::ref;
+    using std::shared_ptr;
 
     for_each(
         m_extractors.begin(), m_extractors.end(),
-            bind(&UrlExtractor::getUrls, 
-                _1, 
-                ref(baseAddress), 
-                ref(content), 
-                ref(destination)));
+            [&](shared_ptr<UrlExtractor> extractor) {
+                extractor->getUrls(baseAddress, content, destination);
+            });
 }

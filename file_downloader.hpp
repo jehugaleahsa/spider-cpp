@@ -12,9 +12,7 @@ namespace spider {
         FileDownloader & operator=(FileDownloader const& other);
 
     public:
-        FileDownloader(
-            Url const& url,
-            Url const& referrer);
+        FileDownloader(Url const& url, Url const& referrer);
 
         void download(std::string const& downloadDirectory);
     };

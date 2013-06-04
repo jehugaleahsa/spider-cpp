@@ -48,7 +48,7 @@ void spider::Spider::run(
     std::ostream & output, 
     Url const& topUrl,
     std::string const& downloadDirectory) const {
-    using std::shared_ptr;
+    using std::make_shared;
 
     Categorizer pageCategorizer;
     supportPageExtensions(pageCategorizer);
@@ -58,19 +58,13 @@ void spider::Spider::run(
 
     Stripper stripper("script");
     TagUrlExtractor baseExtractor("base", "href");
-    shared_ptr<UrlExtractor> anchorExtractor(new TagUrlExtractor("a", "href"));
-    shared_ptr<UrlExtractor> imageExtractor(new TagUrlExtractor("img", "src"));
-    shared_ptr<UrlExtractor> videoExtractor(new TagUrlExtractor("video", "src"));
-    shared_ptr<UrlExtractor> sourceExtractor(new TagUrlExtractor("source", "src"));
-    shared_ptr<UrlExtractor> embedExtractor(new TagUrlExtractor("embed", "flashvars"));
-    shared_ptr<UrlExtractor> paramExtractor(new TagUrlExtractor("param", "value"));
     CompoundExtractor extractor;
-    extractor.addExtractor(anchorExtractor);
-    extractor.addExtractor(imageExtractor);
-    extractor.addExtractor(videoExtractor);
-    extractor.addExtractor(sourceExtractor);
-    extractor.addExtractor(embedExtractor);
-    extractor.addExtractor(paramExtractor);
+    extractor.addExtractor(make_shared<TagUrlExtractor>("a", "href"));
+    extractor.addExtractor(make_shared<TagUrlExtractor>("img", "src"));
+    extractor.addExtractor(make_shared<TagUrlExtractor>("video", "src"));
+    extractor.addExtractor(make_shared<TagUrlExtractor>("source", "src"));
+    extractor.addExtractor(make_shared<TagUrlExtractor>("embed", "flashvars"));
+    extractor.addExtractor(make_shared<TagUrlExtractor>("param", "value"));
 
     int processorCount = getProcessorCount();
     Counter counter;
