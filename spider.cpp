@@ -4,7 +4,6 @@
 #include "downloader.hpp"
 #include "extractor.hpp"
 #include "page_downloader.hpp"
-#include "scoped_counter.hpp"
 #include "spider.hpp"
 #include "stripper.hpp"
 #include "thread_pool.hpp"
@@ -73,33 +72,26 @@ void spider::Spider::run(
     extractor.addExtractor(embedExtractor);
     extractor.addExtractor(paramExtractor);
 
-
-    Counter counter;
     int processorCount = getProcessorCount();
-    ThreadPool pool(processorCount + 2);
+    Counter counter;
+    ThreadPool pool(counter, processorCount + 2);
     pool.start();
     
     UrlTracker tracker;
     tracker.addUrl(topUrl);
 
-    {
-        shared_ptr<PageDownloader> home(new PageDownloader(
-            topUrl,
-            shared_ptr<Url>()));
-        pool.addTask([&,home]() {
-            ScopedCounter scoped(counter);
-            home->download(
-                downloadDirectory,
-                pool,
-                counter,
-                tracker,
-                pageCategorizer,
-                mediaCategorizer,
-                stripper,
-                baseExtractor,
-                extractor);
-        });
-    }
+    pool.addTask([&]() {
+        PageDownloader home(topUrl, Url());
+        home.download(
+            downloadDirectory,
+            pool,
+            tracker,
+            pageCategorizer,
+            mediaCategorizer,
+            stripper,
+            baseExtractor,
+            extractor);
+    });
 
     counter.wait();
 }

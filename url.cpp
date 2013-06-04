@@ -5,6 +5,9 @@
 #include <boost/regex.hpp>
 #include "url.hpp"
 
+spider::Url::Url() {
+}
+
 spider::Url::Url(
     std::string const& host,
     int port,

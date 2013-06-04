@@ -3,6 +3,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include "counter.hpp"
 #include "thread_pool.hpp"
 
 int spider::getProcessorCount() {
@@ -32,61 +33,60 @@ void spider::Consumer::consume() {
         function<void(void)> callable = getTask();
         try {
             callable();
+            m_counter.decrement();
         } catch (...) {
+            m_counter.decrement();
         }
     }
 }
 
 spider::Consumer::Consumer(
+    Counter & counter,
     std::queue<std::function<void(void)> > & tasks,
     std::mutex & queue_mutex,
     std::mutex & has_tasks_mutex)
 :
+    m_counter(counter),
     m_tasks(tasks),
     m_queue_mutex(queue_mutex),
     m_has_tasks_mutex(has_tasks_mutex) {
 }
 
 void spider::Consumer::start() {
-    using std::bind;
-    using std::function;
-    using std::shared_ptr;
+    using std::unique_ptr;
     using std::thread;
     
-    m_thread = shared_ptr<thread>(new thread(bind(&Consumer::consume, this)));
+    m_thread = unique_ptr<thread>(new thread([&]() { consume(); }));
 }
 
-std::shared_ptr<spider::Consumer> spider::ThreadPool::create() {
-    using std::shared_ptr;
+std::unique_ptr<spider::Consumer> spider::ThreadPool::create() {
+    using std::unique_ptr;
     
-    return shared_ptr<Consumer>(new Consumer(
+    return unique_ptr<Consumer>(new Consumer(
+        m_counter,
         m_tasks,
         m_queue_mutex,
         m_has_tasks_mutex));
 }
 
-spider::ThreadPool::ThreadPool(int size) {
+spider::ThreadPool::ThreadPool(Counter & counter, int size) 
+    : m_counter(counter) {
     using std::back_inserter;
-    using std::bind;
     using std::generate_n;
-    using std::ref;
-    using std::shared_ptr;
     
     m_has_tasks_mutex.lock();
     generate_n(
         back_inserter(m_pool),
         size,
-        bind(&ThreadPool::create, this));
+        [&]() { return create(); });
 }
 
 void spider::ThreadPool::start() {
     using std::for_each;
-    using std::bind;
-    using std::placeholders::_1;
     
     for_each(
         m_pool.begin(), m_pool.end(), 
-        bind(&Consumer::start, _1));
+        [](std::unique_ptr<Consumer> & consumer) { consumer->start(); });
 }
 
 void spider::ThreadPool::addTask(std::function<void(void)> callable) {
@@ -95,6 +95,7 @@ void spider::ThreadPool::addTask(std::function<void(void)> callable) {
     using std::mutex;
     using std::unique_lock;
 
+    m_counter.increment();
     lock_guard<mutex> queue_access_lock(m_queue_mutex);
     m_tasks.push(callable);
     m_has_tasks_mutex.unlock();

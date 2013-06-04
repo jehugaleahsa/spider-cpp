@@ -1,7 +1,6 @@
 #ifndef SPIDER_DOWNLOADER_HPP
 #define SPIDER_DOWNLOADER_HPP
 
-#include <memory>
 #include "http_request.hpp"
 #include "url.hpp"
 
@@ -9,7 +8,7 @@ namespace spider {
 
     class Downloader {
         Url m_url;
-        std::shared_ptr<Url> m_referrer;
+        Url m_referrer;
         
         Downloader(Downloader const& other);
         Downloader & operator=(Downloader const& downloadable);
@@ -27,11 +26,11 @@ namespace spider {
 
         Downloader(
             Url const& url, 
-            std::shared_ptr<Url> const referrer);
+            Url const& referrer);
 
         Url const& getUrl() const;
 
-        std::shared_ptr<Url> const getReferrer() const;
+        Url const& getReferrer() const;
 
     public:
         virtual ~Downloader();

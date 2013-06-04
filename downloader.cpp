@@ -7,12 +7,12 @@ void spider::Downloader::addReferrerHeader(spider::HttpRequest & request) const 
     using std::ostringstream;
     using spider::HeaderCollection;
 
-    if (!m_referrer) {
+    if (m_referrer.empty()) {
         return;
     }
     HeaderCollection & headers = request.getHeaders();
     ostringstream referrerBuilder;
-    referrerBuilder << *m_referrer;
+    referrerBuilder << m_referrer;
     headers.addHeader("referer", referrerBuilder.str());
 }
 
@@ -44,9 +44,7 @@ void spider::Downloader::addConnectionHeader(spider::HttpRequest & request) cons
     headers.addHeader("Connection", "close");
 }
 
-spider::Downloader::Downloader(
-    Url const& url,
-    std::shared_ptr<Url> const referrer)
+spider::Downloader::Downloader(Url const& url, Url const& referrer)
     : m_url(url), m_referrer(referrer) {
 }
 
@@ -57,6 +55,6 @@ spider::Url const& spider::Downloader::getUrl() const {
     return m_url;
 }
 
-std::shared_ptr<spider::Url> const spider::Downloader::getReferrer() const {
+spider::Url const& spider::Downloader::getReferrer() const {
     return m_referrer;
 }

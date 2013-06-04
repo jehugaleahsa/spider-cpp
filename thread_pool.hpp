@@ -7,16 +7,18 @@
 #include <memory>
 #include <queue>
 #include <thread>
+#include "counter.hpp"
 
 namespace spider {
 
     int getProcessorCount();
 
     class Consumer {
+        Counter & m_counter;
         std::queue<std::function<void(void)>> & m_tasks;
         std::mutex & m_queue_mutex;
         std::mutex & m_has_tasks_mutex;
-        std::shared_ptr<std::thread> m_thread;
+        std::unique_ptr<std::thread> m_thread;
 
         std::function<void(void)> getTask();
 
@@ -24,6 +26,7 @@ namespace spider {
 
     public:
         Consumer(
+            Counter & counter,
             std::queue<std::function<void(void)>> & tasks,
             std::mutex & queue_mutex,
             std::mutex & has_tasks_mutex);
@@ -32,7 +35,8 @@ namespace spider {
     };
 
     class ThreadPool {
-        std::vector<std::shared_ptr<Consumer>> m_pool;
+        Counter & m_counter;
+        std::vector<std::unique_ptr<Consumer>> m_pool;
         std::queue<std::function<void(void)>> m_tasks;
         std::mutex m_queue_mutex;
         std::mutex m_has_tasks_mutex;
@@ -40,10 +44,10 @@ namespace spider {
         ThreadPool(ThreadPool const& other);
         ThreadPool& operator=(ThreadPool const& other);
         
-        std::shared_ptr<Consumer> create();
+        std::unique_ptr<Consumer> create();
 
     public:
-        ThreadPool(int size);
+        ThreadPool(Counter & counter, int size);
         
         void start();
 

@@ -8,13 +8,11 @@
 #include <string>
 #include <vector>
 #include "categorizer.hpp"
-#include "counter.hpp"
 #include "downloader.hpp"
 #include "extractor.hpp"
 #include "file_downloader.hpp"
 #include "http_request.hpp"
 #include "page_downloader.hpp"
-#include "scoped_counter.hpp"
 #include "stripper.hpp"
 #include "thread_pool.hpp"
 #include "tracker.hpp"
@@ -71,7 +69,6 @@ void spider::PageDownloader::queuePageDownloads(
     std::vector<Url>::const_iterator end,
     std::string const& downloadDirectory,
     ThreadPool & pool,
-    Counter & counter,
     UrlTracker & tracker,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer,
@@ -87,7 +84,6 @@ void spider::PageDownloader::queuePageDownloads(
             false,
             downloadDirectory,
             pool,
-            counter,
             tracker,
             pageCategorizer,
             mediaCategorizer,
@@ -102,7 +98,6 @@ void spider::PageDownloader::queuePageDownload(
     bool reuseReferrer,
     std::string const& downloadDirectory,
     ThreadPool & pool,
-    Counter & counter,
     UrlTracker & tracker,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer,
@@ -113,21 +108,12 @@ void spider::PageDownloader::queuePageDownload(
     using std::shared_ptr;
 
     if (tracker.addUrl(url)) {
-        shared_ptr<Url> referrer;
-        if (reuseReferrer) {
-            referrer = getReferrer();
-        } else { 
-            referrer = shared_ptr<Url>(new Url(getUrl()));
-        }
-        shared_ptr<PageDownloader> downloader(new PageDownloader(
-            url,
-            referrer));
-        pool.addTask([&,downloader]() { 
-            ScopedCounter scoped(counter);
-            downloader->download(
+        Url referrer = reuseReferrer ? getReferrer() : getUrl();
+        pool.addTask([&, url, referrer]() { 
+            PageDownloader downloader(url, referrer);
+            downloader.download(
                 downloadDirectory,
                 pool,
-                counter,
                 tracker,
                 pageCategorizer,
                 mediaCategorizer,
@@ -142,48 +128,41 @@ void spider::PageDownloader::queueFileDownloads(
     std::vector<Url>::const_iterator begin,
     std::vector<Url>::const_iterator end,
     ThreadPool & pool,
-    Counter & counter,
     UrlTracker & tracker,
     std::string const& downloadDirectory) {
     using std::for_each;
     using std::vector;
     
     for_each(begin, end, [&](Url const& url) {
-        queueFileDownload(url, pool, counter, tracker, downloadDirectory);
+        queueFileDownload(url, pool, tracker, downloadDirectory);
     });
 }
 
 void spider::PageDownloader::queueFileDownload(
     Url const& url, 
     ThreadPool & pool,
-    Counter & counter,
     UrlTracker & tracker,
     std::string const& downloadDirectory) {
     using std::shared_ptr;
     
     if (tracker.addUrl(url)) {
-        shared_ptr<Url> referrer(new Url(getUrl()));
-        shared_ptr<FileDownloader> downloader(new FileDownloader(
-            url,
-            referrer
-        ));
-        pool.addTask([&,downloader]() {
-            ScopedCounter scoped(counter);
-            downloader->download(downloadDirectory);
+        Url referrer = getUrl();
+        pool.addTask([&, url, referrer]() {
+            FileDownloader downloader(url, referrer);
+            downloader.download(downloadDirectory);
         });
     }
 }
 
 spider::PageDownloader::PageDownloader(
     Url const& url,
-    std::shared_ptr<Url> const referrer)
+    Url const& referrer)
     : Downloader(url, referrer) {
 }
 
 void spider::PageDownloader::download(
     std::string const& downloadDirectory,
     ThreadPool & pool,
-    Counter & counter,
     UrlTracker & tracker,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer,
@@ -221,7 +200,6 @@ void spider::PageDownloader::download(
                 true,
                 downloadDirectory,
                 pool,
-                counter,
                 tracker,
                 pageCategorizer,
                 mediaCategorizer,
@@ -247,7 +225,6 @@ void spider::PageDownloader::download(
         urls.begin(), pageEnd,
         downloadDirectory,
         pool,
-        counter,
         tracker,
         pageCategorizer,
         mediaCategorizer,
@@ -258,5 +235,5 @@ void spider::PageDownloader::download(
     vector<Url>::iterator mediaEnd = partition(urls.begin(), urls.end(), [&](Url const& url) {
         return mediaCategorizer.isDesired(url);
     });
-    queueFileDownloads(urls.begin(), mediaEnd, pool, counter, tracker, downloadDirectory);
+    queueFileDownloads(urls.begin(), mediaEnd, pool, tracker, downloadDirectory);
 }

@@ -44,7 +44,7 @@ namespace {
 
 spider::FileDownloader::FileDownloader(
     Url const& url,
-    std::shared_ptr<Url> const referrer)
+    Url const& referrer)
     : Downloader(url, referrer) {
 }
 

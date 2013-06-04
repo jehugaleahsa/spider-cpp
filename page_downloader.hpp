@@ -1,11 +1,9 @@
 #ifndef SPIDER_PAGE_DOWNLOADER_HPP
 #define SPIDER_PAGE_DOWNLOADER_HPP
 
-#include <memory>
 #include <string>
 #include <vector>
 #include "categorizer.hpp"
-#include "counter.hpp"
 #include "downloader.hpp"
 #include "extractor.hpp"
 #include "stripper.hpp"
@@ -29,7 +27,6 @@ namespace spider {
             std::vector<Url>::const_iterator end,
             std::string const& downloadDirectory,
             ThreadPool & pool,
-            Counter & counter,
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
@@ -43,7 +40,6 @@ namespace spider {
             bool reuseReferrer,
             std::string const& downloadDirectory,
             ThreadPool & pool,
-            Counter & counter,
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
@@ -56,7 +52,6 @@ namespace spider {
             std::vector<Url>::const_iterator begin,
             std::vector<Url>::const_iterator end,
             ThreadPool & pool,
-            Counter & counter,
             UrlTracker & tracker,
             std::string const& downloadDirectory
         );
@@ -64,21 +59,15 @@ namespace spider {
         void queueFileDownload(
             Url const& url,
             ThreadPool & pool,
-            Counter & counter,
             UrlTracker & tracker,
             std::string const& downloadDirectory);
 
-
     public:
-        PageDownloader(
-            Url const& url,
-            std::shared_ptr<Url> const referrer
-        );
+        PageDownloader(Url const& url, Url const& referrer);
 
         void download(
             std::string const& downloadDirectory,
             ThreadPool & pool,
-            Counter & counter,
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
