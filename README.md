@@ -52,3 +52,4 @@ I came into this project completely inexperienced writing realistic applications
 * Boost's `bind` function can save from creating lots of little functor classes.
 * Polymorphism can rarely be used with references; pointers work more naturally.
 * There's not a convenient formatting for ctors withlots of parameters or long initializer lists.
+* Don't pass `shared_ptr` to lambda by reference!
