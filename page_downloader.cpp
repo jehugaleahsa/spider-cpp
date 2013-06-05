@@ -9,14 +9,13 @@
 #include <vector>
 #include "categorizer.hpp"
 #include "downloader.hpp"
-#include "extractor.hpp"
 #include "file_downloader.hpp"
 #include "http_request.hpp"
 #include "page_downloader.hpp"
-#include "stripper.hpp"
 #include "thread_pool.hpp"
 #include "tracker.hpp"
 #include "url.hpp"
+#include "url_finder.hpp"
 
 spider::HttpResponse spider::PageDownloader::getResponse() const {
     Url const& url = getUrl();
@@ -49,9 +48,7 @@ void spider::PageDownloader::handleRedirect(
     UrlTracker & tracker,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer,
-    Stripper const& stripper,
-    UrlExtractor const& baseExtractor,
-    UrlExtractor const& extractor) const {
+    UrlFinder const& finder) const {
     using std::string;
 
     HeaderCollection const& headers = response.getHeaders();
@@ -69,26 +66,8 @@ void spider::PageDownloader::handleRedirect(
             tracker,
             pageCategorizer,
             mediaCategorizer,
-            stripper,
-            baseExtractor,
-            extractor);
+            finder);
     } catch (...) {
-    }
-}
-
-spider::Url spider::PageDownloader::getBaseUrl(
-    UrlExtractor const& baseExtractor,
-    std::string const& content) const {
-    using std::back_inserter;
-    using std::vector;
-
-    Url const& url = getUrl();
-    vector<Url> baseAddresses;
-    baseExtractor.getUrls(url, content, baseAddresses);
-    if (baseAddresses.size() == 0) {
-        return url;
-    } else {
-        return baseAddresses.back();
     }
 }
 
@@ -100,9 +79,7 @@ void spider::PageDownloader::queuePageDownloads(
     UrlTracker & tracker,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer,
-    Stripper const& stripper,
-    UrlExtractor const& baseExtractor,
-    UrlExtractor const& extractor) const {
+    UrlFinder const& finder) const {
     using std::for_each;
     using std::vector;
 
@@ -115,9 +92,7 @@ void spider::PageDownloader::queuePageDownloads(
             tracker,
             pageCategorizer,
             mediaCategorizer,
-            stripper,
-            baseExtractor,
-            extractor);
+            finder);
     });
 }
 
@@ -129,9 +104,7 @@ void spider::PageDownloader::queuePageDownload(
     UrlTracker & tracker,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer,
-    Stripper const& stripper,
-    UrlExtractor const& baseExtractor,
-    UrlExtractor const& extractor) const {
+    UrlFinder const& finder) const {
     using std::bind;
     using std::shared_ptr;
 
@@ -145,9 +118,7 @@ void spider::PageDownloader::queuePageDownload(
                 tracker,
                 pageCategorizer,
                 mediaCategorizer,
-                stripper,
-                baseExtractor,
-                extractor); 
+                finder); 
         });
     }
 }
@@ -194,9 +165,8 @@ void spider::PageDownloader::download(
     UrlTracker & tracker,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer,
-    Stripper const& stripper,
-    UrlExtractor const& baseExtractor,
-    UrlExtractor const& extractor) const {
+    UrlFinder const& finder) const {
+    using std::back_inserter;
     using std::string;
     using std::vector;
 
@@ -214,18 +184,14 @@ void spider::PageDownloader::download(
                 tracker,
                 pageCategorizer,
                 mediaCategorizer,
-                stripper,
-                baseExtractor,
-                extractor);
+                finder);
             return;
         }
 
         string content = getContent(response);
-        content = stripper.strip(content);
 
-        Url baseUrl = getBaseUrl(baseExtractor, content);
         vector<Url> urls;
-        extractor.getUrls(baseUrl, content, urls);
+        finder.getUrls(getUrl(), content, back_inserter(urls));
 
         vector<Url>::iterator pageEnd = partition(
             urls.begin(), urls.end(), 
@@ -237,9 +203,7 @@ void spider::PageDownloader::download(
             tracker,
             pageCategorizer,
             mediaCategorizer,
-            stripper,
-            baseExtractor,
-            extractor);
+            finder);
 
         vector<Url>::iterator mediaEnd = partition(
             urls.begin(), urls.end(), 

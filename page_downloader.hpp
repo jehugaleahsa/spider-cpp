@@ -5,11 +5,10 @@
 #include <vector>
 #include "categorizer.hpp"
 #include "downloader.hpp"
-#include "extractor.hpp"
-#include "stripper.hpp"
 #include "thread_pool.hpp"
 #include "tracker.hpp"
 #include "url.hpp"
+#include "url_finder.hpp"
 
 namespace spider {
 
@@ -25,11 +24,7 @@ namespace spider {
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
-            Stripper const& stripper,
-            UrlExtractor const& baseExtractor,
-            UrlExtractor const& extractor) const;
-
-        Url getBaseUrl(UrlExtractor const& baseExtractor, std::string const& content) const;
+            UrlFinder const& finder) const;
 
         void queuePageDownloads(
             std::vector<Url>::const_iterator begin,
@@ -39,10 +34,7 @@ namespace spider {
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
-            Stripper const& stripper,
-            UrlExtractor const& baseExtractor,
-            UrlExtractor const& extractor
-        ) const;
+            UrlFinder const& finder) const;
         
         void queuePageDownload(
             Url const& url, 
@@ -52,10 +44,7 @@ namespace spider {
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
-            Stripper const& stripper,
-            UrlExtractor const& baseExtractor,
-            UrlExtractor const& extractor
-        ) const;
+            UrlFinder const& finder) const;
 
         void queueFileDownloads(
             std::vector<Url>::const_iterator begin,
@@ -80,9 +69,7 @@ namespace spider {
             UrlTracker & tracker,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer,
-            Stripper const& stripper,
-            UrlExtractor const& baseExtractor,
-            UrlExtractor const& extractor) const;
+            UrlFinder const& finder) const;
     };
 
 }

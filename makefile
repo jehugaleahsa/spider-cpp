@@ -1,5 +1,5 @@
 CFLAGS=-std=c++11 -Wall -pedantic -L/usr/lib -g
-OBJS = categorizer.o counter.o downloader.o extractor.o file_downloader.o header.o http_request.o http_response.o main.o page_downloader.o spider.o stripper.o thread_pool.o tracker.o url.o
+OBJS = categorizer.o counter.o downloader.o extractor.o file_downloader.o header.o http_request.o http_response.o main.o page_downloader.o spider.o stripper.o thread_pool.o tracker.o url.o url_finder.o
 
 # define header dependencies
 
@@ -16,6 +16,7 @@ HTTP_REQUEST = http_request.hpp $(HEADER) $(HTTP_RESPONSE) $(URL)
 CATEGORIZER = categorizer.hpp $(URL)
 DOWNLOADER = downloader.hpp $(HTTP_REQUEST) $(URL)
 EXTRACTOR = extractor.hpp $(URL)
+URL_FINDER = url_finder.hpp $(EXTRACTOR) $(STRIPPER) $(URL)
 FILE_DOWNLOADER = file_downloader.hpp $(DOWNLOADER) $(HTTP_REQUEST) $(HTTP_RESPONSE) $(PATH_UTILITIES) $(URL)
 PAGE_DOWNLOADER = page_downloader.hpp $(CATEGORIZER) $(DOWNLOADER) $(EXTRACTOR) $(FILE_DOWNLOADER) $(HTTP_REQUEST) $(STRIPPER) $(THREAD_POOL) $(TRACKER) $(URL)
 SPIDER = spider.hpp $(CATEGORIZER) $(COUNTER) $(DOWNLOADER) $(EXTRACTOR) $(PAGE_DOWNLOADER) $(STRIPPER) $(THREAD_POOL) $(TRACKER) $(URL)
@@ -80,6 +81,9 @@ tracker.o: tracker.cpp $(TRACKER)
 
 url.o: url.cpp $(URL)
 	g++ -c url.cpp $(CFLAGS)
+
+url_finder.o: url_finder.cpp $(URL_FINDER)
+	g++ -c url_finder.cpp $(CFLAGS)
 
 .PHONY : clean
 clean:

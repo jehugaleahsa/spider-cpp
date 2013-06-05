@@ -9,6 +9,7 @@
 #include "thread_pool.hpp"
 #include "tracker.hpp"
 #include "url.hpp"
+#include "url_finder.hpp"
 
 namespace {
 
@@ -65,6 +66,7 @@ void spider::Spider::run(
     extractor.addExtractor(make_shared<TagUrlExtractor>("source", "src"));
     extractor.addExtractor(make_shared<TagUrlExtractor>("embed", "flashvars"));
     extractor.addExtractor(make_shared<TagUrlExtractor>("param", "value"));
+    UrlFinder finder(stripper, baseExtractor, extractor);
 
     int processorCount = getProcessorCount();
     Counter counter;
@@ -82,9 +84,7 @@ void spider::Spider::run(
             tracker,
             pageCategorizer,
             mediaCategorizer,
-            stripper,
-            baseExtractor,
-            extractor);
+            finder);
     });
 
     counter.wait();
