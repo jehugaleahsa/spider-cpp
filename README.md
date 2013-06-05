@@ -53,3 +53,4 @@ I came into this project completely inexperienced writing realistic applications
 * Polymorphism can rarely be used with references; pointers work more naturally.
 * There's not a convenient formatting for ctors withlots of parameters or long initializer lists.
 * Don't pass `shared_ptr` to lambda by reference!
+* C++11 threads call `terminate` when deconstructed, unless detached.
