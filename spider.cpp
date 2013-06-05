@@ -1,5 +1,6 @@
 #include <memory>
 #include <vector>
+#include <boost/optional.hpp>
 #include "categorizer.hpp"
 #include "counter.hpp"
 #include "downloader.hpp"
@@ -54,6 +55,7 @@ void spider::Spider::run(
     std::string const& downloadDirectory) const {
     using std::make_shared;
     using std::vector;
+    using boost::optional;
 
     int processorCount = getProcessorCount();
     Counter counter;
@@ -86,7 +88,7 @@ void spider::Spider::run(
     manager.associate(mediaCategorizer, fileFactory);
 
     vector<Url> rootUrls { topUrl };
-    manager.download(Url(), rootUrls.begin(), rootUrls.end());
+    manager.download(optional<Url>(), rootUrls.begin(), rootUrls.end());
 
     counter.wait();
 }

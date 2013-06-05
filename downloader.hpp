@@ -1,6 +1,7 @@
 #ifndef SPIDER_DOWNLOADER_HPP
 #define SPIDER_DOWNLOADER_HPP
 
+#include <boost/optional.hpp>
 #include "http_request.hpp"
 #include "url.hpp"
 
@@ -8,7 +9,7 @@ namespace spider {
 
     class Downloader {
         Url m_url;
-        Url m_referrer;
+        boost::optional<Url> m_referrer;
         
         Downloader(Downloader const& other);
         Downloader & operator=(Downloader const& downloadable);
@@ -24,13 +25,11 @@ namespace spider {
 
         void addConnectionHeader(HttpRequest & request) const;
 
-        Downloader(
-            Url const& url, 
-            Url const& referrer);
+        Downloader(Url const& url, boost::optional<Url> referrer);
 
         Url const& getUrl() const;
 
-        Url const& getReferrer() const;
+        boost::optional<Url> const& getReferrer() const;
 
     public:
         virtual ~Downloader();

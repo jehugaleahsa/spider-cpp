@@ -2,6 +2,7 @@
 #define SPIDER_DOWNLOAD_FACTORY
 
 #include <functional>
+#include <boost/optional.hpp>
 #include "url.hpp"
 
 namespace spider {
@@ -13,7 +14,7 @@ namespace spider {
 
         virtual std::function<void(void)> create(
             Url const& url, 
-            Url const& referrer) const = 0;
+            boost::optional<Url> referrer) const = 0;
     };
 
 }

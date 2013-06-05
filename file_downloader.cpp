@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include "downloader.hpp"
 #include "file_downloader.hpp"
@@ -42,7 +43,9 @@ namespace {
 
 }
 
-spider::FileDownloader::FileDownloader(Url const& url, Url const& referrer)
+spider::FileDownloader::FileDownloader(
+    Url const& url, 
+    boost::optional<Url> referrer)
     : Downloader(url, referrer) {
 }
 
@@ -63,7 +66,7 @@ void spider::FileDownloader::download(std::string const& downloadDirectory) {
     }
 
     try {
-        HttpRequest request(GET, url);
+        HttpRequest request(RequestMethod::GET, url);
         addReferrerHeader(request);
         addUserAgentHeader(request);
         addAcceptHeader(request);

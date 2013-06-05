@@ -1,4 +1,5 @@
 #include <functional>
+#include <boost/optional.hpp>
 #include "download_factory.hpp"
 #include "file_downloader.hpp"
 #include "file_download_factory.hpp"
@@ -10,7 +11,7 @@ spider::FileDownloadFactory::FileDownloadFactory(std::string const& downloadDire
 
 std::function<void(void)> spider::FileDownloadFactory::create(
     Url const& url,
-    Url const& referrer) const {
+    boost::optional<Url> referrer) const {
     auto action = [&, url, referrer]() {
         FileDownloader downloader(url, referrer);
         downloader.download(m_downloadDirectory);

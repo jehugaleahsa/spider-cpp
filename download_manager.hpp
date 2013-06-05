@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <utility>
+#include <boost/optional.hpp>
 #include "categorizer.hpp"
 #include "download_factory.hpp"
 #include "thread_pool.hpp"
@@ -23,12 +24,14 @@ namespace spider {
         void associate(Categorizer const& categorizer, DownloadFactory const& downloadFactory);
 
         template <typename TInputIterator>
-        void download(Url const& referrer, TInputIterator first, TInputIterator past);
+        void download(
+            boost::optional<Url> referrer, 
+            TInputIterator first, TInputIterator past);
     };
 
     template <typename TInputIterator>
     void DownloadManager::download(
-        Url const& referrer, 
+        boost::optional<Url> referrer, 
         TInputIterator first, 
         TInputIterator past) {
         for_each(first, past,

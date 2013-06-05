@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 #include "downloader.hpp"
 #include "download_manager.hpp"
 #include "url.hpp"
@@ -21,7 +22,7 @@ namespace spider {
             UrlFinder const& finder) const;
 
     public:
-        PageDownloader(Url const& url, Url const& referrer);
+        PageDownloader(Url const& url, boost::optional<Url> referrer);
 
         void download(
             DownloadManager & manager,

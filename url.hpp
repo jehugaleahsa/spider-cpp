@@ -19,8 +19,6 @@ namespace spider {
         std::string m_userInfo;
 
     public:
-        Url();
-
         Url(std::string const& host,
             int port = Url::getDefaultPort(),
             std::string const& path = std::string(),
@@ -32,8 +30,6 @@ namespace spider {
         static std::string const& getDefaultScheme();
 
         static int getDefaultPort();
-
-        bool empty() const;
 
         std::string const& getScheme() const;
 
@@ -51,10 +47,6 @@ namespace spider {
 
         static Url parse(std::string const& urlString);
     };
-
-    inline bool Url::empty() const {
-        return m_host.empty();
-    }
 
     inline std::string const& Url::getScheme() const {
         return m_scheme;

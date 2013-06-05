@@ -1,4 +1,5 @@
 #include <functional>
+#include <boost/optional.hpp>
 #include "download_manager.hpp"
 #include "page_downloader.hpp"
 #include "page_download_factory.hpp"
@@ -13,7 +14,7 @@ spider::PageDownloadFactory::PageDownloadFactory(
 
 std::function<void(void)> spider::PageDownloadFactory::create(
     Url const& url,
-    Url const& referrer) const {
+    boost::optional<Url> referrer) const {
     auto action = [&, url, referrer]() {
         PageDownloader downloader(url, referrer);
         downloader.download(m_manager, m_finder);

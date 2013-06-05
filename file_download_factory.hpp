@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <string>
+#include <boost/optional.hpp>
 #include "download_factory.hpp"
 #include "url.hpp"
 
@@ -14,7 +15,9 @@ namespace spider {
     public:
         FileDownloadFactory(std::string const& downloadDirectory);
 
-        std::function<void(void)> create(Url const& url, Url const& referrer) const;
+        std::function<void(void)> create(
+            Url const& url, 
+            boost::optional<Url> referrer) const;
     };
 
 }

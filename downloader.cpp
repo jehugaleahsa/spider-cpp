@@ -1,4 +1,5 @@
 #include <sstream>
+#include <boost/optional.hpp>
 #include "downloader.hpp"
 #include "http_request.hpp"
 #include "url.hpp"
@@ -7,12 +8,13 @@ void spider::Downloader::addReferrerHeader(spider::HttpRequest & request) const 
     using std::ostringstream;
     using spider::HeaderCollection;
 
-    if (m_referrer.empty()) {
+    if (!m_referrer) {
         return;
     }
+
     HeaderCollection & headers = request.getHeaders();
     ostringstream referrerBuilder;
-    referrerBuilder << m_referrer;
+    referrerBuilder << *m_referrer;
     headers.addHeader("referer", referrerBuilder.str());
 }
 
@@ -44,7 +46,7 @@ void spider::Downloader::addConnectionHeader(spider::HttpRequest & request) cons
     headers.addHeader("Connection", "close");
 }
 
-spider::Downloader::Downloader(Url const& url, Url const& referrer)
+spider::Downloader::Downloader(Url const& url, boost::optional<Url> referrer)
     : m_url(url), m_referrer(referrer) {
 }
 
@@ -55,6 +57,6 @@ spider::Url const& spider::Downloader::getUrl() const {
     return m_url;
 }
 
-spider::Url const& spider::Downloader::getReferrer() const {
+boost::optional<spider::Url> const& spider::Downloader::getReferrer() const {
     return m_referrer;
 }

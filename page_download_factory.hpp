@@ -2,6 +2,7 @@
 #define SPIDER_PAGE_DOWNLOAD_FACTORY_HPP
 
 #include <functional>
+#include <boost/optional.hpp>
 #include "download_factory.hpp"
 #include "download_manager.hpp"
 #include "url.hpp"
@@ -16,7 +17,9 @@ namespace spider {
     public:
         PageDownloadFactory(DownloadManager & manager, UrlFinder const& finder);
 
-        std::function<void(void)> create(Url const& url, Url const& referrer) const;
+        std::function<void(void)> create(
+            Url const& url, 
+            boost::optional<Url> referrer) const;
     };
 
 }

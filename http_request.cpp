@@ -27,20 +27,20 @@ namespace {
         static const string connectString = "CONNECT";
 
         switch (method) {
-            case spider::GET:
+            case spider::RequestMethod::GET:
             default:
                 return getString;
-            case spider::POST:
+            case spider::RequestMethod::POST:
                 return postString;
-            case spider::PUT:
+            case spider::RequestMethod::PUT:
                 return putString;
-            case spider::DELETE:
+            case spider::RequestMethod::DELETE:
                 return deleteString;
-            case spider::HEAD:
+            case spider::RequestMethod::HEAD:
                 return headString;
-            case spider::TRACE:
+            case spider::RequestMethod::TRACE:
                 return traceString;
-            case spider::CONNECT:
+            case spider::RequestMethod::CONNECT:
                 return connectString;
         }
     }

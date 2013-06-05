@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 #include "downloader.hpp"
 #include "download_manager.hpp"
 #include "http_request.hpp"
@@ -17,7 +18,7 @@
 
 spider::HttpResponse spider::PageDownloader::getResponse() const {
     Url const& url = getUrl();
-    HttpRequest request(GET, url);
+    HttpRequest request(RequestMethod::GET, url);
     addReferrerHeader(request);
     addUserAgentHeader(request);
     addAcceptHeader(request);
@@ -45,6 +46,7 @@ void spider::PageDownloader::handleRedirect(
     UrlFinder const& finder) const {
     using std::string;
     using std::vector;
+    using boost::optional;
 
     HeaderCollection const& headers = response.getHeaders();
     if (!headers.hasHeader("Location")) {
@@ -52,7 +54,7 @@ void spider::PageDownloader::handleRedirect(
     }
     string urlString = headers.getHeader("Location").getValue(0);
     try {
-        Url const& referrer = getReferrer();
+        optional<Url> referrer = getReferrer();
         vector<Url> redirectUrls { Url::parse(urlString) };
         manager.download(
             referrer, 
@@ -63,7 +65,7 @@ void spider::PageDownloader::handleRedirect(
 
 spider::PageDownloader::PageDownloader(
     Url const& url,
-    Url const& referrer)
+    boost::optional<Url> referrer)
     : Downloader(url, referrer) {
 }
 

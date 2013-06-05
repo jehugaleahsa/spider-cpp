@@ -10,7 +10,7 @@
 
 namespace spider {
 
-    enum RequestMethod {
+    enum class RequestMethod {
         GET,
         POST,
         PUT,
