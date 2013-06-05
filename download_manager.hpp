@@ -10,8 +10,6 @@
 #include "tracker.hpp"
 #include "url.hpp"
 
-#include <iostream>
-
 namespace spider {
 
     class DownloadManager {

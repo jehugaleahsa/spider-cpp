@@ -30,6 +30,8 @@ namespace spider {
             std::queue<std::function<void(void)>> & tasks,
             std::mutex & queue_mutex,
             std::mutex & has_tasks_mutex);
+
+        ~Consumer();
         
         void start();
     };

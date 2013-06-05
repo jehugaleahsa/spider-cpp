@@ -52,6 +52,12 @@ spider::Consumer::Consumer(
     m_has_tasks_mutex(has_tasks_mutex) {
 }
 
+spider::Consumer::~Consumer() {
+    if (m_thread != nullptr) {
+        m_thread->detach();
+    }
+}
+
 void spider::Consumer::start() {
     using std::unique_ptr;
     using std::thread;

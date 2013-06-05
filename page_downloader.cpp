@@ -85,9 +85,9 @@ void spider::PageDownloader::download(
             handleRedirect(response, manager, finder);
             return;
         }
-
+        
         string content = getContent(response);
-
+        
         vector<Url> urls;
         finder.getUrls(url, content, back_inserter(urls));
         
