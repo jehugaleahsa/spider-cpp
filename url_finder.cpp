@@ -1,5 +1,7 @@
 #include <string>
 #include <vector>
+#include "extractor.hpp"
+#include "stripper.hpp"
 #include "url_finder.hpp"
 #include "url.hpp"
 

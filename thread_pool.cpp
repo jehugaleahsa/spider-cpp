@@ -75,10 +75,7 @@ spider::ThreadPool::ThreadPool(Counter & counter, int size)
     using std::generate_n;
     
     m_has_tasks_mutex.lock();
-    generate_n(
-        back_inserter(m_pool),
-        size,
-        [&]() { return create(); });
+    generate_n(back_inserter(m_pool), size, [&]() { return create(); });
 }
 
 void spider::ThreadPool::start() {

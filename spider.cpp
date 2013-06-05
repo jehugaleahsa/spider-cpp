@@ -1,9 +1,12 @@
 #include <memory>
+#include <vector>
 #include "categorizer.hpp"
 #include "counter.hpp"
 #include "downloader.hpp"
+#include "download_manager.hpp"
 #include "extractor.hpp"
-#include "page_downloader.hpp"
+#include "file_download_factory.hpp"
+#include "page_download_factory.hpp"
 #include "spider.hpp"
 #include "stripper.hpp"
 #include "thread_pool.hpp"
@@ -50,13 +53,17 @@ void spider::Spider::run(
     Url const& topUrl,
     std::string const& downloadDirectory) const {
     using std::make_shared;
+    using std::vector;
 
-    Categorizer pageCategorizer;
-    supportPageExtensions(pageCategorizer);
+    int processorCount = getProcessorCount();
+    Counter counter;
+    ThreadPool pool(counter, processorCount + 2);
+    pool.start();
+    
+    UrlTracker tracker;
 
-    Categorizer mediaCategorizer;
-    supportMediaExtensions(mediaCategorizer);
-
+    DownloadManager manager(pool, tracker);
+    
     Stripper stripper("script");
     TagUrlExtractor baseExtractor("base", "href");
     CompoundExtractor extractor;
@@ -67,25 +74,19 @@ void spider::Spider::run(
     extractor.addExtractor(make_shared<TagUrlExtractor>("embed", "flashvars"));
     extractor.addExtractor(make_shared<TagUrlExtractor>("param", "value"));
     UrlFinder finder(stripper, baseExtractor, extractor);
-
-    int processorCount = getProcessorCount();
-    Counter counter;
-    ThreadPool pool(counter, processorCount + 2);
-    pool.start();
     
-    UrlTracker tracker;
-    tracker.addUrl(topUrl);
+    PageDownloadFactory pageFactory(manager, finder);
+    Categorizer pageCategorizer;
+    supportPageExtensions(pageCategorizer);
+    manager.associate(pageCategorizer, pageFactory);
+    
+    FileDownloadFactory fileFactory(downloadDirectory);
+    Categorizer mediaCategorizer;
+    supportMediaExtensions(mediaCategorizer);
+    manager.associate(mediaCategorizer, fileFactory);
 
-    pool.addTask([&]() {
-        PageDownloader home(topUrl, Url());
-        home.download(
-            downloadDirectory,
-            pool,
-            tracker,
-            pageCategorizer,
-            mediaCategorizer,
-            finder);
-    });
+    vector<Url> rootUrls { topUrl };
+    manager.download(Url(), rootUrls.begin(), rootUrls.end());
 
     counter.wait();
 }
