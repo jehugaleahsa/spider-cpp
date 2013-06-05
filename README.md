@@ -10,6 +10,7 @@ spider-cpp was compiled on Ubuntu 12/Slackware 14 with g++-4.8.1 installed. It w
 
 ##Usage
 Assuming you have boost installed under `/usr`, the following should build and run the spider:
+    
     make extractor SITE=root_url DIR=download_directory
 
 ## Purpose
@@ -51,6 +52,6 @@ I came into this project completely inexperienced writing realistic applications
 * there may be some value in creating simple wrapper classes around primitive types to make sure they are given the same treatment as user-defined types within ctors.
 * Boost's `bind` function can save from creating lots of little functor classes.
 * Polymorphism can rarely be used with references; pointers work more naturally.
-* There's not a convenient formatting for ctors withlots of parameters or long initializer lists.
-* Don't pass `shared_ptr` to lambda by reference!
-* C++11 threads call `terminate` when deconstructed, unless detached.
+* There's not a convenient formatting for ctors with lots of parameters or long initializer lists.
+* Don't pass variables to a lambda by reference when it will be running in a separate thread!
+* C++11 threads call `terminate` when deconstructed, unless joined or detached.
