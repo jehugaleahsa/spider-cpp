@@ -1,15 +1,36 @@
 #include <string>
+#include <unordered_map>
 #include <boost/algorithm/string.hpp>
 #include "categorizer.hpp"
 #include "url.hpp"
 
-void spider::Categorizer::supportExtension(std::string const& extension) {
-    using std::string;
-    using boost::to_lower;
+namespace {
 
-    string copy(extension);
-    to_lower(copy);
-    m_extensions.insert(copy);
+    std::string getExtension(spider::Url const& url) {
+        using std::string;
+        using boost::to_lower;
+
+        string const& path = url.getPath();
+        string::const_reverse_iterator rposition = find(
+            path.rbegin(), path.rend(), '.');
+
+        if (rposition == path.rend()) {
+            return string();
+        }
+        string::const_iterator position = rposition.base();
+        string extension = string(position, path.end());
+        to_lower(extension);
+        return extension;
+    }
+
+}
+
+void spider::Categorizer::supportExtension(int priority, std::string const& extension) {
+    using std::string;
+    using boost::to_lower_copy;
+
+    string copy = to_lower_copy(extension);
+    m_extensions[copy] = priority;
 }
 
 bool spider::Categorizer::isDesired(Url const& url) const {
@@ -17,15 +38,18 @@ bool spider::Categorizer::isDesired(Url const& url) const {
     using std::string;
     using boost::to_lower;
 
-    string const& path = url.getPath();
-    string::const_reverse_iterator rposition = find(
-        path.rbegin(), path.rend(), '.');
-
-    string extension;
-    if (rposition != path.rend()) {
-        string::const_iterator position = rposition.base();
-        extension = string(position, path.end());
-        to_lower(extension);
-    }
+    string extension = getExtension(url);
     return m_extensions.find(extension) != m_extensions.end();
+}
+
+int spider::Categorizer::getPriority(Url const& url) const {
+    using std::string;
+    using std::unordered_map;
+
+    string extension = getExtension(url);
+    auto iterator = m_extensions.find(extension);
+    if (iterator == m_extensions.end()) {
+        return 0;
+    }
+    return iterator->second;
 }

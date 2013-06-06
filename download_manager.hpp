@@ -34,20 +34,24 @@ namespace spider {
         boost::optional<Url> referrer, 
         TInputIterator first, 
         TInputIterator past) {
-        for_each(first, past,
-            [&](Url const& url) {
-                if (m_tracker.addUrl(url)) {
-                    for_each(m_categories.begin(), m_categories.end(),
-                        [&](std::pair<Categorizer const&, DownloadFactory const&> const& pair) {
-                            Categorizer const& categorizer = pair.first;
-                            if (categorizer.isDesired(url)) {
-                                DownloadFactory const& factory = pair.second;
-                                std::function<void(void)> task = factory.create(url, referrer);
-                                m_pool.addTask(task);
-                            }
-                        });
-                }
-            });
+        using std::for_each;
+        using std::function;
+        using std::pair;
+
+        for_each(first, past, [&](Url const& url) {
+            if (m_tracker.addUrl(url)) {
+                for_each(m_categories.begin(), m_categories.end(),
+                    [&](pair<Categorizer const&, DownloadFactory const&> const& pair) {
+                        Categorizer const& categorizer = pair.first;
+                        if (categorizer.isDesired(url)) {
+                            DownloadFactory const& factory = pair.second;
+                            function<void(void)> task = factory.create(url, referrer);
+                            int priority = categorizer.getPriority(url);
+                            m_pool.addTask(priority, task);
+                        }
+                    });
+            }
+        });
     }
 
 }

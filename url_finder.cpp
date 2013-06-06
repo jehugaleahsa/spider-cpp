@@ -22,7 +22,7 @@ spider::UrlFinder::UrlFinder(
     Stripper const& stripper,
     UrlExtractor const& baseExtractor,
     UrlExtractor const& extractor)
-    :
+:
     m_stripper(stripper),
     m_baseExtractor(baseExtractor),
     m_extractor(extractor) {

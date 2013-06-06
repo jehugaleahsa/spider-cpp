@@ -1,29 +1,56 @@
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <utility>
 #include "counter.hpp"
 #include "thread_pool.hpp"
+
+namespace {
+
+    int getTimestamp() {
+        using std::chrono::duration;
+        using std::chrono::duration_cast;
+        using std::chrono::milliseconds;
+        using std::chrono::time_point;
+        using std::chrono::system_clock;
+
+        time_point<system_clock> now = system_clock::now();
+        system_clock::duration elapsed = now.time_since_epoch();
+        return duration_cast<milliseconds>(elapsed).count();
+    }
+
+}
 
 int spider::getProcessorCount() {
     return std::thread::hardware_concurrency();
 }
 
+spider::Task::Task(int priority, std::function<void(void)> task)
+    : 
+    m_priority(priority), 
+    m_timestamp(getTimestamp()), 
+    m_task(task) {
+}
+
 std::function<void(void)> spider::Consumer::getTask() {
     using std::defer_lock;
+    using std::get;
     using std::function;
     using std::mutex;
+    using std::tuple;
     using std::unique_lock;
 
     unique_lock<mutex> queue_access_lock(m_queue_mutex, defer_lock);
     lock(queue_access_lock, m_has_tasks_mutex);
-    function<void(void)> callable = m_tasks.front();
+    Task task = m_tasks.top();
     m_tasks.pop();
     if (!m_tasks.empty()) {
         m_has_tasks_mutex.unlock();
     }
-    return callable;
+    return task.getTask();
 }
 
 void spider::Consumer::consume() {
@@ -42,7 +69,7 @@ void spider::Consumer::consume() {
 
 spider::Consumer::Consumer(
     Counter & counter,
-    std::queue<std::function<void(void)> > & tasks,
+    std::priority_queue<Task> & tasks,
     std::mutex & queue_mutex,
     std::mutex & has_tasks_mutex)
 :
@@ -92,14 +119,15 @@ void spider::ThreadPool::start() {
         [](std::unique_ptr<Consumer> & consumer) { consumer->start(); });
 }
 
-void spider::ThreadPool::addTask(std::function<void(void)> callable) {
+void spider::ThreadPool::addTask(int priority, std::function<void(void)> callable) {
     using std::defer_lock;
     using std::lock_guard;
+    using std::make_tuple;
     using std::mutex;
     using std::unique_lock;
 
     m_counter.increment();
     lock_guard<mutex> queue_access_lock(m_queue_mutex);
-    m_tasks.push(callable);
+    m_tasks.push(Task(priority, callable));
     m_has_tasks_mutex.unlock();
 }
