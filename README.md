@@ -10,6 +10,7 @@ spider-cpp was compiled on Ubuntu 12/Slackware 14 with g++-4.8.1 installed. It w
 
 ##Usage
 Assuming you have boost installed under `/usr`, the following should build and run the spider:
+    
     make extractor SITE=root_url DIR=download_directory
 
 ## Purpose
