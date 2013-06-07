@@ -1,8 +1,9 @@
 #include <vector>
 #include <utility>
+#include "task_pool.hpp"
 #include "download_manager.hpp"
 
-spider::DownloadManager::DownloadManager(ThreadPool & pool, UrlTracker & tracker)
+spider::DownloadManager::DownloadManager(TaskPool & pool, UrlTracker & tracker)
     : m_pool(pool), m_tracker(tracker) {
 }
 

@@ -64,6 +64,12 @@ void spider::FileDownloader::download(std::string const& downloadDirectory) {
     if (url.getScheme() == "https") {
         return;
     }
+        
+    string fileName = createFileName(url);
+    string path = downloadDirectory + '/' + fileName;
+    if (exists(path)) {
+        return;
+    }
 
     try {
         HttpRequest request(RequestMethod::GET, url);
@@ -80,12 +86,6 @@ void spider::FileDownloader::download(std::string const& downloadDirectory) {
             return;
         }
 
-        string fileName = createFileName(url);
-        string path = downloadDirectory + '/' + fileName;
-        if (exists(path)) {
-            return;
-        }
-        
         std::cerr << "Downloading file: " << getUrl() << std::endl;
         
         istream_iterator<unsigned char> begin(stream);

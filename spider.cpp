@@ -2,7 +2,6 @@
 #include <vector>
 #include <boost/optional.hpp>
 #include "categorizer.hpp"
-#include "counter.hpp"
 #include "downloader.hpp"
 #include "download_manager.hpp"
 #include "extractor.hpp"
@@ -10,7 +9,7 @@
 #include "page_download_factory.hpp"
 #include "spider.hpp"
 #include "stripper.hpp"
-#include "thread_pool.hpp"
+#include "task_pool.hpp"
 #include "tracker.hpp"
 #include "url.hpp"
 #include "url_finder.hpp"
@@ -58,8 +57,8 @@ void spider::Spider::run(
     using boost::optional;
 
     int processorCount = getProcessorCount();
-    Counter counter;
-    ThreadPool pool(counter, processorCount + 2);
+    //TestPool pool;
+    ThreadPool pool(processorCount + 2);
     pool.start();
     
     UrlTracker tracker;
@@ -90,5 +89,5 @@ void spider::Spider::run(
     vector<Url> rootUrls { topUrl };
     manager.download(optional<Url>(), rootUrls.begin(), rootUrls.end());
 
-    counter.wait();
+    pool.wait();
 }

@@ -7,19 +7,19 @@
 #include <boost/optional.hpp>
 #include "categorizer.hpp"
 #include "download_factory.hpp"
-#include "thread_pool.hpp"
+#include "task_pool.hpp"
 #include "tracker.hpp"
 #include "url.hpp"
 
 namespace spider {
 
     class DownloadManager {
-        ThreadPool & m_pool;
+        TaskPool & m_pool;
         UrlTracker & m_tracker;
         std::vector<std::pair<Categorizer const&, DownloadFactory const&>> m_categories;
 
     public:
-        DownloadManager(ThreadPool & pool, UrlTracker & tracker);
+        DownloadManager(TaskPool & pool, UrlTracker & tracker);
 
         void associate(Categorizer const& categorizer, DownloadFactory const& downloadFactory);
 

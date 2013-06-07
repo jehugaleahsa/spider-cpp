@@ -12,10 +12,10 @@ namespace {
     boost::regex getRegex(
         std::string const& tagName,
         std::string const& attributeName) {
-        using std::stringstream;
+        using std::ostringstream;
         using boost::regex;
 
-        stringstream builder;
+        ostringstream builder;
         builder << '<';
         builder << tagName;
         builder << ".*?";
@@ -23,6 +23,48 @@ namespace {
         builder << "\\s*?=\\s*?((\"(?<url>.*?)\")|('(?<url>.*?)'))";
         regex re(builder.str(), regex::icase);
         return re;
+    }
+
+    std::string getSemiAbsoluteUrl(
+        spider::Url const& baseAddress, 
+        std::string const& urlString) {
+        using std::ostringstream;
+        using std::string;
+        using spider::Url;
+
+        Url forAbsolute(
+            baseAddress.getHost(),
+            baseAddress.getPort(),
+            string(),  // path
+            string(),  // query
+            string(),  // fragment
+            baseAddress.getScheme(),
+            baseAddress.getUserInfo());
+        ostringstream builder;
+        builder << forAbsolute;
+        builder << urlString;
+        return builder.str();
+    }
+
+    std::string getRelativeUrl(
+        spider::Url const& baseAddress, 
+        std::string const& urlString) {
+        using std::ostringstream;
+        using std::string;
+        using spider::Url;
+        
+        Url forRelative(
+            baseAddress.getHost(),
+            baseAddress.getPort(),
+            baseAddress.getPath(),
+            string(),  // query
+            string(),  // fragment
+            baseAddress.getScheme(),
+            baseAddress.getUserInfo());
+        ostringstream builder;
+        builder << forRelative;
+        builder << urlString;
+        return builder.str();
     }
 
 }
@@ -36,13 +78,17 @@ spider::UrlExtractor::~UrlExtractor() {
 spider::Url spider::TagUrlExtractor::buildUrl(
     Url const& baseAddress,
     boost::smatch const& match) const {
-    using std::ostringstream;
     using std::string;
     using boost::istarts_with;
 
+    string type = "fully-qualified";
     string urlString = match.str("url");
     // skip blank links
-    if (urlString == "") {
+    if (urlString.empty()) {
+        return baseAddress;
+    }
+    // we don't care about fragment IDs
+    if (urlString[0] == '#') {
         return baseAddress;
     }
     // ignore javascript links
@@ -52,37 +98,14 @@ spider::Url spider::TagUrlExtractor::buildUrl(
     // handle shortened paths
     if (!istarts_with(urlString, "http://")
         && !istarts_with(urlString, "https://")) {
-        // we don't care about fragment identifiers
-        if (urlString[0] == '#') {
-            return baseAddress;
         // handle semi-absolute URLs
-        } else if (urlString[0] == '/') {
-            Url forAbsolute(
-                baseAddress.getHost(),
-                baseAddress.getPort(),
-                "",  // path
-                "",  // query
-                "",  // fragment
-                baseAddress.getScheme(),
-                baseAddress.getUserInfo());
-            ostringstream builder;
-            builder << forAbsolute;
-            builder << urlString;
-            urlString = builder.str();
+        if (urlString[0] == '/') {
+            urlString = getSemiAbsoluteUrl(baseAddress, urlString);
+            type = "semi-absolute";
         // handle relative URLs
         } else {
-            Url forRelative(
-                baseAddress.getHost(),
-                baseAddress.getPort(),
-                baseAddress.getPath(),
-                "",  // query
-                "",  // fragment
-                baseAddress.getScheme(),
-                baseAddress.getUserInfo());
-            ostringstream builder;
-            builder << forRelative;
-            builder << urlString;
-            urlString = builder.str();
+            urlString = getRelativeUrl(baseAddress, urlString);
+            type = "relative";
         }
     }
     try {
@@ -133,9 +156,8 @@ void spider::CompoundExtractor::getUrls(
     using std::for_each;
     using std::shared_ptr;
 
-    for_each(
-        m_extractors.begin(), m_extractors.end(),
-            [&](shared_ptr<UrlExtractor> extractor) {
-                extractor->getUrls(baseAddress, content, destination);
-            });
+    for_each(m_extractors.begin(), m_extractors.end(),
+        [&](shared_ptr<UrlExtractor> extractor) {
+            extractor->getUrls(baseAddress, content, destination);
+        });
 }

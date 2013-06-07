@@ -53,14 +53,11 @@ void spider::PageDownloader::handleRedirect(
         return;
     }
     string urlString = headers.getHeader("Location").getValue(0);
-    try {
-        optional<Url> referrer = getReferrer();
-        vector<Url> redirectUrls { Url::parse(urlString) };
-        manager.download(
-            referrer, 
-            redirectUrls.begin(), redirectUrls.end());
-    } catch (...) {
-    }
+    optional<Url> referrer = getReferrer();
+    vector<Url> redirectUrls { Url::parse(urlString) };
+    manager.download(
+       referrer, 
+       redirectUrls.begin(), redirectUrls.end());
 }
 
 spider::PageDownloader::PageDownloader(

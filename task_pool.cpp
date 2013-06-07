@@ -6,7 +6,7 @@
 #include <thread>
 #include <utility>
 #include "counter.hpp"
-#include "thread_pool.hpp"
+#include "task_pool.hpp"
 
 namespace {
 
@@ -92,6 +92,27 @@ void spider::Consumer::start() {
     m_thread = unique_ptr<thread>(new thread([&]() { consume(); }));
 }
 
+spider::TaskPool::~TaskPool() {
+}
+
+spider::TestPool::TestPool() {
+}
+
+void spider::TestPool::start() {
+}
+
+void spider::TestPool::addTask(int priority, std::function<void(void)> callable) {
+    m_tasks.push(Task(priority, callable));
+    while (!m_tasks.empty()) {
+        Task task = m_tasks.top();
+        m_tasks.pop();
+        task.getTask()();
+    }
+}
+
+void spider::TestPool::wait() {
+}
+
 std::unique_ptr<spider::Consumer> spider::ThreadPool::create() {
     using std::unique_ptr;
     
@@ -102,8 +123,8 @@ std::unique_ptr<spider::Consumer> spider::ThreadPool::create() {
         m_has_tasks_mutex));
 }
 
-spider::ThreadPool::ThreadPool(Counter & counter, int size) 
-    : m_counter(counter) {
+spider::ThreadPool::ThreadPool(int size) 
+    : m_counter() {
     using std::back_inserter;
     using std::generate_n;
     
@@ -130,4 +151,8 @@ void spider::ThreadPool::addTask(int priority, std::function<void(void)> callabl
     lock_guard<mutex> queue_access_lock(m_queue_mutex);
     m_tasks.push(Task(priority, callable));
     m_has_tasks_mutex.unlock();
+}
+
+void spider::ThreadPool::wait() {
+    m_counter.wait();
 }

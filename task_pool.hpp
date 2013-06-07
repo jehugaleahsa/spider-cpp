@@ -73,24 +73,53 @@ namespace spider {
         void start();
     };
 
-    class ThreadPool {
-        Counter & m_counter;
+    class TaskPool {
+    public:
+        virtual ~TaskPool();
+
+        virtual void start() = 0;
+
+        virtual void addTask(int priority, std::function<void(void)> callable) = 0;
+
+        virtual void wait() = 0;
+    };
+
+    class TestPool : public virtual TaskPool {
+        std::priority_queue<Task> m_tasks;
+
+        TestPool(TestPool const& other);
+        TestPool & operator=(TestPool const& other);
+
+    public:
+        TestPool();
+
+        void start();
+
+        void addTask(int priority, std::function<void(void)> callable);
+
+        void wait();
+    };
+
+    class ThreadPool : public virtual TaskPool {
+        Counter m_counter;
         std::vector<std::unique_ptr<Consumer>> m_pool;
         std::priority_queue<Task> m_tasks;
         std::mutex m_queue_mutex;
         std::mutex m_has_tasks_mutex;
 
         ThreadPool(ThreadPool const& other);
-        ThreadPool& operator=(ThreadPool const& other);
+        ThreadPool & operator=(ThreadPool const& other);
         
         std::unique_ptr<Consumer> create();
 
     public:
-        ThreadPool(Counter & counter, int size);
+        ThreadPool(int size);
         
         void start();
 
         void addTask(int priority, std::function<void(void)> callable);
+
+        void wait();
     };
 
 }
