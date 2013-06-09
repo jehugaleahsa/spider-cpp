@@ -15,9 +15,8 @@ spider::PageDownloadFactory::PageDownloadFactory(
 std::function<void(void)> spider::PageDownloadFactory::create(
     Url const& url,
     boost::optional<Url> referrer) const {
-    auto action = [&, url, referrer]() {
-        PageDownloader downloader(url, referrer);
-        downloader.download(m_manager, m_finder);
+    return [&, url, referrer]() { 
+        PageDownloader downloader(url, referrer, m_manager, m_finder);
+        downloader.download(); 
     };
-    return action;
 }

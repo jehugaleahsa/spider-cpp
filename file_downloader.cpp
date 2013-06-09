@@ -45,11 +45,12 @@ namespace {
 
 spider::FileDownloader::FileDownloader(
     Url const& url, 
-    boost::optional<Url> referrer)
-    : Downloader(url, referrer) {
+    boost::optional<Url> referrer,
+    std::string const& downloadDirectory)
+    : Downloader(url, referrer), m_downloadDirectory(downloadDirectory) {
 }
 
-void spider::FileDownloader::download(std::string const& downloadDirectory) {
+void spider::FileDownloader::download() const {
     using std::copy;
     using std::ios;
     using std::istream;
@@ -66,7 +67,7 @@ void spider::FileDownloader::download(std::string const& downloadDirectory) {
     }
         
     string fileName = createFileName(url);
-    string path = downloadDirectory + '/' + fileName;
+    string path = m_downloadDirectory + '/' + fileName;
     if (exists(path)) {
         return;
     }

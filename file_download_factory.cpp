@@ -12,9 +12,8 @@ spider::FileDownloadFactory::FileDownloadFactory(std::string const& downloadDire
 std::function<void(void)> spider::FileDownloadFactory::create(
     Url const& url,
     boost::optional<Url> referrer) const {
-    auto action = [&, url, referrer]() {
-        FileDownloader downloader(url, referrer);
-        downloader.download(m_downloadDirectory);
+    return [&, url, referrer]() { 
+        FileDownloader downloader(url, referrer, m_downloadDirectory);
+        downloader.download(); 
     };
-    return action;
 }

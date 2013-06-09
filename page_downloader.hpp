@@ -12,21 +12,23 @@
 namespace spider {
 
     class PageDownloader : public virtual Downloader {
+        DownloadManager & m_manager;
+        UrlFinder const& m_finder;
+
         HttpResponse getResponse() const;
 
         std::string getContent(HttpResponse & response) const;
 
-        void handleRedirect(
-            HttpResponse & response,
-            DownloadManager & manager,
-            UrlFinder const& finder) const;
+        void handleRedirect(HttpResponse & response) const;
 
     public:
-        PageDownloader(Url const& url, boost::optional<Url> referrer);
-
-        void download(
+        PageDownloader(
+            Url const& url, 
+            boost::optional<Url> referrer,
             DownloadManager & manager,
-            UrlFinder const& finder) const;
+            UrlFinder const& finder);
+
+        void download() const override;
     };
 
 }

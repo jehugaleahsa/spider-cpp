@@ -40,10 +40,7 @@ std::string spider::PageDownloader::getContent(HttpResponse & response) const {
     return string(begin, end);
 }
         
-void spider::PageDownloader::handleRedirect(
-    HttpResponse & response,
-    DownloadManager & manager,
-    UrlFinder const& finder) const {
+void spider::PageDownloader::handleRedirect(HttpResponse & response) const {
     using std::string;
     using std::vector;
     using boost::optional;
@@ -55,20 +52,20 @@ void spider::PageDownloader::handleRedirect(
     string urlString = headers.getHeader("Location").getValue(0);
     optional<Url> referrer = getReferrer();
     vector<Url> redirectUrls { Url::parse(urlString) };
-    manager.download(
+    m_manager.download(
        referrer, 
        redirectUrls.begin(), redirectUrls.end());
 }
 
 spider::PageDownloader::PageDownloader(
     Url const& url,
-    boost::optional<Url> referrer)
-    : Downloader(url, referrer) {
+    boost::optional<Url> referrer,
+    DownloadManager & manager,
+    UrlFinder const & finder)
+    : Downloader(url, referrer), m_manager(manager), m_finder(finder) {
 }
 
-void spider::PageDownloader::download(
-    DownloadManager & manager,
-    UrlFinder const& finder) const {
+void spider::PageDownloader::download() const {
     using std::back_inserter;
     using std::string;
     using std::vector;
@@ -81,16 +78,16 @@ void spider::PageDownloader::download(
 
         int statusCode = response.getStatusCode();
         if (statusCode >= 300 && statusCode < 400) {
-            handleRedirect(response, manager, finder);
+            handleRedirect(response);
             return;
         }
         
         string content = getContent(response);
         
         vector<Url> urls;
-        finder.getUrls(url, content, back_inserter(urls));
+        m_finder.getUrls(url, content, back_inserter(urls));
         
-        manager.download(url, urls.begin(), urls.end());
+        m_manager.download(url, urls.begin(), urls.end());
 
     } catch (ConnectionException const& exception) {
         std::cerr << exception.what() << std::endl;

@@ -9,13 +9,18 @@
 namespace spider {
 
     class FileDownloader : public virtual Downloader {
+        std::string m_downloadDirectory;
+
         FileDownloader(FileDownloader const& other);
         FileDownloader & operator=(FileDownloader const& other);
 
     public:
-        FileDownloader(Url const& url, boost::optional<Url> referrer);
+        FileDownloader(
+            Url const& url, 
+            boost::optional<Url> referrer,
+            std::string const& downloadDirectory);
 
-        void download(std::string const& downloadDirectory);
+        void download() const override;
     };
 
 }
