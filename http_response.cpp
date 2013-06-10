@@ -30,22 +30,35 @@ namespace {
         return input;
     }
 
-    std::pair<std::string, std::string> parseHeaderPair(Line const& line) {
-        using std::find;
-        using std::pair;
-        using std::string;
-        using boost::algorithm::trim;
-
-        string::const_iterator position = find(line.value.begin(), line.value.end(), ':');
-        if (position == line.value.end()) {
-            return pair<string, string>("", "");
+    class HeaderParser : std::unary_function<Line const&, std::pair<std::string, std::string>> {
+        std::string m_headerName;
+    public:
+        HeaderParser()
+            : m_headerName() {
         }
-        string name(line.value.begin(), position);
-        trim(name);
-        string value(position + 1, line.value.end());
-        trim(value);
-        return pair<string, string>(name, value);
-    }
+
+        std::pair<std::string, std::string> operator() (Line const& line) {
+            using std::find;
+            using std::pair;
+            using std::string;
+            using boost::algorithm::trim;
+            using boost::algorithm::trim_copy;
+
+            string::const_iterator position = find(line.value.begin(), line.value.end(), ':');
+            if (position == line.value.end()) {
+                string value = trim_copy(line.value);
+                return pair<string, string>(m_headerName, value);
+            } else {
+                string name(line.value.begin(), position);
+                trim(name);
+                m_headerName = name;
+                string value(position + 1, line.value.end());
+                trim(value);
+                return pair<string, string>(name, value);
+            }
+        }
+    };
+
 }
 
 spider::HttpResponse::HttpResponse(std::shared_ptr<std::istream> stream)
@@ -96,15 +109,10 @@ std::string spider::HttpResponse::getStatusMessage() {
 
 void spider::HttpResponse::getHeadersCached() {
     using std::back_inserter;
-    using std::bind;
-    using std::equal_to;
     using std::for_each;
     using std::istream_iterator;
-    using std::not1;
     using std::pair;
-    using std::placeholders::_1;
     using std::string;
-    using std::remove_if;
     using std::transform;
     using std::vector;
 
@@ -127,21 +135,15 @@ void spider::HttpResponse::getHeadersCached() {
 
             // split the lines at the first colon (:)
             vector<HeaderPair> headerPairs;
+            HeaderParser parser;
             transform(
                 lines.begin(), lines.end(),
                 back_inserter(headerPairs),
-                parseHeaderPair);
-
-            // ignore any headers without a name
-            vector<HeaderPair>::iterator pastHeaders = remove_if(
-                headerPairs.begin(), headerPairs.end(),
-                [](HeaderPair const& pair) { 
-                    return pair.first.empty(); 
-                });
+                parser);
 
             // add each header pair to the header collection
             for_each(
-                headerPairs.begin(), pastHeaders,
+                headerPairs.begin(), headerPairs.end(),
                 [&](HeaderPair const& pair) { 
                     m_headers.addHeader(pair.first, pair.second);
                 });
