@@ -27,7 +27,7 @@ namespace {
             using std::streamsize;
             using std::string;
 
-            if (m_position == m_chunkSize) {
+            if (*m_stream && m_position == m_chunkSize) {
                 *m_stream >> hex >> m_chunkSize;
                 m_position = 0;
                 string ignore;
@@ -35,7 +35,9 @@ namespace {
             }
             streamsize remaining = m_chunkSize - m_position;
             streamsize count = min(remaining, n);
-            m_stream->read(buffer, count);
+            if (!m_stream->read(buffer, count)) {
+                return -1;
+            }
             m_position += count;
             return count;
         }
