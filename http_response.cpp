@@ -46,8 +46,7 @@ namespace {
 
             string::const_iterator position = find(line.value.begin(), line.value.end(), ':');
             if (position == line.value.end()) {
-                string value = trim_copy(line.value);
-                return pair<string, string>(m_headerName, value);
+                return pair<string, string>(m_headerName, trim_copy(line.value));
             } else {
                 string name(line.value.begin(), position);
                 trim(name);
