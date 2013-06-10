@@ -8,6 +8,7 @@
 #include <utility>
 #include <boost/algorithm/string.hpp>
 #include "algorithm.hpp"
+#include "chunked_stream.hpp"
 #include "header.hpp"
 #include "http_response.hpp"
 
@@ -145,6 +146,12 @@ void spider::HttpResponse::getHeadersCached() {
                     m_headers.addHeader(pair.first, pair.second);
                 });
             m_hasHeaders = true;
+        }
+        if (m_headers.hasHeader("Transfer-Encoding")) {
+            Header const& header = m_headers.getHeader("Transfer-Encoding");
+            if (header.getValue(0) == "chunked") {
+                m_stream.reset(new ChunkedStream<char>(m_stream));
+            }
         }
     }
 }
