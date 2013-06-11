@@ -23,7 +23,7 @@ spider::HttpResponse spider::PageDownloader::getResponse() const {
     addUserAgentHeader(request);
     addAcceptHeader(request);
     addHostHeader(request);
-    //addConnectionHeader(request);
+    addConnectionHeader(request);
     return request.getResponse();
 }
 
@@ -77,6 +77,9 @@ void spider::PageDownloader::download() const {
         HttpResponse response = getResponse();
 
         int statusCode = response.getStatusCode();
+        if (statusCode < 200 || statusCode >= 400) {
+            return;  // ignore errors
+        }
         if (statusCode >= 300 && statusCode < 400) {
             handleRedirect(response);
             return;

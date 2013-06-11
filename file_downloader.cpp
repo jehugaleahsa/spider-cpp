@@ -81,6 +81,10 @@ void spider::FileDownloader::download() const {
         addConnectionHeader(request);
         HttpResponse response = request.getResponse();
 
+        if (response.getStatusCode() != 200) {
+            return;
+        }
+
         istream & stream = response.getContent();
         stream >> noskipws;
         if (!stream) {

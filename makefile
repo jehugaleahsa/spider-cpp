@@ -25,7 +25,7 @@ FILE_DOWNLOAD_FACTORY = file_download_factory.hpp $(DOWNLOAD_FACTORY) $(FILE_DOW
 PAGE_DOWNLOADER = page_downloader.hpp $(DOWNLOADER) $(DOWNLOAD_MANAGER) $(HTTP_REQUEST) $(HTTP_RESPONSE) $(URL) $(URL_FINDER)
 PAGE_DOWNLOAD_FACTORY = page_download_factory.hpp $(DOWNLOAD_FACTORY) $(DOWNLOAD_MANAGER) $(PAGE_DOWNLOADER) $(URL) $(URL_FINDER)
 SPIDER = spider.hpp $(CATEGORIZER) $(DOWNLOADER) $(DOWNLOAD_MANAGER) $(EXTRACTOR) $(FILE_DOWNLOAD_FACTORY) $(PAGE_DOWNLOAD_FACTORY) $(STRIPPER) $(TASK_POOL) $(TRACKER) $(URL) $(URL_FINDER)
-MAIN = $(SPIDER) $(URL)
+MAIN = $(CATEGORIZER) $(SPIDER) $(URL)
 
 all: spider
 
@@ -34,11 +34,11 @@ all: spider
 export LD_LIBRARY_PATH=/usr/lib:/usr/lib64
 
 extractor: spider
-	./spider $(SITE) $(DIR)
+	./spider --url=$(SITE) --directory=$(DIR)
 
 .PHONY : spider
 spider: $(OBJS)
-	g++ $(OBJS) -lboost_filesystem -lboost_regex -lboost_system -lpthread -o spider $(CFLAGS)
+	g++ $(OBJS) -lboost_filesystem -lboost_regex -lboost_system -lpthread -lboost_program_options -o spider $(CFLAGS)
 	
 # object files
 	

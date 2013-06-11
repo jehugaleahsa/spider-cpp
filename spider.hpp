@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <string>
+#include "categorizer.hpp"
 #include "url.hpp"
 
 namespace spider {
@@ -10,9 +11,10 @@ namespace spider {
     class Spider {
     public:
         void run(
-            std::ostream & output, 
             Url const& topUrl, 
-            std::string const& downloadDirectory) const;
+            std::string const& downloadDirectory,
+            Categorizer const& pageCategorizer,
+            Categorizer const& mediaCategorizer) const;
     };
 
 }

@@ -14,44 +14,11 @@
 #include "url.hpp"
 #include "url_finder.hpp"
 
-namespace {
-
-    void supportPageExtensions(spider::Categorizer & categorizer) {
-        categorizer.supportExtension(0, "");
-        categorizer.supportExtension(0, "htm");
-        categorizer.supportExtension(0, "html");
-        categorizer.supportExtension(0, "xhtml");
-        categorizer.supportExtension(0, "jsp");
-        categorizer.supportExtension(0, "php");
-        categorizer.supportExtension(0, "asp");
-        categorizer.supportExtension(0, "aspx");
-        categorizer.supportExtension(0, "cgi");
-        categorizer.supportExtension(0, "shtml");
-        categorizer.supportExtension(0, "cfm");
-        categorizer.supportExtension(0, "cfml");
-    }
-
-    void supportMediaExtensions(spider::Categorizer & categorizer) {
-        categorizer.supportExtension(2, "mpg");
-        categorizer.supportExtension(2, "mpeg");
-        categorizer.supportExtension(2, "mp4");
-        categorizer.supportExtension(2, "avi");
-        categorizer.supportExtension(2, "wmv");
-        categorizer.supportExtension(2, "mov");
-        categorizer.supportExtension(2, "rm");
-        categorizer.supportExtension(1, "png");
-        categorizer.supportExtension(1, "gif");
-        categorizer.supportExtension(1, "jpg");
-        categorizer.supportExtension(1, "tif");
-        categorizer.supportExtension(1, "bmp"); 
-    }
-
-}
-
 void spider::Spider::run(
-    std::ostream & output, 
     Url const& topUrl,
-    std::string const& downloadDirectory) const {
+    std::string const& downloadDirectory,
+    Categorizer const& pageCategorizer,
+    Categorizer const& mediaCategorizer) const {
     using std::make_shared;
     using std::vector;
     using boost::optional;
@@ -77,13 +44,9 @@ void spider::Spider::run(
     UrlFinder finder(stripper, baseExtractor, extractor);
     
     PageDownloadFactory pageFactory(manager, finder);
-    Categorizer pageCategorizer;
-    supportPageExtensions(pageCategorizer);
     manager.associate(pageCategorizer, pageFactory);
     
     FileDownloadFactory fileFactory(downloadDirectory);
-    Categorizer mediaCategorizer;
-    supportMediaExtensions(mediaCategorizer);
     manager.associate(mediaCategorizer, fileFactory);
 
     vector<Url> rootUrls { topUrl };
