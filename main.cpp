@@ -101,16 +101,21 @@ int main(int argc, char** argv) {
     description.add_options()
         ("directory,d", value<string>(&downloadDirectory)->default_value(string()), "The directory to save downloaded media.")
         ("help,h", "Display this help message.")
-        ("media-extensions,m", value<string>(&mediaExtensions)->default_value(string()), "Comma-separated list of valid media extensions.")
+        ("media-extensions,m", value<string>(&mediaExtensions)->default_value(string())->composing(), "Comma-separated list of valid media extensions.")
         ("min-size,s", value<uintmax_t>(&minSize)->default_value(0), "The minimum size that a file must be in order to download.")
-        ("page-extensions,p", value<string>(&pageExtensions)->default_value(string()), "Comma-separated list of valid page extensions.")
+        ("page-extensions,p", value<string>(&pageExtensions)->default_value(string())->composing(), "Comma-separated list of valid page extensions.")
         ("restrict,r", value<string>(&restrictedDomain), "The domain that all pages and media are restricted to.")
         ("threads,t", value<int>(&threadCount)->default_value(Environment::getProcessorCount()), "The number of threads to create.")
         ("url,u", value<string>(&urlString), "The initial URL to begin searching for media.");
 
     variables_map map;
-    store(parse_command_line(argc, argv, description), map);
-    notify(map);
+    try {
+        store(parse_command_line(argc, argv, description), map);
+        notify(map);
+    } catch (std::exception const& exception) {
+        cerr << exception.what() << endl;
+        return -1;
+    }
     
     if (map.count("help")) {
         cout << description << endl;
