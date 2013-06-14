@@ -1,14 +1,15 @@
 CFLAGS=-std=c++11 -Wall -pedantic -L/usr/lib -g
-OBJS = categorizer.o counter.o downloader.o download_manager.o extractor.o file_downloader.o file_download_factory.o header.o http_request.o http_response.o main.o page_downloader.o page_download_factory.o spider.o stripper.o task_pool.o tracker.o url.o url_finder.o
+OBJS = categorizer.o counter.o downloader.o download_manager.o environment.o extractor.o file_downloader.o file_download_factory.o header.o http_request.o http_response.o main.o page_downloader.o page_download_factory.o path.o spider.o stripper.o task_pool.o tracker.o url.o url_finder.o
 
 # define header dependencies
 
 ALGORITHM = algorithm.hpp
+ENVIRONMENT = environment.hpp
 URL = url.hpp
 HEADER = header.hpp
 COUNTER = counter.hpp
 CHUNKED_STREAM = chunked_stream.hpp
-PATH_UTILITIES = path_utilities.hpp
+PATH_ = path.hpp
 STRIPPER = stripper.hpp
 DOWNLOAD_FACTORY = download_factory.hpp $(URL)
 TASK_POOL = task_pool.hpp $(COUNTER)
@@ -20,21 +21,17 @@ DOWNLOAD_MANAGER = download_manager.hpp $(CATEGORIZER) $(DOWNLOAD_FACTORY) $(TAS
 DOWNLOADER = downloader.hpp $(HTTP_REQUEST) $(URL)
 EXTRACTOR = extractor.hpp $(URL)
 URL_FINDER = url_finder.hpp $(EXTRACTOR) $(STRIPPER) $(URL)
-FILE_DOWNLOADER = file_downloader.hpp $(DOWNLOADER) $(HTTP_REQUEST) $(HTTP_RESPONSE) $(PATH_UTILITIES) $(URL)
+FILE_DOWNLOADER = file_downloader.hpp $(DOWNLOADER) $(HTTP_REQUEST) $(HTTP_RESPONSE) $(PATH_) $(URL)
 FILE_DOWNLOAD_FACTORY = file_download_factory.hpp $(DOWNLOAD_FACTORY) $(FILE_DOWNLOADER) $(URL)
 PAGE_DOWNLOADER = page_downloader.hpp $(DOWNLOADER) $(DOWNLOAD_MANAGER) $(HTTP_REQUEST) $(HTTP_RESPONSE) $(URL) $(URL_FINDER)
 PAGE_DOWNLOAD_FACTORY = page_download_factory.hpp $(DOWNLOAD_FACTORY) $(DOWNLOAD_MANAGER) $(PAGE_DOWNLOADER) $(URL) $(URL_FINDER)
 SPIDER = spider.hpp $(CATEGORIZER) $(DOWNLOADER) $(DOWNLOAD_MANAGER) $(EXTRACTOR) $(FILE_DOWNLOAD_FACTORY) $(PAGE_DOWNLOAD_FACTORY) $(STRIPPER) $(TASK_POOL) $(TRACKER) $(URL) $(URL_FINDER)
-MAIN = $(CATEGORIZER) $(SPIDER) $(URL)
+MAIN = $(CATEGORIZER) $(ENVIRONMENT) $(PATH_) $(SPIDER) $(URL)
 
 all: spider
 
-# binaries
-
-export LD_LIBRARY_PATH=/usr/lib:/usr/lib64
-
 extractor: spider
-	./spider --url=$(SITE) --directory=$(DIR)
+	LD_LIBRARY_PATH=/usr/lib:/usr/lib64	./spider --url=$(SITE) --directory=$(DIR)
 
 .PHONY : spider
 spider: $(OBJS)
@@ -53,6 +50,9 @@ downloader.o: downloader.cpp $(DOWNLOADER)
 
 download_manager.o: download_manager.cpp $(DOWNLOAD_MANAGER)
 	g++ -c download_manager.cpp $(CFLAGS)
+
+environment.o: environment.cpp $(ENVIRONMENT)
+	g++ -c environment.cpp $(CFLAGS)
 	
 extractor.o: extractor.cpp $(EXTRACTOR)
 	g++ -c extractor.cpp $(CFLAGS)
@@ -80,6 +80,9 @@ page_downloader.o: page_downloader.cpp $(PAGE_DOWNLOADER)
 
 page_download_factory.o: page_download_factory.cpp $(PAGE_DOWNLOAD_FACTORY)
 	g++ -c page_download_factory.cpp $(CFLAGS)
+
+path.o: path.cpp $(PATH_)
+	g++ -c path.cpp $(CFLAGS)
 
 spider.o: spider.cpp $(SPIDER)
 	g++ -c spider.cpp $(CFLAGS)

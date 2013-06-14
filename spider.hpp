@@ -13,6 +13,7 @@ namespace spider {
         void run(
             Url const& topUrl, 
             std::string const& downloadDirectory,
+            int threadCount,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer) const;
     };

@@ -17,15 +17,14 @@
 void spider::Spider::run(
     Url const& topUrl,
     std::string const& downloadDirectory,
+    int threadCount,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer) const {
     using std::make_shared;
     using std::vector;
     using boost::optional;
 
-    int processorCount = getProcessorCount();
-    //TestPool pool;
-    ThreadPool pool(processorCount + 2);
+    ThreadPool pool(threadCount);
     pool.start();
     
     UrlTracker tracker;

@@ -5,14 +5,13 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include "downloader.hpp"
 #include "file_downloader.hpp"
 #include "http_request.hpp"
 #include "http_response.hpp"
-#include "path_utilities.hpp"
+#include "path.hpp"
 #include "url.hpp"
 
 namespace {
@@ -30,11 +29,10 @@ namespace {
     std::string createFileName(spider::Url const& url) {
         using std::ostringstream;
         using std::string;
-        using spider::getDirectory;
-        using spider::getFileName;
+        using spider::Path;
 
-        string directory = getDirectory(url.getPath());
-        string fileName = getFileName(url.getPath());
+        string directory = Path::getDirectory(url.getPath());
+        string fileName = Path::getFileName(url.getPath());
 
         ostringstream builder;
         builder << encode(url.getHost()) << encode(directory) << fileName;
@@ -59,7 +57,6 @@ void spider::FileDownloader::download() const {
     using std::ofstream;
     using std::ostream_iterator;
     using std::string;
-    using boost::filesystem::exists;
 
     Url const& url = getUrl();
     if (url.getScheme() == "https") {
@@ -68,7 +65,7 @@ void spider::FileDownloader::download() const {
         
     string fileName = createFileName(url);
     string path = m_downloadDirectory + '/' + fileName;
-    if (exists(path)) {
+    if (Path::exists(path)) {
         return;
     }
 

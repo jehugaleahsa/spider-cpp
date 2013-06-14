@@ -8,6 +8,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
 #include "categorizer.hpp"
+#include "environment.hpp"
+#include "path.hpp"
 #include "spider.hpp"
 #include "url.hpp"
 
@@ -67,6 +69,7 @@ void buildCategorizer(std::string const& extensions, spider::Categorizer & categ
 }
 
 int main(int argc, char** argv) {
+    using std::cerr;
     using std::cout;
     using std::endl;
     using std::string;
@@ -77,6 +80,8 @@ int main(int argc, char** argv) {
     using boost::program_options::value;
     using boost::program_options::variables_map;
     using spider::Categorizer;
+    using spider::Environment;
+    using spider::Path;
     using spider::Spider;
     using spider::Url;
 
@@ -92,7 +97,7 @@ int main(int argc, char** argv) {
         ("help,h", "Display this help message.")
         ("media-extensions,m", value<string>(&mediaExtensions)->default_value(string()), "Comma-separated list of valid media extensions.")
         ("page-extensions,p", value<string>(&pageExtensions)->default_value(string()), "Comma-separated list of valid page extensions.")
-        ("threads,t", value<int>(&threadCount)->default_value(0), "The number of threads to create.")
+        ("threads,t", value<int>(&threadCount)->default_value(Environment::getProcessorCount()), "The number of threads to create.")
         ("url,u", value<string>(&urlString), "The initial URL to begin searching for media.");
 
     variables_map map;
@@ -101,7 +106,7 @@ int main(int argc, char** argv) {
 
     if (map.count("help")) {
         cout << description << endl;
-        return 1;
+        return 0;
     }
 
     if (urlString.empty()) {
@@ -110,8 +115,18 @@ int main(int argc, char** argv) {
     if (downloadDirectory.empty()) {
         downloadDirectory = getDownloadDirectory();
     }
+    if (downloadDirectory.empty()) {
+        cerr << "You must provide a download directory." << endl;
+    }
+    if (!Path::exists(downloadDirectory)) {
+        if (!Path::createDirectory(downloadDirectory)) {
+            cerr << "The directory did not exist and could not be created." << endl;
+        }
+    } else if (!Path::isDirectory(downloadDirectory)) {
+        cerr << "The path provided is not a valid directory." << endl;
+    }
     if (threadCount < 0) {
-        threadCount = 0;
+        cerr << "The thread count cannot be negative." << endl;
     }
     if (mediaExtensions.empty()) {
         mediaExtensions = "mpg:2,mpeg:2,mp4:2,avi:2,wmv:2,mov:2,rm:2,png:1,gif:1,jpg:1,tif:1,bmp:1,pdf:1";
@@ -124,10 +139,10 @@ int main(int argc, char** argv) {
     buildCategorizer(pageExtensions, pageCategorizer, 0);
     Categorizer mediaCategorizer;
     buildCategorizer(mediaExtensions, mediaCategorizer, 1);
-
+    
     Url url = Url::parse(urlString);
     Spider spider;
-    spider.run(url, downloadDirectory, pageCategorizer, mediaCategorizer);
+    spider.run(url, downloadDirectory, threadCount, pageCategorizer, mediaCategorizer);
 
     return 0;
 }
