@@ -2,6 +2,7 @@
 #define SPIDER_DOWNLOAD_MANAGER_HPP
 
 #include <functional>
+#include <memory>
 #include <vector>
 #include <utility>
 #include <boost/optional.hpp>
@@ -14,12 +15,12 @@
 namespace spider {
 
     class DownloadManager {
-        TaskPool & m_pool;
+        std::shared_ptr<TaskPool> m_pool;
         UrlTracker & m_tracker;
         std::vector<std::pair<Categorizer const&, DownloadFactory const&>> m_categories;
 
     public:
-        DownloadManager(TaskPool & pool, UrlTracker & tracker);
+        DownloadManager(std::shared_ptr<TaskPool> pool, UrlTracker & tracker);
 
         void associate(Categorizer const& categorizer, DownloadFactory const& downloadFactory);
 
@@ -47,7 +48,7 @@ namespace spider {
                             DownloadFactory const& factory = pair.second;
                             function<void(void)> task = factory.create(url, referrer);
                             int priority = categorizer.getPriority(url);
-                            m_pool.addTask(priority, task);
+                            m_pool->addTask(priority, task);
                         }
                     });
             }

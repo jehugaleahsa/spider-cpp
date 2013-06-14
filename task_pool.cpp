@@ -24,10 +24,6 @@ namespace {
 
 }
 
-int spider::getProcessorCount() {
-    return std::thread::hardware_concurrency();
-}
-
 spider::Task::Task(int priority, std::function<void(void)> task)
     : 
     m_priority(priority), 
@@ -95,22 +91,26 @@ void spider::Consumer::start() {
 spider::TaskPool::~TaskPool() {
 }
 
-spider::TestPool::TestPool() {
+spider::SingletonPool::SingletonPool() {
 }
 
-void spider::TestPool::start() {
+void spider::SingletonPool::start() {
 }
 
-void spider::TestPool::addTask(int priority, std::function<void(void)> callable) {
+void spider::SingletonPool::addTask(int priority, std::function<void(void)> callable) {
     m_tasks.push(Task(priority, callable));
-    while (!m_tasks.empty()) {
-        Task task = m_tasks.top();
-        m_tasks.pop();
-        task.getTask()();
+    if (!m_inProgress) {
+        m_inProgress = true;
+        while (!m_tasks.empty()) {
+            Task task = m_tasks.top();
+            m_tasks.pop();
+            task.getTask()();
+        }
+        m_inProgress = false;
     }
 }
 
-void spider::TestPool::wait() {
+void spider::SingletonPool::wait() {
 }
 
 std::unique_ptr<spider::Consumer> spider::ThreadPool::create() {

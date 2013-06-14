@@ -21,11 +21,18 @@ void spider::Spider::run(
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer) const {
     using std::make_shared;
+    using std::shared_ptr;
     using std::vector;
     using boost::optional;
 
-    ThreadPool pool(threadCount);
-    pool.start();
+
+    shared_ptr<TaskPool> pool;
+    if (threadCount == 0) {
+        pool.reset(new SingletonPool());
+    } else { 
+        pool.reset(new ThreadPool(threadCount));
+    }
+    pool->start();
     
     UrlTracker tracker;
 
@@ -51,5 +58,5 @@ void spider::Spider::run(
     vector<Url> rootUrls { topUrl };
     manager.download(optional<Url>(), rootUrls.begin(), rootUrls.end());
 
-    pool.wait();
+    pool->wait();
 }

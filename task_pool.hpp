@@ -1,5 +1,5 @@
-#ifndef SPIDER_THREAD_POOL_HPP
-#define SPIDER_THREAD_POOL_HPP
+#ifndef SPIDER_TASK_POOL_HPP
+#define SPIDER_TASK_POOL_HPP
 
 #include <algorithm>
 #include <functional>
@@ -11,8 +11,6 @@
 #include "counter.hpp"
 
 namespace spider {
-
-    int getProcessorCount();
 
     class Task {
         int m_priority;
@@ -84,14 +82,15 @@ namespace spider {
         virtual void wait() = 0;
     };
 
-    class TestPool : public virtual TaskPool {
+    class SingletonPool : public virtual TaskPool {
         std::priority_queue<Task> m_tasks;
+        bool m_inProgress;
 
-        TestPool(TestPool const& other);
-        TestPool & operator=(TestPool const& other);
+        SingletonPool(SingletonPool const& other);
+        SingletonPool & operator=(SingletonPool const& other);
 
     public:
-        TestPool();
+        SingletonPool();
 
         void start();
 
@@ -124,4 +123,4 @@ namespace spider {
 
 }
 
-#endif // SPIDER_THREAD_POOL_HPP
+#endif // SPIDER_TASK_POOL_HPP
