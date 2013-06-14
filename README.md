@@ -3,6 +3,7 @@
 ##Dependencies
 spider-cpp is dependent on **Boost 1.53**. It requires access to the libraries:
 * boost asio
+* boost filesystem
 * boost regex
 * boost system
 
@@ -11,7 +12,9 @@ spider-cpp was compiled on Ubuntu 12/Slackware 14 with g++-4.8.1 installed. It w
 ##Usage
 Assuming you have boost installed under `/usr`, the following should build and run the spider:
     
-    make extractor SITE=root_url DIR=download_directory
+    ./spider [options] --url=<url> --directory=<directory>
+
+If you have any issues, you might need to change your `LD_LIBRARY_PATH` to point to your GCC lib/ path and Boost's /lib path.
 
 ## Purpose
 The hope is that, given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while). Additionally, URLs referring to certain types of resources (movies, images, etc.) will be downloaded to a local file.
