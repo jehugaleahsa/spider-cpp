@@ -18,13 +18,13 @@ void spider::Spider::run(
     Url const& topUrl,
     std::string const& downloadDirectory,
     int threadCount,
+    uintmax_t minSize,
     Categorizer const& pageCategorizer,
     Categorizer const& mediaCategorizer) const {
     using std::make_shared;
     using std::shared_ptr;
     using std::vector;
     using boost::optional;
-
 
     shared_ptr<TaskPool> pool;
     if (threadCount == 0) {
@@ -52,7 +52,7 @@ void spider::Spider::run(
     PageDownloadFactory pageFactory(manager, finder);
     manager.associate(pageCategorizer, pageFactory);
     
-    FileDownloadFactory fileFactory(downloadDirectory);
+    FileDownloadFactory fileFactory(downloadDirectory, minSize);
     manager.associate(mediaCategorizer, fileFactory);
 
     vector<Url> rootUrls { topUrl };

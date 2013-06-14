@@ -69,3 +69,11 @@ bool spider::Path::exists(std::string const& path) {
 bool spider::Path::isDirectory(std::string const& path) {
     return boost::filesystem::is_directory(path);
 }
+
+uintmax_t spider::Path::size(std::string const& path) {
+    return boost::filesystem::file_size(path);
+}
+
+void spider::Path::remove(std::string const& path) {
+    boost::filesystem::remove(path);
+}

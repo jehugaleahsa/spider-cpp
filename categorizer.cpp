@@ -25,6 +25,9 @@ namespace {
 
 }
 
+spider::Categorizer::~Categorizer() {
+}
+
 void spider::Categorizer::supportExtension(int priority, std::string const& extension) {
     using std::string;
     using boost::to_lower_copy;
@@ -52,4 +55,16 @@ int spider::Categorizer::getPriority(Url const& url) const {
         return 0;
     }
     return iterator->second;
+}
+
+spider::DomainCategorizer::DomainCategorizer(std::string const& domain) 
+    : m_domain(domain) {
+}
+
+bool spider::DomainCategorizer::isDesired(Url const& url) const {
+    using std::string;
+    using boost::iends_with;
+
+    string const& domain = url.getHost();
+    return iends_with(domain, m_domain) && Categorizer::isDesired(url);
 }

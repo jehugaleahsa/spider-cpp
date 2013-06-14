@@ -14,6 +14,7 @@ namespace spider {
             Url const& topUrl, 
             std::string const& downloadDirectory,
             int threadCount,
+            uintmax_t minSize,
             Categorizer const& pageCategorizer,
             Categorizer const& mediaCategorizer) const;
     };

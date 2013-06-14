@@ -11,11 +11,22 @@ namespace spider {
         std::unordered_map<std::string, int> m_extensions;
 
     public:
+        virtual ~Categorizer();
+
+        virtual bool isDesired(Url const& url) const;
+
         void supportExtension(int priority, std::string const& extension);
 
-        bool isDesired(Url const& url) const;
-
         int getPriority(Url const& url) const;
+    };
+
+    class DomainCategorizer : public virtual Categorizer {
+        std::string m_domain;
+
+    public:
+        DomainCategorizer(std::string const& domain);
+
+        bool isDesired(Url const& url) const override;
     };
 
 }

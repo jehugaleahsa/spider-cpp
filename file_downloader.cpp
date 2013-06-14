@@ -41,11 +41,61 @@ namespace {
 
 }
 
+bool spider::FileDownloader::isLargeEnough() const {
+    using std::istringstream;
+    using std::string;
+
+    if (m_minSize == 0) {
+        return true;
+    }
+
+    try {
+        Url const& url = getUrl();
+        HttpRequest request(RequestMethod::HEAD, url);
+        addReferrerHeader(request);
+        addUserAgentHeader(request);
+        addAcceptHeader(request);
+        addHostHeader(request);
+        addConnectionHeader(request);
+        HttpResponse response = request.getResponse();
+
+        if (response.getStatusCode() != 200) {
+            return false;
+        }
+
+        HeaderCollection const& headers = response.getHeaders();
+        if (headers.hasHeader("Content-Length")) {
+            Header const& header = headers.getHeader("Content-Length");
+            string contentLengthString = header.getValue(0);
+            istringstream source(contentLengthString);
+            uintmax_t contentLength = 0;
+            if (source >> contentLength && contentLength < m_minSize) {
+                return false;
+            }
+        }
+        return true;
+    }
+    catch (ConnectionException const& exception) {
+        std::cerr << exception.what() << std::endl;
+        return false;
+    }
+}
+
+void spider::FileDownloader::removeSmallFile(std::string const& path) const {
+    if (m_minSize == 0) {
+        return;
+    }
+    if (Path::size(path) < m_minSize) {
+        Path::remove(path);
+    }
+}
+
 spider::FileDownloader::FileDownloader(
     Url const& url, 
     boost::optional<Url> referrer,
-    std::string const& downloadDirectory)
-    : Downloader(url, referrer), m_downloadDirectory(downloadDirectory) {
+    std::string const& downloadDirectory,
+    uintmax_t minSize)
+    : Downloader(url, referrer), m_downloadDirectory(downloadDirectory), m_minSize(minSize) {
 }
 
 void spider::FileDownloader::download() const {
@@ -66,6 +116,10 @@ void spider::FileDownloader::download() const {
     string fileName = createFileName(url);
     string path = m_downloadDirectory + '/' + fileName;
     if (Path::exists(path)) {
+        return;
+    }
+
+    if (!isLargeEnough()) {
         return;
     }
 
@@ -96,6 +150,9 @@ void spider::FileDownloader::download() const {
         ofstream file(path.c_str(), ios::out | ios::binary);
         ostream_iterator<unsigned char> destination(file);
         copy(begin, end, destination);
+
+        removeSmallFile(path);
+
     } catch (ConnectionException const& exception) {
         std::cerr << exception.what() << std::endl;
     }

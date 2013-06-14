@@ -13,7 +13,8 @@ spider::Url::Url(
     std::string const& fragment,
     std::string const& scheme,
     std::string const& userInfo)
-    : m_host(boost::to_lower_copy(host)),
+: 
+    m_host(boost::to_lower_copy(host)),
     m_port(port),
     m_path(path),
     m_query(query),
@@ -39,7 +40,7 @@ spider::Url spider::Url::parse(std::string const& urlString) {
     using boost::regex_match;
     using boost::smatch;
 
-    const static string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?((?<userinfo>[^@]*)@)?(?<host>[a-zA-Z0-9.-]+)(:(?<port>[\\d]{1,5}))?(?<path>[/\\\\][^?#]*)?(\\?(?<query>[^#]*))?(#(?<fragment>.*))?";
+    const static string urlFormat = "((?<scheme>[a-zA-Z][a-zA-Z0-9+.-]*)://)?((?<userinfo>[^@]*)@)?(?<host>[a-zA-Z0-9.-]*)(:(?<port>[\\d]{1,5}))?(?<path>[/\\\\][^?#]*)?(\\?(?<query>[^#]*))?(#(?<fragment>.*))?";
     regex expression(urlFormat, regex::icase);
     smatch matches;
     bool found = regex_match(urlString, matches, expression);
@@ -75,20 +76,20 @@ spider::Url spider::Url::parse(std::string const& urlString) {
 
 std::ostream & spider::operator<<(std::ostream & stream, Url const& url) {
     stream << url.getScheme() << "://";
-    if (url.getUserInfo() != "") {
+    if (!url.getUserInfo().empty()) {
         stream << url.getUserInfo() << "@";
     }
     stream << url.getHost();
     if (url.getPort() != Url::getDefaultPort()) {
         stream << ":" << url.getPort();
     }
-    if (url.getPath() != "") {
+    if (!url.getPath().empty()) {
         stream << url.getPath();
     }
-    if (url.getQuery() != "") {
+    if (!url.getQuery().empty()) {
         stream << "?" << url.getQuery();
     }
-    if (url.getFragment() != "") {
+    if (!url.getFragment().empty()) {
         stream << "#" << url.getFragment();
     }
     return stream;

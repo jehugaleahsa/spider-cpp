@@ -11,9 +11,10 @@ namespace spider {
 
     class FileDownloadFactory : public virtual DownloadFactory {
         std::string m_downloadDirectory;
+        uintmax_t m_minSize;
 
     public:
-        FileDownloadFactory(std::string const& downloadDirectory);
+        FileDownloadFactory(std::string const& downloadDirectory, uintmax_t minSize);
 
         std::function<void(void)> create(
             Url const& url, 

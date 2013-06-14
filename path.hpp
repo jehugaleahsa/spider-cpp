@@ -23,6 +23,10 @@ namespace spider {
 
         static bool isDirectory(std::string const& path);
 
+        static uintmax_t size(std::string const& path);
+
+        static void remove(std::string const& path);
+
     };
 
 }

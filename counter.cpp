@@ -3,13 +3,13 @@
 
 spider::Counter::Counter() 
     : m_counter(0) {
-    m_wait_mutex.lock();
 }
 
 void spider::Counter::increment() {
     using std::lock_guard;
     using std::mutex;
 
+    m_wait_mutex.try_lock();
     lock_guard<mutex> guard(m_counter_mutex);
     ++m_counter;
 }
