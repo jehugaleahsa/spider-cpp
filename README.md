@@ -19,10 +19,17 @@ If you have any issues, you might need to change your `LD_LIBRARY_PATH` to point
 ## Purpose
 The hope is that, given a URL, the code will eventually extract additional URLs from the resultant HTML. From those URLs, more pages will be extracted. This process should continue until all unique URLs are visited (this could take a while). Additionally, URLs referring to certain types of resources (movies, images, etc.) will be downloaded to a local file.
 
-## TODO
-These are the tasks I have to do yet.
-* Handle SSL handshaking.
-* Spit out download progress to the command line as streaming text.
+## Possible Extensions
+These are tasks that could be interesting:
+
+* Handle HTTPS.
+* Create NCurses interface with progress bars.
+* Create a GUI with progress bars.
+* Use WebKit or related technology to build HTML DOM.
+* URL pattern detection for "guessing" unlinked resources.
+* robots.txt support
+* persistent database for long-term caching
+* cloud-based
 
 ## What I've Learned So Far
 I came into this project completely inexperienced writing realistic applications with C++. Previously, I only wrote simple command-line applications that worked within the STL. That means no database access, no network access and almost no file system access. Already, I have learned a lot about writing realistic C++ applications. It has made me more appreciative of how hard it can be to write large scale software in such a low-level language. Amongst the things I have learned, here is a short list:
