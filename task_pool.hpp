@@ -5,26 +5,30 @@
 #include <functional>
 #include <iterator>
 #include <memory>
-#include <queue>
 #include <thread>
 #include <utility>
-#include "counter.hpp"
+#include <chrono>
+#include "queue.hpp"
 
 namespace spider {
 
     class Task {
         int m_priority;
-        int m_timestamp;
+        std::chrono::milliseconds::rep m_timestamp;
         std::function<void(void)> m_task;
 
     public:
         Task(int priority, std::function<void(void)> task);
 
+        Task(Task const& other);
+
+        Task & operator=(Task const& other);
+
         int getPriority() const;
 
-        int getTimestamp() const;
+        std::chrono::milliseconds::rep getTimestamp() const;
 
-        std::function<void(void)> getTask() const;
+        void run() const;
 
         friend bool operator <(Task const& first, Task const& second);
     };
@@ -33,12 +37,12 @@ namespace spider {
         return m_priority;
     }
 
-    inline int Task::getTimestamp() const {
+    inline std::chrono::milliseconds::rep Task::getTimestamp() const {
         return m_timestamp;
     }
 
-    inline std::function<void(void)> Task::getTask() const {
-        return m_task;
+    inline void Task::run() const {
+        m_task();
     }
 
     inline bool operator<(Task const& first, Task const& second) {
@@ -49,26 +53,17 @@ namespace spider {
 
     class Consumer {
     private:
-        Counter & m_counter;
-        std::priority_queue<Task> & m_tasks;
-        std::mutex & m_queue_mutex;
-        std::mutex & m_has_tasks_mutex;
+        ProducerConsumerQueue<Task> & m_tasks;
         std::unique_ptr<std::thread> m_thread;
-
-        std::function<void(void)> getTask();
 
         void consume();
 
     public:
-        Consumer(
-            Counter & counter,
-            std::priority_queue<Task> & tasks,
-            std::mutex & queue_mutex,
-            std::mutex & has_tasks_mutex);
-
-        ~Consumer();
+        Consumer(ProducerConsumerQueue<Task> & tasks);
         
         void start();
+
+        void stop();
     };
 
     class TaskPool {
@@ -83,8 +78,6 @@ namespace spider {
     };
 
     class SingletonPool : public virtual TaskPool {
-        std::priority_queue<Task> m_tasks;
-        bool m_inProgress;
 
         SingletonPool(SingletonPool const& other);
         SingletonPool & operator=(SingletonPool const& other);
@@ -100,11 +93,8 @@ namespace spider {
     };
 
     class ThreadPool : public virtual TaskPool {
-        Counter m_counter;
         std::vector<std::unique_ptr<Consumer>> m_pool;
-        std::priority_queue<Task> m_tasks;
-        std::mutex m_queue_mutex;
-        std::mutex m_has_tasks_mutex;
+        ProducerConsumerQueue<Task> m_tasks;
 
         ThreadPool(ThreadPool const& other);
         ThreadPool & operator=(ThreadPool const& other);

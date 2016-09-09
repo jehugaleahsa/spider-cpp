@@ -5,6 +5,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <iostream>
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include "downloader.hpp"
@@ -42,6 +43,7 @@ namespace {
 }
 
 bool spider::FileDownloader::isLargeEnough() const {
+    using std::cerr;
     using std::istringstream;
     using std::string;
 
@@ -51,7 +53,7 @@ bool spider::FileDownloader::isLargeEnough() const {
 
     try {
         Url const& url = getUrl();
-        HttpRequest request(RequestMethod::HEAD, url);
+        HttpRequest request("HEAD", url);
         addReferrerHeader(request);
         addUserAgentHeader(request);
         addAcceptHeader(request);
@@ -124,7 +126,7 @@ void spider::FileDownloader::download() const {
     }
 
     try {
-        HttpRequest request(RequestMethod::GET, url);
+        HttpRequest request("GET", url);
         addReferrerHeader(request);
         addUserAgentHeader(request);
         addAcceptHeader(request);

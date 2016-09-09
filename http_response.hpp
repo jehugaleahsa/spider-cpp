@@ -13,17 +13,17 @@ namespace spider {
     class HttpResponse {
         friend class HttpRequest;
 
-        std::shared_ptr<std::istream> m_stream;
+        mutable std::shared_ptr<std::istream> m_stream;
 
-        bool m_hasStatus;
-        void getStatusCached();
-        std::string m_version;
-        int m_statusCode;
-        std::string m_statusMessage;
+        mutable bool m_hasStatus;
+        mutable std::string m_version;
+        mutable int m_statusCode;
+        mutable std::string m_statusMessage;
+        void getStatusCached() const;
 
-        bool m_hasHeaders;
-        void getHeadersCached();
-        HeaderCollection m_headers;
+        mutable bool m_hasHeaders;
+        mutable HeaderCollection m_headers;
+        void getHeadersCached() const;
 
         HttpResponse(std::shared_ptr<std::istream> stream);
 
@@ -32,11 +32,11 @@ namespace spider {
     public:
         HttpResponse(HttpResponse const& other);
 
-        std::string getVersion();
+        std::string getVersion() const;
 
-        int getStatusCode();
+        int getStatusCode() const;
 
-        std::string getStatusMessage();
+        std::string getStatusMessage() const;
 
         HeaderCollection const& getHeaders() const;
 

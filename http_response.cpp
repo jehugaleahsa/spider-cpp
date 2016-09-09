@@ -72,14 +72,16 @@ spider::HttpResponse::HttpResponse(HttpResponse const& other)
     m_hasHeaders(other.m_hasHeaders) {
 }
 
-void spider::HttpResponse::getStatusCached() {
+void spider::HttpResponse::getStatusCached() const {
     using std::getline;
     using std::istringstream;
     using boost::algorithm::trim;
 
     if (!m_hasStatus) {
+
         Line line;
         if (*m_stream >> line) {
+
             istringstream reader(line.value);
             reader >> m_version;
             reader >> m_statusCode;
@@ -91,22 +93,22 @@ void spider::HttpResponse::getStatusCached() {
     }
 }
 
-std::string spider::HttpResponse::getVersion() {
+std::string spider::HttpResponse::getVersion() const {
     getStatusCached();
     return m_version;
 }
 
-int spider::HttpResponse::getStatusCode() {
+int spider::HttpResponse::getStatusCode() const {
     getStatusCached();
     return m_statusCode;
 }
 
-std::string spider::HttpResponse::getStatusMessage() {
+std::string spider::HttpResponse::getStatusMessage() const {
     getStatusCached();
     return m_statusMessage;
 }
 
-void spider::HttpResponse::getHeadersCached() {
+void spider::HttpResponse::getHeadersCached() const {
     using std::back_inserter;
     using std::for_each;
     using std::istream_iterator;
@@ -119,6 +121,7 @@ void spider::HttpResponse::getHeadersCached() {
 
     if (!m_hasHeaders) {
         getStatusCached();
+
         if (*m_stream) {
             istream_iterator<Line> begin(*m_stream);
             istream_iterator<Line> end;
@@ -158,6 +161,7 @@ void spider::HttpResponse::getHeadersCached() {
 }
 
 spider::HeaderCollection const& spider::HttpResponse::getHeaders() const {
+    getHeadersCached();
     return m_headers;
 }
 

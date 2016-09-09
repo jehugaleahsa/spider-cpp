@@ -75,6 +75,7 @@ int main(int argc, char** argv) {
     using std::endl;
     using std::string;
     using std::unique_ptr;
+    using std::exception;
     using boost::program_options::notify;
     using boost::program_options::options_description;
     using boost::program_options::parse_command_line;
@@ -173,8 +174,11 @@ int main(int argc, char** argv) {
         Url url = Url::parse(urlString);
         Spider spider;
         spider.run(url, downloadDirectory, threadCount, minSize, *pageCategorizer, *mediaCategorizer);    
-    } catch (BadUrlException const& exception) {
-        cerr << exception.what() << endl;
+    } catch (BadUrlException const& ex) {
+        cerr << ex.what() << endl;
+        return -1;
+    } catch (exception const& ex) {
+        cerr << ex.what() << endl;
         return -1;
     }
 

@@ -1,0 +1,27 @@
+using msvc : : : <compileflags>-D_WIN32_WINNT=0x0501 ;
+
+exe "spider" 
+    : "categorizer.cpp"
+    "downloader.cpp" 
+    "download_manager.cpp" 
+    "environment.cpp"
+    "extractor.cpp" 
+    "file_downloader.cpp" 
+    "file_download_factory.cpp" 
+    "header.cpp" 
+    "http_request.cpp" 
+    "http_response.cpp" 
+    "main.cpp" 
+    "page_downloader.cpp" 
+    "page_download_factory.cpp"
+    "path.cpp"
+    "spider.cpp" 
+    "stripper.cpp" 
+    "task_pool.cpp" 
+    "tracker.cpp" 
+    "url.cpp" 
+    "url_finder.cpp"
+    : <include>"C:/Source/CPP/boost_1_61_0"
+    <library-path>"C:/Source/CPP/boost_1_61_0/lib64-msvc-14.0"
+    <address-model>64
+    ;

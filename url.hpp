@@ -109,10 +109,6 @@ namespace std {
         }
     };
 
-}
-
-namespace std {
-
     template <>
     struct hash<spider::Url> : public std::unary_function<spider::Url, std::size_t> {
         result_type operator ()(argument_type const& url) const {

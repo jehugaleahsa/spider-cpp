@@ -18,7 +18,7 @@
 
 spider::HttpResponse spider::PageDownloader::getResponse() const {
     Url const& url = getUrl();
-    HttpRequest request(RequestMethod::GET, url);
+    HttpRequest request("GET", url);
     addReferrerHeader(request);
     addUserAgentHeader(request);
     addAcceptHeader(request);
@@ -46,7 +46,7 @@ void spider::PageDownloader::handleRedirect(HttpResponse & response) const {
     using boost::optional;
 
     HeaderCollection const& headers = response.getHeaders();
-    if (!headers.hasHeader("Location")) {
+    if (!headers.hasHeader("Location")) {        
         return;
     }
     string urlString = headers.getHeader("Location").getValue(0);

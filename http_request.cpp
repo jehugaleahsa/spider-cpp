@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -13,46 +12,12 @@
 #include "http_response.hpp"
 #include "url.hpp"
 
-namespace {
-
-    std::string const& str(spider::RequestMethod method) {
-        using std::string;
-
-        static const string getString = "GET";
-        static const string postString = "POST";
-        static const string putString = "PUT";
-        static const string deleteString = "DELETE";
-        static const string headString = "HEAD";
-        static const string traceString = "TRACE";
-        static const string connectString = "CONNECT";
-
-        switch (method) {
-            case spider::RequestMethod::GET:
-            default:
-                return getString;
-            case spider::RequestMethod::POST:
-                return postString;
-            case spider::RequestMethod::PUT:
-                return putString;
-            case spider::RequestMethod::DELETE:
-                return deleteString;
-            case spider::RequestMethod::HEAD:
-                return headString;
-            case spider::RequestMethod::TRACE:
-                return traceString;
-            case spider::RequestMethod::CONNECT:
-                return connectString;
-        }
-    }
-
-}
-
 std::string const& spider::HttpRequest::getNewline() {
      static const std::string newline = "\r\n";
      return newline;
 }
 
-spider::HttpRequest::HttpRequest(RequestMethod method, Url const& url)
+spider::HttpRequest::HttpRequest(std::string const& method, Url const& url)
     : m_method(method), m_url(url) {
 }
 
@@ -80,7 +45,7 @@ spider::HttpResponse spider::HttpRequest::getResponse() const {
         throw ConnectionException(m_url);
     }
 
-    *tcpStream << str(m_method) << " " << m_url.getPath();
+    *tcpStream << m_method << " " << m_url.getPath();
 
     string const& query = m_url.getQuery();
     if (query != "") {

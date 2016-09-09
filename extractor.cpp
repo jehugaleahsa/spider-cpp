@@ -2,6 +2,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <iostream>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/regex.hpp>
 #include "extractor.hpp"
@@ -78,6 +79,7 @@ spider::UrlExtractor::~UrlExtractor() {
 spider::Url spider::TagUrlExtractor::buildUrl(
     Url const& baseAddress,
     boost::smatch const& match) const {
+    using std::cerr;
     using std::string;
     using boost::istarts_with;
 

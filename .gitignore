@@ -16,3 +16,9 @@
 
 # Spider Executable
 spider
+
+# VS Code
+.vscode
+
+# Output
+bin/
