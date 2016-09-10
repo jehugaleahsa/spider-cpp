@@ -6,13 +6,15 @@ spider-cpp is dependent on **Boost 1.53 or above**. It requires access to the li
 * boost filesystem
 * boost regex
 * boost thread
+* boost program_options
+* boost system
 
 spider-cpp was originally written/compiled on Ubuntu 12/Slackware 14 with g++-4.8.1 installed. It was written using VIM. I used GNU make to automate my builds. Later, I change it to compile on Windows using MSVC14 (Visual C++ 14 with Visual Studio 15 Community Edition). Builds were performed using Boost.Build. I switched to using Visual Studio Code with the C/C++ extension package.
 
 ##Usage
 You can build the software by opening the `Jamroot` file and changing the `<include>`/`<library-path>` values to point to your boost folder. Make sure the main boost directory is on your PATH; typing `b2` will compile the code and place an executable in the `bin\` directory.
 
-The following should build and run the spider:
+The following should be able to run the spider:
     
     ./spider [options] --url=<url> --directory=<directory>
 
