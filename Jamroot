@@ -1,4 +1,5 @@
-using msvc : : : <compileflags>-D_WIN32_WINNT=0x0501 ;
+#using msvc : : : <compileflags>-D_WIN32_WINNT=0x0501 ;
+using gcc : : : <compileflags>-std=c++14 ;
 
 exe "spider" 
     : "categorizer.cpp"
@@ -21,7 +22,16 @@ exe "spider"
     "tracker.cpp" 
     "url.cpp" 
     "url_finder.cpp"
-    : <include>"C:/Source/CPP/boost_1_61_0"
-    <library-path>"C:/Source/CPP/boost_1_61_0/lib64-msvc-14.0"
+    :
+    #<include>"C:/Source/CPP/boost_1_61_0"
+    #<library-path>"C:/Source/CPP/boost_1_61_0/lib64-msvc-14.0"
+    <include>/usr/local/
+    <linkflags>-L/usr/local/lib
+    <linkflags>-lboost_filesystem
+    <linkflags>-lboost_regex
+    <linkflags>-lboost_system
+    <linkflags>-lpthread
+    <linkflags>-lboost_program_options
+    <linkflags>-lboost_thread
     <address-model>64
     ;
